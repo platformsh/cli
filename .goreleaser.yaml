@@ -1,0 +1,161 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+project_name: platform
+
+before:
+  hooks:
+    - go generate ./...
+
+builds:
+  - binary: platform
+    id: platform
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X "github.com/platformsh/cli/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "github.com/platformsh/cli/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+      - -X main.builtBy=goreleaser`.
+  - binary: platform
+    id: platform-macos
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X "github.com/platformsh/cli/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "github.com/platformsh/cli/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+      - -X main.builtBy=goreleaser`.
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+universal_binaries:
+  - id: platform-macos
+    name_template: "{{ .ProjectName }}"
+    replace: true
+    hooks:
+      post:
+        - gon .gon.hcl
+        - rm -rf ./dist/platform-macos_darwin_arm64/
+        - rm -rf ./dist/platform-macos_darwin_amd64_v1/
+
+release:
+  github:
+    owner: platformsh
+    name: homebrew-tap
+  extra_files:
+    - glob: ./dist/platform-macos.zip
+
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - completion/*
+    format_overrides:
+      - goos: windows
+        format: zip
+
+brews:
+  - name: platformsh-cli
+    tap:
+      owner: platformsh
+      name: homebrew-tap
+      token: "{{ .Env.GITHUB_TOKEN }}"
+
+    goarm: "7"
+    folder: Formula
+
+    commit_author:
+      name: Antonis Kalipetis
+      email: antonis.kalipetis@platform.sh
+
+    homepage: https://docs.platform.sh/administration/cli.html
+    description: Platform.sh CLI
+    license: MIT
+
+    dependencies:
+      - name: git
+        type: optional
+      - name: oniguruma
+      - name: openssl@1.1
+
+    install: |
+      bin.install "platform"
+      bash_completion.install "completion/bash/platform.bash" => "platform"
+      zsh_completion.install "completion/zsh/_platform" => "_platform"
+
+    test: |
+      system "#{bin}/platform --version"
+
+    caveats: |
+      In order to enable completions, you need to follow one of the following steps:
+
+        * Install using Homebrew and include bash-completion or zsh-completion package, depending on your shell of choice
+        * Run the following command to enable completion for bash
+          echo 'eval $(platform completion bash)' >> ~/.bashrc
+        * Run the following command to enable completion for zsh
+          echo 'eval $(platform completion zsh)' >> ~/.zshrc
+
+scoop:
+  bucket:
+    owner: platformsh
+    name: homebrew-tap
+    token: "{{ .Env.GITHUB_TOKEN }}"
+
+  folder: Scoops
+  commit_author:
+    name: Antonis Kalipetis
+    email: antonis.kalipetis@platform.sh
+
+  homepage: https://docs.platform.sh/administration/cli.html
+  description: Platform.sh CLI
+  license: MIT
+
+nfpms:
+  - file_name_template: "{{ .ConventionalFileName }}"
+    homepage: https://docs.platform.sh/administration/cli.html
+    description: Platform.sh CLI
+    maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
+    license: MIT
+    vendor: Platform.sh
+    builds:
+      - platform
+    formats:
+      - apk
+      - deb
+      - rpm
+    contents:
+      - src: completion/bash/platform.bash
+        dst: /etc/bash_completion.d/platform
+      - src: completion/zsh/_platform
+        dst: /usr/local/share/zsh/site-functions/_platform

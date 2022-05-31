@@ -1,0 +1,3 @@
+[submodule "ext/static-php-cli"]
+	path = ext/static-php-cli
+	url = https://github.com/crazywhalecc/static-php-cli
