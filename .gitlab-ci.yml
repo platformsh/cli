@@ -1,0 +1,38 @@
+stages:
+  - php
+  - build
+  # - bdd
+  # - release
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_DEPTH: 10
+
+build-php-linux:
+  stage: php
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    - apk add -U make
+    - make php-linux
+  artifacts:
+    paths:
+      - legacy/archives/*
+    expire_in: 1 day
+
+build:
+  stage: build
+  image:
+    name: goreleaser/goreleaser:v1.9.2
+    entrypoint: [""]
+  script: make snapshot
+  dependencies:
+    - build-php-linux
+  artifacts:
+    paths:
+      - dist/psh-go_*
+      - dist/checksums.txt
+    expire_in: 1 day
