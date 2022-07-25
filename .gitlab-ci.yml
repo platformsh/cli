@@ -17,7 +17,7 @@ build-php-linux:
     DOCKER_HOST: tcp://docker:2375
   script:
     - apk add -U make
-    - make php-linux
+    - make php
   artifacts:
     paths:
       - legacy/archives/*
