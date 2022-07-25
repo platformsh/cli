@@ -1,5 +1,5 @@
 PHP_VERSION = 8.0.21
-PLATFORM := $(shell uname -s | awk '{print tolower($0)}')
+PLATFORM := $(shell uname -s |  | tr '[:upper:]' '[:lower:]')
 
 php-linux:
 	cp ext/extensions.txt ext/static-php-cli/docker
