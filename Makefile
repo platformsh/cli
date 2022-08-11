@@ -1,13 +1,13 @@
 PHP_VERSION = 8.0.22
 PSH_VERSION = 3.81.0
 GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
-GOARCH := $(uname -m)
+GOARCH := $(shell uname -m)
 PHP_BINARY_PATH := legacy/archives/php_$(GOOS)_$(GOARCH)
 
 legacy/archives/platform.phar:
 	wget https://github.com/platformsh/platformsh-cli/releases/download/v$(PSH_VERSION)/platform.phar -O legacy/archives/platform.phar
 
-php-linux:
+legacy/archives/php_linux_$(GOARCH):
 	cp ext/extensions.txt ext/static-php-cli/docker
 	cd ext/static-php-cli/docker ;\
 	docker build -t static-php . --build-arg USE_BACKUP_ADDRESS=yes

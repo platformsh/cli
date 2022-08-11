@@ -17,6 +17,7 @@ build-php-linux:
     DOCKER_HOST: tcp://docker:2375
   script:
     - apk add -U make
+    - mkdir -p legacy/archives
     - make php
   artifacts:
     paths:
@@ -32,6 +33,7 @@ build-php-windows:
     DOCKER_HOST: tcp://docker:2375
   script:
     - apk add -U make
+    - mkdir -p legacy/archives
     - make php GOOS=windows GOARCH=amd64
   artifacts:
     paths:
