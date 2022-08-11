@@ -23,6 +23,21 @@ build-php-linux:
       - legacy/archives/*
     expire_in: 1 day
 
+build-php-windows:
+  stage: php
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  script:
+    - apk add -U make
+    - make php GOOS=windows GOARCH=amd64
+  artifacts:
+    paths:
+      - legacy/archives/*
+    expire_in: 1 day
+
 build:
   stage: build
   image:
@@ -31,6 +46,7 @@ build:
   script: make snapshot
   dependencies:
     - build-php-linux
+    - build-php-windows
   artifacts:
     paths:
       - dist/psh-go_*

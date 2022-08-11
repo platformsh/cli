@@ -5,22 +5,25 @@ before:
   hooks:
     - go generate ./...
 builds:
-  - env:
+  - binary: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+    env:
       - CGO_ENABLED=0
     goos:
-      - darwin
       - linux
+      - windows
     goarch:
       - arm64
       - amd64
-    binary: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}" -X "lab.plat.farm/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
 archives:
   - replacements:
       darwin: MacOS
       linux: Linux
       windows: Windows
-      386: i386
-      amd64: x86_64
 checksum:
   name_template: 'checksums.txt'
 snapshot:

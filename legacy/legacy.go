@@ -6,22 +6,24 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path"
+	"strings"
+	"text/template"
 )
 
 //go:embed archives/platform.phar
 var pshCLI []byte
 
-const (
-	pshVersion = "3.79.7"
-	phpVersion = "8.1.6"
-)
+var PSHVersion string
+var PHPVersion string
 
-var phpPath = fmt.Sprintf("php-%s", phpVersion)
-var pshPath = fmt.Sprintf("psh-%s", pshVersion)
+const prefix = "psh-go"
+
+var phpPath = fmt.Sprintf("php-%s", PHPVersion)
+var pshPath = fmt.Sprintf("psh-%s", PSHVersion)
 
 // copyFile from the given bytes to destination
 func copyFile(destination string, fin []byte) error {
@@ -46,18 +48,20 @@ func copyFile(destination string, fin []byte) error {
 
 // LegacyCLIWrapper wraps the legacy CLI
 type LegacyCLIWrapper struct {
-	tmpDir string
+}
+
+func (c *LegacyCLIWrapper) cacheDir() string {
+	return path.Join(os.TempDir(), fmt.Sprintf("%s-%s-%s", prefix, PHPVersion, PSHVersion))
 }
 
 // Init the CLI wrapper, creating a temporary directory and copying over files
 func (c *LegacyCLIWrapper) Init() error {
-	if c.tmpDir != "" {
-		return nil
-	}
+	if err := os.Mkdir(c.cacheDir(), 0700); err != nil {
+		if os.IsExist(err) {
+			log.Printf("cache directory already exists: %s", c.cacheDir())
+			return nil
+		}
 
-	var err error
-	c.tmpDir, err = ioutil.TempDir("", "psh-go")
-	if err != nil {
 		return fmt.Errorf("could not create temporary directory: %w", err)
 	}
 
@@ -74,16 +78,24 @@ func (c *LegacyCLIWrapper) Init() error {
 	return nil
 }
 
-// Close the CLI wrapper, removing the temporary directory that was created
-func (c *LegacyCLIWrapper) Close() error {
-	if c.tmpDir == "" {
-		return nil
+// Cleanup the CLI wrapper, removing the cache directory that was created and any other related directory
+func (c *LegacyCLIWrapper) Cleanup() error {
+	files, err := os.ReadDir(os.TempDir())
+	if err != nil {
+		return fmt.Errorf("could not list temporary directory: %w", err)
 	}
 
-	if err := os.RemoveAll(c.tmpDir); err != nil {
-		return fmt.Errorf("could not remove temporary directory: %w", err)
+	for _, f := range files {
+		if strings.HasPrefix(f.Name(), prefix) {
+			err := os.RemoveAll(path.Join(os.TempDir(), f.Name()))
+			if err != nil {
+				log.Printf("could not remove directory: %s", f.Name())
+			}
+		}
 	}
 
+	w, _ := os.Open("")
+	template.Must(template.New("php.ini").Parse("")).Execute(w, map[string]string{"PSHDir": c.cacheDir()})
 	return nil
 }
 
@@ -101,23 +113,9 @@ func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
 	return nil
 }
 
-// PSHPath returns the path that the PHP CLI will reside
-func (c *LegacyCLIWrapper) PHPPath() string {
-	return path.Join(c.tmpDir, phpPath)
-}
-
 // PSHPath returns the path that the PSH CLI will reside
 func (c *LegacyCLIWrapper) PSHPath() string {
-	return path.Join(c.tmpDir, pshPath)
-}
-
-// copyPHP to destination, if it does not exist
-func (c *LegacyCLIWrapper) copyPHP() error {
-	if err := copyFile(c.PHPPath(), phpCLI); err != nil {
-		return fmt.Errorf("could not copy PHP CLI: %w", err)
-	}
-
-	return nil
+	return path.Join(c.cacheDir(), pshPath)
 }
 
 // copyPSH to destination, if it does not exist
