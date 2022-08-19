@@ -1,2 +1,4 @@
-legacy/archives
+legacy/archives/*
 dist/
+php-*
+!legacy/archives/windows_php.ini.tpl
