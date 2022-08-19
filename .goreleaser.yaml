@@ -6,6 +6,7 @@ before:
     - go generate ./...
 builds:
   - binary: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+    id: psh-go
     env:
       - CGO_ENABLED=0
     goos:
@@ -16,6 +17,17 @@ builds:
     ignore:
       - goos: windows
         goarch: arm64
+    ldflags:
+      - -s -w -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}" -X "lab.plat.farm/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+  - binary: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+    id: psh-go-macos
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - arm64
+      - amd64
     ldflags:
       - -s -w -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}" -X "lab.plat.farm/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
 archives:
@@ -33,3 +45,12 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+universal_binaries:
+- id: psh-go-macos
+  name_template: "{{ .ProjectName }}-darwin-all"
+  replace: true
+  hooks:
+    post:
+      - gon -log-level=DEBUG -log-json gon.hcl
+      - rm -rf ./dist/psh-go-macos_darwin_arm64/
+      - rm -rf ./dist/psh-go-macos_darwin_amd64_v1/
