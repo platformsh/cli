@@ -1,11 +1,14 @@
 PHP_VERSION = 8.0.22
 PSH_VERSION = 3.81.0
 GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
-GOARCH := $(shell uname -m)
 ifeq ($(GOOS), darwin)
 	GORELEASER_ID=psh-go-macos
 else
 	GORELEASER_ID=psh-go
+endif
+GOARCH := $(shell uname -m)
+ifeq ($(GOARCH), x86_64)
+	GOARCH=amd64
 endif
 PHP_BINARY_PATH := legacy/archives/php_$(GOOS)_$(GOARCH)
 
@@ -26,7 +29,7 @@ legacy/archives/php_darwin_$(GOARCH):
 	mv -f $(GOOS)/php-$(PHP_VERSION)/sapi/cli/php $(PHP_BINARY_PATH)
 	rm -rf $(GOOS)
 
-legacy/archives/php_windows_$(GOARCH): legacy/archives/php_windows.zip legacy/archives/cacert.pem
+legacy/archives/php_windows_amd64: legacy/archives/php_windows.zip legacy/archives/cacert.pem
 
 legacy/archives/php_windows.zip:
 	wget https://windows.php.net/downloads/releases/php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip -O legacy/archives/php_windows.zip

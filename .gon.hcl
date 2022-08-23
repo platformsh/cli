@@ -9,5 +9,9 @@ apple_id {
 }
 
 sign {
-  application_identity = "Apple Development: Antonis Kalipetis"
+  application_identity = "Developer ID Application: Blackfire (DN59GP4LUB)"
+}
+
+zip {
+  output_path = "./dist/psh-go-macos.zip"
 }

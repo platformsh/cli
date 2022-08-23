@@ -46,11 +46,11 @@ changelog:
       - '^docs:'
       - '^test:'
 universal_binaries:
-- id: psh-go-macos
-  name_template: "{{ .ProjectName }}-darwin-all"
-  replace: true
-  hooks:
-    post:
-      - gon -log-level=DEBUG -log-json gon.hcl
-      - rm -rf ./dist/psh-go-macos_darwin_arm64/
-      - rm -rf ./dist/psh-go-macos_darwin_amd64_v1/
+  - id: psh-go-macos
+    name_template: "{{ .ProjectName }}-darwin-all"
+    replace: true
+    hooks:
+      post:
+        - gon .gon.hcl
+        - rm -rf ./dist/psh-go-macos_darwin_arm64/
+        - rm -rf ./dist/psh-go-macos_darwin_amd64_v1/
