@@ -4,5 +4,5 @@ import (
 	_ "embed"
 )
 
-//go:embed archives/php_darwin_x86_64
+//go:embed archives/php_darwin_amd64
 var phpCLI []byte
