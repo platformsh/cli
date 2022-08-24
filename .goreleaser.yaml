@@ -17,6 +17,8 @@ builds:
     ignore:
       - goos: windows
         goarch: arm64
+      - goos: linux
+        goarch: arm64
     ldflags:
       - -s -w -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}" -X "lab.plat.farm/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
   - binary: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
@@ -54,3 +56,6 @@ universal_binaries:
         - gon .gon.hcl
         - rm -rf ./dist/psh-go-macos_darwin_arm64/
         - rm -rf ./dist/psh-go-macos_darwin_amd64_v1/
+release:
+  extra_files:
+  - glob: ./dist/psh-go-macos.zip
