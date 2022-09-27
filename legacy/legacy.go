@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-	"text/template"
 )
 
 //go:embed archives/platform.phar
@@ -94,8 +93,6 @@ func (c *LegacyCLIWrapper) Cleanup() error {
 		}
 	}
 
-	w, _ := os.Open("")
-	template.Must(template.New("php.ini").Parse("")).Execute(w, map[string]string{"PSHDir": c.cacheDir()})
 	return nil
 }
 

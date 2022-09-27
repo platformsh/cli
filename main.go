@@ -17,6 +17,7 @@ func main() {
 	}
 
 	if err := c.Exec(context.TODO(), os.Args[1:]...); err != nil {
+		c.Cleanup()
 		log.Fatalf("Could not execute command: %s\n", err)
 		return
 	}
