@@ -47,6 +47,7 @@ func copyFile(destination string, fin []byte) error {
 
 // LegacyCLIWrapper wraps the legacy CLI
 type LegacyCLIWrapper struct {
+	debug bool
 }
 
 func (c *LegacyCLIWrapper) cacheDir() string {
@@ -55,12 +56,20 @@ func (c *LegacyCLIWrapper) cacheDir() string {
 
 // Init the CLI wrapper, creating a temporary directory and copying over files
 func (c *LegacyCLIWrapper) Init() error {
-	if err := os.Mkdir(c.cacheDir(), 0700); err != nil {
-		if os.IsExist(err) {
+	c.debug = os.Getenv("PLATFORMSH_CLI_DEBUG") == "1"
+	if st, err := os.Stat(c.cacheDir()); st != nil && st.IsDir() {
+		if c.debug {
 			log.Printf("cache directory already exists: %s", c.cacheDir())
-			return nil
 		}
+		return nil
+	} else if err == nil {
+		if c.debug {
+			log.Printf("cache path exists but is not a directory, cleaning up: %s", c.cacheDir())
+		}
+		c.Cleanup()
+	}
 
+	if err := os.Mkdir(c.cacheDir(), 0700); err != nil {
 		return fmt.Errorf("could not create temporary directory: %w", err)
 	}
 
@@ -87,7 +96,7 @@ func (c *LegacyCLIWrapper) Cleanup() error {
 	for _, f := range files {
 		if strings.HasPrefix(f.Name(), prefix) {
 			err := os.RemoveAll(path.Join(os.TempDir(), f.Name()))
-			if err != nil {
+			if err != nil && c.debug {
 				log.Printf("could not remove directory: %s", f.Name())
 			}
 		}
@@ -103,6 +112,8 @@ func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Env = append(cmd.Env, os.Environ()...)
+	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_UPDATES_CHECK=0")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("could not run legacy CLI command: %w", err)
 	}

@@ -1,7 +1,8 @@
 set -ex
 
+brew install bison openssl@1.1 oniguruma pkg-config coreutils autoconf
 BREW_PREFIX=$(brew --prefix)
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_PREFIX/opt/openssl@1.1/lib/pkgconfig"
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_PREFIX/opt/openssl@1.1/lib/pkgconfig:$BREW_PREFIX/opt/oniguruma/lib/pkgconfig"
 
 DIR=$2
 mkdir -p $DIR
@@ -25,5 +26,4 @@ rm -f sapi/cli/php
   --without-pcre-jit \
   --disable-all
 
-export PATH="$BREW_PREFIX/opt/bison/bin:$PATH"
-make -j$(sysctl -n hw.logicalcpu) cli
+make -j$(nproc) cli
