@@ -67,16 +67,16 @@ universal_binaries:
 
 release:
   github:
-    owner: akalipetis
-    name: homebrew-psh-go
+    owner: platformsh
+    name: homebrew-tap
   extra_files:
     - glob: ./dist/platform-macos.zip
 
 brews:
   - name: platformsh-cli
     tap:
-      owner: akalipetis
-      name: homebrew-psh-go
+      owner: platformsh
+      name: homebrew-tap
       token: "{{ .Env.GITHUB_TOKEN }}"
 
     goarm: "7"
