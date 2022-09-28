@@ -1,5 +1,5 @@
 source = [
-    "./dist/platform-macos_darwin_all/platform-darwin-all",
+    "./dist/platform-macos_darwin_all/platform",
 ]
 bundle_id = "sh.platform.cli"
 

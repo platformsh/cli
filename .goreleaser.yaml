@@ -57,7 +57,7 @@ changelog:
 
 universal_binaries:
   - id: platform-macos
-    name_template: "{{ .ProjectName }}-darwin-all"
+    name_template: "{{ .ProjectName }}"
     replace: true
     hooks:
       post:
