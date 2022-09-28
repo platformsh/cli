@@ -1,12 +1,14 @@
 # This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
-project_name: psh-go
+project_name: platform
+
 before:
   hooks:
     - go generate ./...
+
 builds:
-  - binary: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
-    id: psh-go
+  - binary: platform
+    id: platform
     env:
       - CGO_ENABLED=0
     goos:
@@ -14,15 +16,16 @@ builds:
       - windows
     goarch:
       - amd64
-    ignore:
-      - goos: windows
-        goarch: arm64
-      - goos: linux
-        goarch: arm64
     ldflags:
-      - -s -w -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}" -X "lab.plat.farm/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
-  - binary: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
-    id: psh-go-macos
+      - -s -w
+      - -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "lab.plat.farm/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+      - -X main.builtBy=goreleaser`.
+  - binary: platform
+    id: platform-macos
     env:
       - CGO_ENABLED=0
     goos:
@@ -31,31 +34,70 @@ builds:
       - arm64
       - amd64
     ldflags:
-      - -s -w -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}" -X "lab.plat.farm/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
-archives:
-  - replacements:
-      darwin: MacOS
-      linux: Linux
-      windows: Windows
+      - -s -w
+      - -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "lab.plat.farm/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+      - -X main.builtBy=goreleaser`.
+
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
+
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
+
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
+
 universal_binaries:
-  - id: psh-go-macos
+  - id: platform-macos
     name_template: "{{ .ProjectName }}-darwin-all"
     replace: true
     hooks:
       post:
         - gon .gon.hcl
-        - rm -rf ./dist/psh-go-macos_darwin_arm64/
-        - rm -rf ./dist/psh-go-macos_darwin_amd64_v1/
+        - rm -rf ./dist/platform-macos_darwin_arm64/
+        - rm -rf ./dist/platform-macos_darwin_amd64_v1/
+
 release:
+  github:
+    owner: akalipetis
+    name: homebrew-psh-go
   extra_files:
-  - glob: ./dist/psh-go-macos.zip
+    - glob: ./dist/platform-macos.zip
+
+brews:
+  - name: platformsh-cli
+    tap:
+      owner: akalipetis
+      name: homebrew-psh-go
+      token: "{{ .Env.GITHUB_TOKEN }}"
+
+    goarm: "7"
+    folder: Formula
+
+    commit_author:
+      name: Antonis Kalipetis
+      email: antonis.kalipetis@platform.sh
+
+    homepage: "https://docs.platform.sh/administration/cli.html"
+    description: "Platform.sh CLI."
+    license: "MIT"
+
+    dependencies:
+      - name: git
+        type: optional
+      - name: oniguruma
+      - name: openssl@1.1
+
+    install: |
+      bin.install "platform"
+
+    test: |
+      system "#{bin}/platform --version"

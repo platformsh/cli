@@ -1,5 +1,5 @@
 source = [
-    "./dist/psh-go-macos_darwin_all/psh-go-darwin-all",
+    "./dist/platform-macos_darwin_all/platform-darwin-all",
 ]
 bundle_id = "sh.platform.cli"
 
@@ -13,5 +13,5 @@ sign {
 }
 
 zip {
-  output_path = "./dist/psh-go-macos.zip"
+  output_path = "./dist/platform-macos.zip"
 }

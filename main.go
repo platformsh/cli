@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -9,6 +11,14 @@ import (
 )
 
 func main() {
+	version := flag.Bool("version", false, "")
+	flag.Parse()
+
+	if *version {
+		fmt.Printf("Platform.sh CLI %s (Wrapped binary)\n", legacy.PSHVersion)
+		return
+	}
+
 	c := &legacy.LegacyCLIWrapper{}
 	if err := c.Init(); err != nil {
 		c.Cleanup()
