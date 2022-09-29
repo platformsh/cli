@@ -10,12 +10,17 @@ import (
 	"lab.plat.farm/accounts/psh-go/legacy"
 )
 
+var version = ""
+
 func main() {
-	version := flag.Bool("version", false, "")
+	versionFlag := flag.Bool("version", false, "")
 	flag.Parse()
 
-	if *version {
-		fmt.Printf("Platform.sh CLI %s (Wrapped binary)\n", legacy.PSHVersion)
+	if *versionFlag {
+		fmt.Printf("Platform.sh CLI %s (Wrapped legacy CLI %s)\n",
+			version,
+			legacy.PSHVersion,
+		)
 		return
 	}
 
