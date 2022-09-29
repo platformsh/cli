@@ -40,4 +40,4 @@ single: legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --rm-dist
 
 release: legacy/archives/platform.phar php
-	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser release --rm-dist
+	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser release --rm-dist --auto-snapshot
