@@ -24,26 +24,8 @@ builds:
       - -X main.commit={{.Commit}}
       - -X main.date={{.Date}}
       - -X main.builtBy=goreleaser`.
-  - binary: platform
-    id: platform-macos
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - darwin
-    goarch:
-      - arm64
-      - amd64
-    ldflags:
-      - -s -w
-      - -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}"
-      - -X "lab.plat.farm/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
-      - -X main.version={{.Version}}
-      - -X main.commit={{.Commit}}
-      - -X main.date={{.Date}}
-      - -X main.builtBy=goreleaser`.
-
 checksum:
-  name_template: "checksums.txt"
+  name_template: checksums.txt
 
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
@@ -61,7 +43,7 @@ universal_binaries:
     replace: true
     hooks:
       post:
-        - gon .gon.hcl
+        # - gon .gon.hcl
         - rm -rf ./dist/platform-macos_darwin_arm64/
         - rm -rf ./dist/platform-macos_darwin_amd64_v1/
 
@@ -86,9 +68,9 @@ brews:
       name: Antonis Kalipetis
       email: antonis.kalipetis@platform.sh
 
-    homepage: "https://docs.platform.sh/administration/cli.html"
-    description: "Platform.sh CLI."
-    license: "MIT"
+    homepage: https://docs.platform.sh/administration/cli.html
+    description: Platform.sh CLI
+    license: MIT
 
     dependencies:
       - name: git
@@ -101,3 +83,22 @@ brews:
 
     test: |
       system "#{bin}/platform --version"
+
+nfpms:
+  - file_name_template: "{{ .ConventionalFileName }}"
+    homepage: https://docs.platform.sh/administration/cli.html
+    description: Platform.sh CLI
+    maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
+    license: MIT
+    vendor: Platform.sh
+    builds:
+      - platform
+    formats:
+      - apk
+      - deb
+      - rpm
+    dependencies:
+      - libonig5
+      - libssl1.1
+    recommends:
+      - git
