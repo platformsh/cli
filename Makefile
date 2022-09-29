@@ -17,11 +17,12 @@ legacy/archives/platform.phar:
 
 legacy/archives/php_windows_amd64: legacy/archives/php_windows.zip legacy/archives/cacert.pem
 
-legacy/archives/php_darwin_$(GOARCH): php-unix
+legacy/archives/php_darwin_$(GOARCH):
+	bash build-php-brew.sh $(PHP_VERSION) $(GOOS)
+	mv -f $(GOOS)/php-$(PHP_VERSION)/sapi/cli/php $(PHP_BINARY_PATH)
+	rm -rf $(GOOS)
 
-legacy/archives/php_linux_$(GOARCH): php-unix
-
-php-unix:
+legacy/archives/php_linux_$(GOARCH):
 	bash build-php-brew.sh $(PHP_VERSION) $(GOOS)
 	mv -f $(GOOS)/php-$(PHP_VERSION)/sapi/cli/php $(PHP_BINARY_PATH)
 	rm -rf $(GOOS)
@@ -35,11 +36,8 @@ legacy/archives/cacert.pem:
 
 php: $(PHP_BINARY_PATH)
 
-snapshot: legacy/archives/platform.phar
-	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --snapshot --rm-dist --id=$(GORELEASER_ID)
-
-single: php legacy/archives/platform.phar
+single: legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --rm-dist
 
-release: legacy/archives/platform.phar
+release: legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser release --rm-dist
