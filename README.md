@@ -14,6 +14,8 @@ brew install platformsh/tap/platformsh-cli
 
 The HomeBrew packages are distributed with our own tap at https://github.com/platformsh/homebrew-tap
 
+Alternatively, you can install the binary directly from the GitHub release.
+
 ### Future installers
 
 Below are installers that do not currently exist, but will be created before we go GA.
