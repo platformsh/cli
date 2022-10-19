@@ -65,7 +65,7 @@ universal_binaries:
     replace: true
     hooks:
       post:
-        # - gon .gon.hcl
+        - gon .gon.hcl
         - rm -rf ./dist/platform-macos_darwin_arm64/
         - rm -rf ./dist/platform-macos_darwin_amd64_v1/
 
