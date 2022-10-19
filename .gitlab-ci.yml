@@ -5,13 +5,17 @@ stages:
   # - release
 
 variables:
-  GIT_SUBMODULE_STRATEGY: recursive
+  DOCKER_HOST: tcp://docker:2375
   GIT_DEPTH: 10
+  GIT_SUBMODULE_STRATEGY: recursive
 
 build-php-linux:
   stage: php
-  image: homebrew/brew
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
   script:
+    - apk add -U make
     - mkdir -p legacy/archives
     - make php
   artifacts:
@@ -21,8 +25,9 @@ build-php-linux:
 
 build-php-windows:
   stage: php
-  image: homebrew/brew
+  image: docker:20.10-git
   script:
+    - apk add -U make wget
     - mkdir -p legacy/archives
     - make php GOOS=windows GOARCH=amd64
   artifacts:
