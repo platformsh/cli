@@ -16,6 +16,10 @@ builds:
       - windows
     goarch:
       - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
     ldflags:
       - -s -w
       - -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}"
@@ -31,8 +35,8 @@ builds:
     goos:
       - darwin
     goarch:
-      - arm64
       - amd64
+      - arm64
     ldflags:
       - -s -w
       - -X "lab.plat.farm/accounts/psh-go/legacy.PHPVersion={{.Env.PHP_VERSION}}"
@@ -43,7 +47,7 @@ builds:
       - -X main.builtBy=goreleaser`.
 
 checksum:
-  name_template: "checksums.txt"
+  name_template: checksums.txt
 
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
@@ -57,7 +61,7 @@ changelog:
 
 universal_binaries:
   - id: platform-macos
-    name_template: "{{ .ProjectName }}-darwin-all"
+    name_template: "{{ .ProjectName }}"
     replace: true
     hooks:
       post:
@@ -67,16 +71,16 @@ universal_binaries:
 
 release:
   github:
-    owner: akalipetis
-    name: homebrew-psh-go
+    owner: platformsh
+    name: homebrew-tap
   extra_files:
     - glob: ./dist/platform-macos.zip
 
 brews:
   - name: platformsh-cli
     tap:
-      owner: akalipetis
-      name: homebrew-psh-go
+      owner: platformsh
+      name: homebrew-tap
       token: "{{ .Env.GITHUB_TOKEN }}"
 
     goarm: "7"
@@ -86,9 +90,9 @@ brews:
       name: Antonis Kalipetis
       email: antonis.kalipetis@platform.sh
 
-    homepage: "https://docs.platform.sh/administration/cli.html"
-    description: "Platform.sh CLI."
-    license: "MIT"
+    homepage: https://docs.platform.sh/administration/cli.html
+    description: Platform.sh CLI
+    license: MIT
 
     dependencies:
       - name: git
@@ -101,3 +105,17 @@ brews:
 
     test: |
       system "#{bin}/platform --version"
+
+nfpms:
+  - file_name_template: "{{ .ConventionalFileName }}"
+    homepage: https://docs.platform.sh/administration/cli.html
+    description: Platform.sh CLI
+    maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
+    license: MIT
+    vendor: Platform.sh
+    builds:
+      - platform
+    formats:
+      - apk
+      - deb
+      - rpm
