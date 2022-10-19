@@ -57,18 +57,14 @@ func (c *LegacyCLIWrapper) cacheDir() string {
 // Init the CLI wrapper, creating a temporary directory and copying over files
 func (c *LegacyCLIWrapper) Init() error {
 	c.debug = os.Getenv("PLATFORMSH_CLI_DEBUG") == "1"
-	if st, err := os.Stat(c.cacheDir()); st != nil && st.IsDir() {
+	if st, _ := os.Stat(c.PHPPath()); st != nil && st.Mode().IsRegular() {
 		if c.debug {
 			log.Printf("cache directory already exists: %s", c.cacheDir())
 		}
 		return nil
-	} else if err == nil {
-		if c.debug {
-			log.Printf("cache path exists but is not a directory, cleaning up: %s", c.cacheDir())
-		}
-		c.Cleanup()
 	}
 
+	c.Cleanup()
 	if err := os.Mkdir(c.cacheDir(), 0700); err != nil {
 		return fmt.Errorf("could not create temporary directory: %w", err)
 	}
