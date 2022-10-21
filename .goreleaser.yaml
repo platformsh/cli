@@ -76,6 +76,14 @@ release:
   extra_files:
     - glob: ./dist/platform-macos.zip
 
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+    format_overrides:
+      - goos: windows
+        format: zip
+
 brews:
   - name: platformsh-cli
     tap:
@@ -102,9 +110,20 @@ brews:
 
     install: |
       bin.install "platform"
+      bash_completion.install "completion/bash/platform.bash" => "platform"
+      zsh_completion.install "completion/zsh/_platform" => "_platform"
 
     test: |
       system "#{bin}/platform --version"
+
+    caveats: |
+      In order to enable completions, you need to follow one of the following steps:
+
+        * Install using Homebrew and include bash-completion or zsh-completion package, depending on your shell of choice
+        * Run the following command to enable completion for bash
+          `echo 'echo 'eval $(platform completion bash)' >> ~/.bashrc'
+        * Run the following command to enable completion for zsh
+          `echo 'echo 'eval $(platform completion zsh)' >> ~/.zshrc'
 
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"
@@ -119,3 +138,8 @@ nfpms:
       - apk
       - deb
       - rpm
+    contents:
+      - src: completion/bash/platform.bash
+        dst: /etc/bash_completion.d/platform
+      - src: completion/zsh/_platform
+        dst: /usr/local/share/zsh/site-functions/_platform
