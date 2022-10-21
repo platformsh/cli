@@ -47,7 +47,10 @@ func copyFile(destination string, fin []byte) error {
 
 // LegacyCLIWrapper wraps the legacy CLI
 type LegacyCLIWrapper struct {
-	debug bool
+	debug  bool
+	Stdout io.Writer
+	Stderr io.Writer
+	Stdin  io.Reader
 }
 
 func (c *LegacyCLIWrapper) cacheDir() string {
@@ -105,9 +108,21 @@ func (c *LegacyCLIWrapper) Cleanup() error {
 func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
 	args = append([]string{c.PSHPath()}, args...)
 	cmd := exec.CommandContext(ctx, c.PHPPath(), args...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if c.Stdin != nil {
+		cmd.Stdin = c.Stdin
+	} else {
+		cmd.Stdin = os.Stdin
+	}
+	if c.Stdout != nil {
+		cmd.Stdout = c.Stdout
+	} else {
+		cmd.Stdout = os.Stdout
+	}
+	if c.Stderr != nil {
+		cmd.Stderr = c.Stderr
+	} else {
+		cmd.Stderr = os.Stderr
+	}
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_UPDATES_CHECK=0")
 	if err := cmd.Run(); err != nil {
