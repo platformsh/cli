@@ -25,19 +25,15 @@ Below are installers that do not currently exist, but will be created before we 
 
 ### Binary installation
 
-Binaries are included in each release, so installing the binary should be easy for both Unix and Windows systems. For Unix systems, you need to make sure that the following dependencies exist in your system: `libssl` and `libonig`.
-
-You can install these dependencies on Ubuntu with:
-
-```console
-apt install libonig5 libssl3
-```
+Binaries are included in each release, so installing the binary should be easy for both Unix and Windows systems. For MacOS systems, you need to make sure that the following dependencies exist in your system: `libssl` and `libonig`.
 
 You can install these dependencies on MacOS with:
 
 ```console
 brew install oniguruma openssl@1.1
 ```
+
+The Windows and Linux PHP binaries are statically compiled and thus no dependency needs to be installed.
 
 ## Building
 
