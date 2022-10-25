@@ -15,12 +15,14 @@ rm -f sapi/cli/php
 ./configure \
   --disable-shared \
   --enable-embed=static \
+  --enable-filter \
   --enable-mbstring \
   --enable-pcntl \
   --enable-phar \
   --enable-posix \
   --enable-static \
   --enable-sysvmsg \
+  --with-curl \
   --with-openssl \
   --with-pear=no \
   --without-pcre-jit \

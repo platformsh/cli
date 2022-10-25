@@ -5,12 +5,12 @@
 ^bcmath
 ^calendar
 ^ctype
-^curl
+curl
 ^dom
 ^event
 ^exif
 ^fileinfo
-^filter
+filter
 ^gd
 ^hash
 ^iconv
