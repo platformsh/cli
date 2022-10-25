@@ -18,6 +18,7 @@ var version = ""
 
 func main() {
 	versionFlag := flag.Bool("version", false, "")
+	helpFlag := flag.Bool("help", false, "")
 	flag.Parse()
 
 	if *versionFlag {
@@ -32,6 +33,22 @@ func main() {
 	if err := c.Init(); err != nil {
 		c.Cleanup()
 		log.Fatalf("Could not initialize CLI: %s", err)
+		return
+	}
+
+	if *helpFlag {
+		if len(flag.Args()) == 0 {
+			if err := c.Exec(context.TODO(), "list"); err != nil {
+				c.Cleanup()
+				log.Fatalf("Could not execute command: %s\n", err)
+			}
+			return
+		}
+
+		if err := c.Exec(context.TODO(), os.Args[1:]...); err != nil {
+			c.Cleanup()
+			log.Fatalf("Could not execute command: %s\n", err)
+		}
 		return
 	}
 
