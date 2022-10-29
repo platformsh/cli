@@ -17,11 +17,16 @@ import (
 var version = ""
 
 func main() {
-	versionFlag := flag.Bool("version", false, "")
-	helpFlag := flag.Bool("help", false, "")
+	versionFlag := false
+	flag.BoolVar(&versionFlag, "version", false, "")
+	flag.BoolVar(&versionFlag, "v", false, "")
+
+	helpFlag := false
+	flag.BoolVar(&helpFlag, "help", false, "")
+	flag.BoolVar(&helpFlag, "h", false, "")
 	flag.Parse()
 
-	if *versionFlag {
+	if versionFlag {
 		fmt.Printf("Platform.sh CLI %s (Wrapped legacy CLI %s)\n",
 			version,
 			legacy.PSHVersion,
@@ -36,7 +41,7 @@ func main() {
 		return
 	}
 
-	if *helpFlag {
+	if helpFlag {
 		if len(flag.Args()) == 0 {
 			if err := c.Exec(context.TODO(), "list"); err != nil {
 				c.Cleanup()
