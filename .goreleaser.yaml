@@ -122,9 +122,9 @@ brews:
 
         * Install using Homebrew and include bash-completion or zsh-completion package, depending on your shell of choice
         * Run the following command to enable completion for bash
-          `echo 'echo 'eval $(platform completion bash)' >> ~/.bashrc'
+          echo 'eval $(platform completion bash)' >> ~/.bashrc
         * Run the following command to enable completion for zsh
-          `echo 'echo 'eval $(platform completion zsh)' >> ~/.zshrc'
+          echo 'eval $(platform completion zsh)' >> ~/.zshrc
 
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"
