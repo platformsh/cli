@@ -5,13 +5,14 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+
+	flag "github.com/spf13/pflag"
 
 	"strings"
 
@@ -23,20 +24,13 @@ import (
 
 var version = "0.0.0"
 
-var (
-	yellow = color.New(color.FgYellow).SprintFunc()
-	cyan   = color.New(color.FgCyan).SprintFunc()
-	green  = color.New(color.FgGreen).SprintFunc()
-)
-
 func main() {
 	versionFlag := false
-	flag.BoolVar(&versionFlag, "version", false, "")
-	flag.BoolVar(&versionFlag, "v", false, "")
+	flag.BoolVarP(&versionFlag, "version", "v", false, "")
 
 	helpFlag := false
-	flag.BoolVar(&helpFlag, "help", false, "")
-	flag.BoolVar(&helpFlag, "h", false, "")
+	flag.BoolVarP(&helpFlag, "help", "h", false, "")
+	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
 	flag.Parse()
 
 	exitCode := 0
@@ -61,9 +55,9 @@ func main() {
 	}()
 
 	if versionFlag {
-		fmt.Printf("Platform.sh CLI %s (Wrapped legacy CLI %s)\n",
-			cyan(version),
-			green(legacy.PSHVersion),
+		fmt.Fprintf(color.Output, "Platform.sh CLI %s (Wrapped legacy CLI %s)\n",
+			color.CyanString(version),
+			color.GreenString(legacy.PSHVersion),
 		)
 		return
 	}
@@ -148,16 +142,16 @@ func printUpdateMessage(newRelease *internal.ReleaseInfo) {
 	if newRelease != nil {
 		executable, _ := os.Executable()
 		isHomebrew := isUnderHomebrew(executable)
-		fmt.Fprintf(os.Stderr, "\n\n%s %s → %s\n",
-			yellow("A new release of the Platform.sh CLI is available:"),
-			cyan(version),
-			cyan(newRelease.Version),
+		fmt.Fprintf(color.Error, "\n\n%s %s → %s\n",
+			color.YellowString("A new release of the Platform.sh CLI is available:"),
+			color.CyanString(version),
+			color.CyanString(newRelease.Version),
 		)
 		if isHomebrew {
 			fmt.Fprintf(os.Stderr, "To upgrade, run: %s\n", "brew upgrade platformsh/tap/platformsh-cli")
 		}
-		fmt.Fprintf(os.Stderr, "%s\n\n",
-			yellow(newRelease.URL))
+		fmt.Fprintf(color.Error, "%s\n\n",
+			color.YellowString(newRelease.URL))
 	}
 }
 

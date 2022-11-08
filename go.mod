@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/fatih/color v1.13.0
 	github.com/mattn/go-isatty v0.0.16
+	github.com/spf13/pflag v1.0.5
 )
 
 require (

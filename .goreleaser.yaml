@@ -126,6 +126,21 @@ brews:
         * Run the following command to enable completion for zsh
           echo 'eval $(platform completion zsh)' >> ~/.zshrc
 
+scoop:
+  bucket:
+    owner: platformsh
+    name: homebrew-tap
+    token: "{{ .Env.GITHUB_TOKEN }}"
+
+  folder: Scoops
+  commit_author:
+    name: Antonis Kalipetis
+    email: antonis.kalipetis@platform.sh
+
+  homepage: https://docs.platform.sh/administration/cli.html
+  description: Platform.sh CLI
+  license: MIT
+
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"
     homepage: https://docs.platform.sh/administration/cli.html
