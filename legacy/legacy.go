@@ -16,8 +16,8 @@ import (
 //go:embed archives/platform.phar
 var pshCLI []byte
 
-var PSHVersion string
-var PHPVersion string
+var PSHVersion string = "0.0.0"
+var PHPVersion string = "0.0.0"
 
 const prefix = "psh-go"
 
