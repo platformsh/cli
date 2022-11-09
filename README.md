@@ -1,42 +1,54 @@
-# Platform.sh CLI - Go wrapper
+# Platform.sh CLI
 
-This project intends to distribute the Platform.sh CLI as a single binary which embeds PHP.
+This repository hosts the releases of the new Platform.sh CLI
 
 ## Installation
 
-Currently we support installing the binary through [HomeBrew](https://docs.brew.sh/) for Mac and [LinuxBrew](https://docs.brew.sh/Homebrew-on-Linux) for Linux.
+We support installing the CLI either through the various options found below
 
-In order to install the package, you just need to run:
+### HomeBrew, LinuxBrew and Scoop
+
+Currently we support [HomeBrew](https://docs.brew.sh/) for macOS, [LinuxBrew](https://docs.brew.sh/Homebrew-on-Linux) for Linux and Scoop for [Windows](https://scoop.sh/).
+
+This is the preferred way of installation.
+
+In order to install the package, you just need to run the following commands, after having installed the package manager for your OS:
+
+#### macOS or Linux
 
 ```console
 brew install platformsh/tap/platformsh-cli
 ```
 
-The HomeBrew packages are distributed with our own tap at https://github.com/platformsh/homebrew-tap
+#### Windows
 
-Alternatively, you can install the binary directly from the GitHub release.
+```console
+scoop bucket add platformsh https://github.com/platformsh/homebrew-tap.git
+scoop install platform
+```
 
-### Future installers
+### Distribution specific Linux packages
 
-Below are installers that do not currently exist, but will be created before we go GA.
+We are distributing the CLI using standard distribution channels for different Linux distributions, like APK, Deb, and RPM.
 
-* [Chocolatey](https://chocolatey.org/) for Windows
-* [nfpm](https://github.com/goreleaser/nfpm) for `.dep`, `rpm` and `.apk` packages for all major Linux distributions
+You can find all available packages in the [latest release](https://github.com/platformsh/cli/releases/latest).
 
 ### Binary installation
 
-Binaries are included in each release, so installing the binary should be easy for both Unix and Windows systems. For MacOS systems, you need to make sure that the following dependencies exist in your system: `libssl` and `libonig`.
+The binaries are included in each release, so installing the binary should be easy for all macOS, Linux and Windows systems.
 
-You can install these dependencies on MacOS with:
+_For macOS systems, you need to make sure that the following dependencies exist in your system: `libssl` and `libonig`. You can install them with the following command._
 
 ```console
 brew install oniguruma openssl@1.1
 ```
 
-The Windows and Linux PHP binaries are statically compiled and thus no dependency needs to be installed.
+You can find all available binaries in the [latest release](https://github.com/platformsh/cli/releases/latest).
 
-## Building
+## Under the hood
 
-The Go part is built using [Go Releaser](https://goreleaser.com/), while the PHP binary that is embedded relies on the PHP source and Brew dependencies.
+The New Platform.sh CLI is built with backwards compatibility in mind. This is why we've embedded PHP, so that all Legacy PHP CLI commands can be executed in the exact same way, making sure that nothing breaks when you switch to it.
 
-The needed dependencies needed for the HomeBrew build are installed automatically in [`build-php-brew.sh`](./build-php-brew.sh) script.
+## Licenses
+
+This binary redistributes PHP in a binary form, which comes with the [PHP License](https://www.php.net/license/3_01.txt).
