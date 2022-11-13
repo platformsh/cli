@@ -3,3 +3,4 @@ dist/
 php-*
 !legacy/archives/windows_php.ini.tpl
 psh-go
+completion

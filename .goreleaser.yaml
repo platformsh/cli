@@ -5,6 +5,7 @@ project_name: platform
 before:
   hooks:
     - go generate ./...
+    - bash scripts/generate_completions.sh
 
 builds:
   - binary: platform
@@ -111,20 +112,10 @@ brews:
 
     install: |
       bin.install "platform"
-      bash_completion.install "completion/bash/platform.bash" => "platform"
-      zsh_completion.install "completion/zsh/_platform" => "_platform"
+      generate_completions_from_executable(bin/"platform", "completion", shells: [:bash, :zsh])
 
     test: |
       system "#{bin}/platform --version"
-
-    caveats: |
-      In order to enable completions, you need to follow one of the following steps:
-
-        * Install using Homebrew and include bash-completion or zsh-completion package, depending on your shell of choice
-        * Run the following command to enable completion for bash
-          echo 'eval $(platform completion bash)' >> ~/.bashrc
-        * Run the following command to enable completion for zsh
-          echo 'eval $(platform completion zsh)' >> ~/.zshrc
 
 scoop:
   bucket:

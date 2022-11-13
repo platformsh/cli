@@ -123,6 +123,7 @@ func main() {
 			path.Base(c.PSHPath()),
 			"platform",
 		)
+		fmt.Fprintln(os.Stdout, "#compdef platform")
 		fmt.Fprintln(os.Stdout, completions)
 		return
 	}
