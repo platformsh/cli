@@ -55,9 +55,17 @@ func main() {
 	}()
 
 	if versionFlag {
-		fmt.Fprintf(color.Output, "Platform.sh CLI %s (Wrapped legacy CLI %s)\n",
+		// Print both versions, only if they differ
+		if strings.Split(version, "-")[0] != strings.Split(legacy.PSHVersion, "-")[0] {
+			fmt.Fprintf(color.Output, "Platform.sh CLI %s (Wrapped legacy CLI %s)\n",
+				color.CyanString(version),
+				color.GreenString(legacy.PSHVersion),
+			)
+			return
+		}
+
+		fmt.Fprintf(color.Output, "Platform.sh CLI %s\n",
 			color.CyanString(version),
-			color.GreenString(legacy.PSHVersion),
 		)
 		return
 	}
