@@ -73,7 +73,7 @@ universal_binaries:
 release:
   github:
     owner: platformsh
-    name: homebrew-tap
+    name: cli
   extra_files:
     - glob: ./dist/platform-macos.zip
 
