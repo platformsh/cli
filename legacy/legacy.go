@@ -125,6 +125,7 @@ func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
 	}
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_UPDATES_CHECK=0")
+	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_MIGRATE_CHECK=0")
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("could not run legacy CLI command: %w", err)
 	}
