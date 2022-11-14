@@ -10,6 +10,9 @@ GOARCH := $(shell uname -m)
 ifeq ($(GOARCH), x86_64)
 	GOARCH=amd64
 endif
+ifeq ($(GOARCH), aarch64)
+	GOARCH=arm64
+endif
 PHP_BINARY_PATH := legacy/archives/php_$(GOOS)_$(GOARCH)
 
 legacy/archives/platform.phar:
@@ -43,6 +46,9 @@ php: $(PHP_BINARY_PATH)
 
 single: legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --rm-dist
+
+snapshot: legacy/archives/platform.phar php
+	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --snapshot --rm-dist
 
 release: legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser release --rm-dist --auto-snapshot

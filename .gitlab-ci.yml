@@ -1,53 +1,100 @@
 stages:
   - php
   - build
-  # - bdd
-  # - release
+  - release
 
 variables:
   DOCKER_HOST: tcp://docker:2375
   GIT_DEPTH: 10
   GIT_SUBMODULE_STRATEGY: recursive
 
-build-php-linux:
+build-php-linux-x86:
   stage: php
   image: docker:20.10-git
   services:
     - docker:20.10-dind
-  script:
+  before_script:
     - apk add -U make
     - mkdir -p legacy/archives
+  script:
     - make php
   artifacts:
     paths:
       - legacy/archives/*
     expire_in: 1 day
 
+build-php-linux-arm:
+  stage: php
+  image: docker:20.10-git
+  services:
+    - docker:20.10-dind
+  before_script:
+    - apk add -U make
+    - mkdir -p legacy/archives
+  script:
+    - make php
+  artifacts:
+    paths:
+      - legacy/archives/*
+    expire_in: 1 day
+  tags:
+    - arm-high-cpu
+
 build-php-windows:
   stage: php
   image: docker:20.10-git
-  script:
+  before_script:
     - apk add -U make wget
     - mkdir -p legacy/archives
+  script:
     - make php GOOS=windows GOARCH=amd64
   artifacts:
     paths:
       - legacy/archives/*
     expire_in: 1 day
 
+build-php-macos-arm:
+  stage: php
+  before_script:
+    - export PATH="/opt/homebrew/bin:$PATH"
+  script:
+    - make php
+  artifacts:
+    paths:
+      - legacy/archives/*
+    expire_in: 1 day
+  tags:
+    - macos-arm
+
+build-php-macos-x86:
+  stage: php
+  script:
+    - make php
+  artifacts:
+    paths:
+      - legacy/archives/*
+    expire_in: 1 day
+  tags:
+    - macos-x86
+
 build:
   stage: build
-  image:
-    name: goreleaser/goreleaser:v1.9.2
-    entrypoint: [""]
-  script: make single
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  before_script:
+    - export PATH="/opt/homebrew/bin:$PATH"
+    - brew install gon goreleaser wget
+  script:
+    - make snapshot
   dependencies:
-    - build-php-linux
+    - build-php-linux-arm
+    - build-php-linux-x86
+    - build-php-macos-arm
+    - build-php-macos-x86
     - build-php-windows
   artifacts:
     paths:
-      - dist/platform_*
-      - dist/checksums.txt
+      - dist/
     expire_in: 1 day
   tags:
     - macos-arm

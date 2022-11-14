@@ -64,18 +64,11 @@ universal_binaries:
   - id: platform-macos
     name_template: "{{ .ProjectName }}"
     replace: true
-    hooks:
-      post:
-        - gon .gon.hcl
-        - rm -rf ./dist/platform-macos_darwin_arm64/
-        - rm -rf ./dist/platform-macos_darwin_amd64_v1/
 
 release:
   github:
     owner: platformsh
     name: cli
-  extra_files:
-    - glob: ./dist/platform-macos.zip
 
 archives:
   - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
