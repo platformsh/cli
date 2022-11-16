@@ -1,5 +1,11 @@
 psh-go (4.0.0-beta.7) unstable; urgency=medium
 
+  * Fix release CI
+
+ -- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Wed, 16 Nov 2022 10:12:46 +0000
+
+psh-go (4.0.0-beta.7) unstable; urgency=medium
+
   [ Antonis Kalipetis ]
   * Improve completions for HomeBrew in both bash and zsh
   * Bump legacy CLI to 3.85.0
