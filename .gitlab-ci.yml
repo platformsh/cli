@@ -1,6 +1,7 @@
 stages:
   - php
   - build
+  - test
   - release
 
 variables:
@@ -108,7 +109,8 @@ release:
     - brew install gon goreleaser wget
   script:
     - make release
-  dependencies:
+  needs:
+    - test-linux
     - build-php-linux-arm
     - build-php-linux-x86
     - build-php-macos-arm
