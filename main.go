@@ -41,7 +41,7 @@ func main() {
 	// Run the update check in parallel
 	updateMessageChan := make(chan *internal.ReleaseInfo)
 	go func() {
-		rel, _ := internal.CheckForUpdate("platformsh/homebrew-tap", version)
+		rel, _ := internal.CheckForUpdate("platformsh/cli", version)
 		updateMessageChan <- rel
 	}()
 
