@@ -80,8 +80,6 @@ build-php-macos-x86:
 
 build:
   stage: build
-  rules:
-    - if: $CI_COMMIT_BRANCH
   before_script:
     - export PATH="/opt/homebrew/bin:$PATH"
     - brew install gon goreleaser wget
@@ -109,7 +107,7 @@ release:
     - brew install gon goreleaser wget
   script:
     - make release
-  needs:
+  dependencies:
     - test-linux
     - build-php-linux-arm
     - build-php-linux-x86
