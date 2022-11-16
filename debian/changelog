@@ -1,0 +1,10 @@
+psh-go (4.0.0-beta.6) unstable; urgency=low
+
+* 284d4cf Add support for checking for new versions and prompting the user to update
+* eb90063 Fix HomeBrew post-install message for installing completion
+* b343e2b Introduce Scoop for Windows releases
+* afc49d2 Merge branch 'akalipetis/14-update-prompt' into 'main'
+* 121be21 Merge branch 'akalipetis/15-scoop-release' into 'main'
+* 09db80a Merge branch 'hotfix/6-post-install-message-fix' into 'main'
+
+-- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Tue, 08 Nov 2022 15:57:00 +0000
