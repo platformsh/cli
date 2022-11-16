@@ -1,3 +1,21 @@
+psh-go (4.0.0-beta.7) unstable; urgency=medium
+
+  [ Antonis Kalipetis ]
+  * Improve completions for HomeBrew in both bash and zsh
+  * Bump legacy CLI to 3.85.0
+  * Skip migrations checks when running within the New CLI
+  * Only print both Legacy and New CLI versions if they differ
+  * Switch to platformsh/cli for releases
+  * Enable PHP building on macOS
+
+  [ Alphonse Delaporte ]
+  * Testing behave
+
+  [ Antonis Kalipetis ]
+  * Add dummy changelog
+
+ -- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Wed, 16 Nov 2022 09:53:46 +0000
+
 psh-go (4.0.0-beta.6) unstable; urgency=low
 
 * 284d4cf Add support for checking for new versions and prompting the user to update
