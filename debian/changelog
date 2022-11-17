@@ -1,3 +1,9 @@
+psh-go (4.0.0-rc.1) unstable; urgency=medium
+
+  * UNRELEASED
+
+ -- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Thu, 17 Nov 2022 17:32:10 +0000
+
 psh-go (4.0.0-beta.8) unstable; urgency=medium
 
   * Fix check for updates repository to be platformsh/cli
