@@ -1,3 +1,10 @@
+psh-go (4.0.0-beta.8) unstable; urgency=medium
+
+  * Fix check for updates repository to be platformsh/cli
+  * Bump Legacy CLI version to 3.86.0
+
+ -- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Thu, 17 Nov 2022 08:27:39 +0000
+
 psh-go (4.0.0-beta.7) unstable; urgency=medium
 
   * Fix release CI
