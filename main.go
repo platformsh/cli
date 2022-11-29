@@ -26,7 +26,7 @@ var version = "0.0.0"
 
 func main() {
 	versionFlag := false
-	flag.BoolVarP(&versionFlag, "version", "v", false, "")
+	flag.BoolVarP(&versionFlag, "version", "V", false, "Displays the application version")
 
 	helpFlag := false
 	flag.BoolVarP(&helpFlag, "help", "h", false, "")

@@ -1,5 +1,5 @@
-PHP_VERSION = 8.0.25
-PSH_VERSION = 3.86.0
+PHP_VERSION = 8.0.26
+PSH_VERSION = 3.86.1
 GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ifeq ($(GOOS), darwin)
 	GORELEASER_ID=platform-macos
@@ -28,7 +28,8 @@ legacy/archives/php_darwin_$(GOARCH):
 legacy/archives/php_linux_$(GOARCH):
 	cp ext/extensions.txt ext/static-php-cli/docker
 	cd ext/static-php-cli/docker ;\
-	docker build --platform=linux/$(GOARCH) -t static-php . --build-arg USE_BACKUP_ADDRESS=yes
+	sed -i 's/alpine:latest/alpine:3.16/g' Dockerfile;\
+	docker build --platform=linux/$(GOARCH) -t static-php . --build-arg USE_BACKUP_ADDRESS=yes --progress=plain
 	mkdir -p legacy/archives
 	docker run --rm --platform=linux/$(GOARCH) -v ${PWD}/legacy/archives:/dist -e USE_BACKUP_ADDRESS=yes static-php build-php no-mirror $(PHP_VERSION) all /dist
 	mv -f legacy/archives/php legacy/archives/php_linux_$(GOARCH)
