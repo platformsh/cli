@@ -37,7 +37,7 @@ You can find all available packages in the [latest release](https://github.com/p
 
 The binaries are included in each release, so installing the binary should be easy for all macOS, Linux and Windows systems.
 
-_For macOS systems, you need to make sure that the following dependencies exist in your system: `libssl` and `libonig`. You can install them with the following command._
+_For macOS systems, it's better to install the CLI using HomeBrew, as you might end up with signing issues otherwise. Also, you need to make sure that the following dependencies exist in your system: `libssl` and `libonig`. You can install them with the following command._
 
 ```console
 brew install oniguruma openssl@1.1
