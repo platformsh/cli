@@ -1,5 +1,5 @@
 PHP_VERSION = 8.0.26
-PSH_VERSION = 3.86.1
+PSH_VERSION = 3.87.0
 GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ifeq ($(GOOS), darwin)
 	GORELEASER_ID=platform-macos
