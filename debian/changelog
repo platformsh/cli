@@ -1,3 +1,9 @@
+psh-go (4.0.0-rc.3) unstable; urgency=medium
+
+  * Bump legacy CLI to 3.87.1
+
+ -- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Thu, 01 Dec 2022 10:38:11 +0000
+
 psh-go (4.0.0-rc.2) unstable; urgency=medium
 
   [ Jérôme Vieilledent ]
