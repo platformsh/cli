@@ -2,6 +2,8 @@
 
 This repository hosts the releases of the new Platform.sh CLI
 
+> This product includes PHP software, freely available from [the PHP website](https://www.php.net/software)
+
 ## Installation
 
 We support installing the CLI either through the various options found below
@@ -52,3 +54,4 @@ The New Platform.sh CLI is built with backwards compatibility in mind. This is w
 ## Licenses
 
 This binary redistributes PHP in a binary form, which comes with the [PHP License](https://www.php.net/license/3_01.txt).
+
