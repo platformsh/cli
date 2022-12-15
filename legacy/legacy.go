@@ -47,11 +47,12 @@ func copyFile(destination string, fin []byte) error {
 
 // LegacyCLIWrapper wraps the legacy CLI
 type LegacyCLIWrapper struct {
-	debug   bool
-	Stdout  io.Writer
-	Stderr  io.Writer
-	Stdin   io.Reader
-	Version string
+	Stdout           io.Writer
+	Stderr           io.Writer
+	Stdin            io.Reader
+	Version          string
+	CustomPshCliPath string
+	Debug            bool
 }
 
 func (c *LegacyCLIWrapper) cacheDir() string {
@@ -60,27 +61,36 @@ func (c *LegacyCLIWrapper) cacheDir() string {
 
 // Init the CLI wrapper, creating a temporary directory and copying over files
 func (c *LegacyCLIWrapper) Init() error {
-	c.debug = os.Getenv("PLATFORMSH_CLI_DEBUG") == "1"
-	if st, _ := os.Stat(c.PHPPath()); st != nil && st.Mode().IsRegular() {
-		if c.debug {
-			log.Printf("cache directory already exists: %s", c.cacheDir())
+	if _, err := os.Stat(c.cacheDir()); os.IsNotExist(err) {
+		if c.Debug {
+			log.Printf("cache directory does not exist, creating: %s", c.cacheDir())
 		}
-		return nil
+		if err := os.Mkdir(c.cacheDir(), 0700); err != nil {
+			return fmt.Errorf("could not create temporary directory: %w", err)
+		}
 	}
 
-	c.Cleanup()
-	if err := os.Mkdir(c.cacheDir(), 0700); err != nil {
-		return fmt.Errorf("could not create temporary directory: %w", err)
+	if _, err := os.Stat(c.PSHPath()); os.IsNotExist(err) {
+		if c.CustomPshCliPath != "" {
+			return fmt.Errorf("given PSH phar path does not exist: %w", err)
+		}
+
+		log.Printf("PSH .phar file does not exist, copying: %s", c.PSHPath())
+		if err := c.copyPSH(); err != nil {
+			return fmt.Errorf("could not copy files: %w", err)
+		}
 	}
 
-	if err := c.copyPHP(); err != nil {
-		return fmt.Errorf("could not copy files: %w", err)
-	}
-	if err := c.copyPSH(); err != nil {
-		return fmt.Errorf("could not copy files: %w", err)
-	}
-	if err := os.Chmod(c.PHPPath(), 0700); err != nil {
-		return fmt.Errorf("could not make PHP executable: %w", err)
+	if _, err := os.Stat(c.PHPPath()); os.IsNotExist(err) {
+		if c.Debug {
+			log.Printf("PHP binary does not exist, copying: %s", c.PHPPath())
+		}
+		if err := c.copyPHP(); err != nil {
+			return fmt.Errorf("could not copy files: %w", err)
+		}
+		if err := os.Chmod(c.PHPPath(), 0700); err != nil {
+			return fmt.Errorf("could not make PHP executable: %w", err)
+		}
 	}
 
 	return nil
@@ -96,7 +106,7 @@ func (c *LegacyCLIWrapper) Cleanup() error {
 	for _, f := range files {
 		if strings.HasPrefix(f.Name(), prefix) {
 			err := os.RemoveAll(path.Join(os.TempDir(), f.Name()))
-			if err != nil && c.debug {
+			if err != nil && c.Debug {
 				log.Printf("could not remove directory: %s", f.Name())
 			}
 		}
@@ -144,11 +154,20 @@ func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
 
 // PSHPath returns the path that the PSH CLI will reside
 func (c *LegacyCLIWrapper) PSHPath() string {
+	if c.CustomPshCliPath != "" {
+		return c.CustomPshCliPath
+	}
+
 	return path.Join(c.cacheDir(), pshPath)
 }
 
 // copyPSH to destination, if it does not exist
 func (c *LegacyCLIWrapper) copyPSH() error {
+	// Do not copy the file, if a custom path was given
+	if c.CustomPshCliPath != "" {
+		return nil
+	}
+
 	if err := copyFile(c.PSHPath(), pshCLI); err != nil {
 		return fmt.Errorf("could not copy legacy Platform.sh CLI: %w", err)
 	}

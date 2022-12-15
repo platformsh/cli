@@ -27,6 +27,8 @@ import (
 var (
 	version            = "0.0.0"
 	shellConfigSnippet = regexp.MustCompile("# BEGIN SNIPPET: Platform.sh CLI configuration(?s).+# END SNIPPET")
+	customPshCliPath   = ""
+	debug              = false
 )
 
 func main() {
@@ -35,6 +37,10 @@ func main() {
 
 	helpFlag := false
 	flag.BoolVarP(&helpFlag, "help", "h", false, "")
+
+	flag.StringVar(&customPshCliPath, "phar-path", os.Getenv("PLATFORMSH_CLI_PHAR_PATH"), "Uses a local .phar file for the PSH CLI")
+	flag.BoolVar(&debug, "debug", os.Getenv("PLATFORMSH_CLI_DEBUG") == "1", "Prints debug logging")
+
 	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
 	flag.Parse()
 
@@ -78,7 +84,9 @@ func main() {
 	}
 
 	c := &legacy.LegacyCLIWrapper{
-		Version: version,
+		Version:          version,
+		CustomPshCliPath: customPshCliPath,
+		Debug:            debug,
 	}
 	if err := c.Init(); err != nil {
 		c.Cleanup()
@@ -189,7 +197,7 @@ func isUnderHomebrew(pshBinary string) bool {
 }
 
 func debugLog(format string, v ...any) {
-	if os.Getenv("PLATFORMSH_CLI_DEBUG") != "1" {
+	if !debug {
 		return
 	}
 
