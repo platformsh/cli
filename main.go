@@ -70,7 +70,9 @@ func main() {
 		return
 	}
 
-	c := &legacy.LegacyCLIWrapper{}
+	c := &legacy.LegacyCLIWrapper{
+		Version: version,
+	}
 	if err := c.Init(); err != nil {
 		c.Cleanup()
 		debugLog("Could not initialize CLI: %s", err)

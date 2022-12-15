@@ -47,10 +47,11 @@ func copyFile(destination string, fin []byte) error {
 
 // LegacyCLIWrapper wraps the legacy CLI
 type LegacyCLIWrapper struct {
-	debug  bool
-	Stdout io.Writer
-	Stderr io.Writer
-	Stdin  io.Reader
+	debug   bool
+	Stdout  io.Writer
+	Stderr  io.Writer
+	Stdin   io.Reader
+	Version string
 }
 
 func (c *LegacyCLIWrapper) cacheDir() string {
@@ -128,6 +129,12 @@ func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
 	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_MIGRATE_CHECK=0")
 	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_APPLICATION_PROMPT_SELF_INSTALL=0")
 	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_WRAPPED=1")
+	cmd.Env = append(cmd.Env, fmt.Sprintf(
+		"PLATFORMSH_CLI_USER_AGENT={APP_NAME_DASH}/%s ({UNAME_S}; {UNAME_R}; PHP %s; WRAPPER psh-go/%s)",
+		PSHVersion,
+		PHPVersion,
+		c.Version,
+	))
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("could not run legacy CLI command: %w", err)
 	}
