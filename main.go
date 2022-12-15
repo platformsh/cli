@@ -6,11 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 
 	flag "github.com/spf13/pflag"
 
@@ -22,7 +24,10 @@ import (
 	"github.com/platformsh/cli/legacy"
 )
 
-var version = "0.0.0"
+var (
+	version            = "0.0.0"
+	shellConfigSnippet = regexp.MustCompile("# BEGIN SNIPPET: Platform.sh CLI configuration(?s).+# END SNIPPET")
+)
 
 func main() {
 	versionFlag := false
@@ -44,6 +49,8 @@ func main() {
 		rel, _ := internal.CheckForUpdate("platformsh/cli", version)
 		updateMessageChan <- rel
 	}()
+
+	defer checkShellConfigLeftovers()
 
 	// Defer the check and do not wait for it if the command has finished first
 	defer func() {
@@ -187,4 +194,37 @@ func debugLog(format string, v ...any) {
 	}
 
 	log.Printf(format, v...)
+}
+
+// checkShellConfigLeftovers checks .zshrc and .bashrc for any leftovers from the legacy CLI
+func checkShellConfigLeftovers() {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return
+	}
+
+	shellConfigFiles := []string{
+		filepath.Join(homeDir, ".zshrc"),
+		filepath.Join(homeDir, ".bashrc"),
+	}
+
+	for _, shellConfigFile := range shellConfigFiles {
+		if _, err := os.Stat(shellConfigFile); err != nil {
+			continue
+		}
+
+		shellConfig, err := ioutil.ReadFile(shellConfigFile)
+		if err != nil {
+			continue
+		}
+
+		if shellConfigSnippet.Match(shellConfig) {
+			fmt.Fprintf(color.Output, "%s Your %s file contains code that is no longer needed for the New Platform.sh CLI\n",
+				color.YellowString("Warning:"),
+				shellConfigFile,
+			)
+			fmt.Fprintf(color.Output, "%s %s\n", color.YellowString("Please remove the following lines from:"), shellConfigFile)
+			fmt.Fprintf(color.Output, "\t%s\n", strings.ReplaceAll(string(shellConfigSnippet.Find(shellConfig)), "\n", "\n\t"))
+		}
+	}
 }
