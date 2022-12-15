@@ -126,8 +126,7 @@ scoop:
   license: MIT
 
 nfpms:
-  - file_name_template: "{{ .ConventionalFileName }}"
-    homepage: https://docs.platform.sh/administration/cli.html
+  - homepage: https://docs.platform.sh/administration/cli.html
     description: Platform.sh CLI
     maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
     license: MIT
