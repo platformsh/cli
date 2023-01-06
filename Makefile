@@ -1,4 +1,4 @@
-PHP_VERSION = 8.0.26
+PHP_VERSION = 8.0.27
 PSH_VERSION = 4.0.0
 GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ifeq ($(GOOS), darwin)
