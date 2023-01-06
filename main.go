@@ -26,7 +26,7 @@ import (
 
 var (
 	version            = "0.0.0"
-	shellConfigSnippet = regexp.MustCompile("# BEGIN SNIPPET: Platform.sh CLI configuration(?s).+# END SNIPPET")
+	shellConfigSnippet = regexp.MustCompile("# BEGIN SNIPPET: Platform.sh CLI configuration(?s).+?# END SNIPPET")
 	customPshCliPath   = ""
 	debug              = false
 )
