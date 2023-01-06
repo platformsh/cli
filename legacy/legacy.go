@@ -62,9 +62,7 @@ func (c *LegacyCLIWrapper) cacheDir() string {
 // Init the CLI wrapper, creating a temporary directory and copying over files
 func (c *LegacyCLIWrapper) Init() error {
 	if _, err := os.Stat(c.cacheDir()); os.IsNotExist(err) {
-		if c.Debug {
-			log.Printf("cache directory does not exist, creating: %s", c.cacheDir())
-		}
+		c.debugLog("cache directory does not exist, creating: %s", c.cacheDir())
 		if err := os.Mkdir(c.cacheDir(), 0700); err != nil {
 			return fmt.Errorf("could not create temporary directory: %w", err)
 		}
@@ -75,16 +73,14 @@ func (c *LegacyCLIWrapper) Init() error {
 			return fmt.Errorf("given PSH phar path does not exist: %w", err)
 		}
 
-		log.Printf("PSH .phar file does not exist, copying: %s", c.PSHPath())
+		c.debugLog("PSH .phar file does not exist, copying: %s", c.PSHPath())
 		if err := c.copyPSH(); err != nil {
 			return fmt.Errorf("could not copy files: %w", err)
 		}
 	}
 
 	if _, err := os.Stat(c.PHPPath()); os.IsNotExist(err) {
-		if c.Debug {
-			log.Printf("PHP binary does not exist, copying: %s", c.PHPPath())
-		}
+		c.debugLog("PHP binary does not exist, copying: %s", c.PHPPath())
 		if err := c.copyPHP(); err != nil {
 			return fmt.Errorf("could not copy files: %w", err)
 		}
@@ -107,7 +103,7 @@ func (c *LegacyCLIWrapper) Cleanup() error {
 		if strings.HasPrefix(f.Name(), prefix) {
 			err := os.RemoveAll(path.Join(os.TempDir(), f.Name()))
 			if err != nil && c.Debug {
-				log.Printf("could not remove directory: %s", f.Name())
+				c.debugLog("could not remove directory: %s", f.Name())
 			}
 		}
 	}
@@ -173,4 +169,11 @@ func (c *LegacyCLIWrapper) copyPSH() error {
 	}
 
 	return nil
+}
+
+// debugLog logs a debugging message, if debug is enabled
+func (c *LegacyCLIWrapper) debugLog(msg string, v ...any) {
+	if c.Debug {
+		log.Printf(msg, v...)
+	}
 }
