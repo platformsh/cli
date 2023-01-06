@@ -24,7 +24,7 @@ builds:
     ldflags:
       - -s -w
       - -X "github.com/platformsh/cli/legacy.PHPVersion={{.Env.PHP_VERSION}}"
-      - -X "github.com/platformsh/cli/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X "github.com/platformsh/cli/legacy.PSHVersion={{.Env.PSH_VERSION}}"
       - -X main.version={{.Version}}
       - -X main.commit={{.Commit}}
       - -X main.date={{.Date}}
@@ -41,7 +41,7 @@ builds:
     ldflags:
       - -s -w
       - -X "github.com/platformsh/cli/legacy.PHPVersion={{.Env.PHP_VERSION}}"
-      - -X "github.com/platformsh/cli/accounts/psh-go/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X "github.com/platformsh/cli/legacy.PSHVersion={{.Env.PSH_VERSION}}"
       - -X main.version={{.Version}}
       - -X main.commit={{.Commit}}
       - -X main.date={{.Date}}
