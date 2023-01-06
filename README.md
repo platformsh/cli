@@ -1,6 +1,8 @@
 # Platform.sh CLI
 
-This repository hosts the releases of the new Platform.sh CLI
+The **Platform.sh CLI** is the official command-line interface for [Platform.sh](https://platform.sh). Use this tool to interact with your [Platform.sh](https://platform.sh) projects, and to build them locally for development purposes.
+
+This repository hosts the source code and releases of the new CLI.
 
 > This product includes PHP software, freely available from [the PHP website](https://www.php.net/software)
 
