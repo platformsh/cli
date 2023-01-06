@@ -1,5 +1,5 @@
 PHP_VERSION = 8.0.26
-PSH_VERSION = 3.88.1
+PSH_VERSION = 4.0.0
 GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ifeq ($(GOOS), darwin)
 	GORELEASER_ID=platform-macos
@@ -16,7 +16,7 @@ endif
 PHP_BINARY_PATH := legacy/archives/php_$(GOOS)_$(GOARCH)
 
 legacy/archives/platform.phar:
-	wget https://github.com/platformsh/platformsh-cli/releases/download/v$(PSH_VERSION)/platform.phar -O legacy/archives/platform.phar
+	wget https://github.com/platformsh/legacy-cli/releases/download/v$(PSH_VERSION)/platform.phar -O legacy/archives/platform.phar
 
 legacy/archives/php_windows_amd64: legacy/archives/php_windows.zip legacy/archives/cacert.pem
 
