@@ -1,3 +1,13 @@
+psh-go (4.0.0+001) unstable; urgency=medium
+
+  [ Patrick Dawkins ]
+  * Fix snippet matching when there is more than one
+
+  [ Antonis Kalipetis ]
+  * Fix version shown for the Legacy CLI
+
+ -- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Fri, 06 Jan 2023 22:23:14 +0000
+
 psh-go (4.0.0) unstable; urgency=medium
 
   [ Antonis Kalipetis ]
