@@ -1,3 +1,12 @@
+psh-go (4.0.1) unstable; urgency=medium
+
+  * Change the way changelog is displayed to be GitHub style
+  * Fix debug logging for the wrapper
+  * Add quotes to support tilde in cafile
+  * Bump Legacy CLI version to 4.0.1
+
+ -- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Mon, 09 Jan 2023 15:02:56 +0000
+
 psh-go (4.0.0+001) unstable; urgency=medium
 
   [ Patrick Dawkins ]
