@@ -227,12 +227,12 @@ func checkShellConfigLeftovers() {
 		}
 
 		if shellConfigSnippet.Match(shellConfig) {
-			fmt.Fprintf(color.Output, "%s Your %s file contains code that is no longer needed for the New Platform.sh CLI\n",
+			fmt.Fprintf(color.Error, "%s Your %s file contains code that is no longer needed for the New Platform.sh CLI\n",
 				color.YellowString("Warning:"),
 				shellConfigFile,
 			)
-			fmt.Fprintf(color.Output, "%s %s\n", color.YellowString("Please remove the following lines from:"), shellConfigFile)
-			fmt.Fprintf(color.Output, "\t%s\n", strings.ReplaceAll(string(shellConfigSnippet.Find(shellConfig)), "\n", "\n\t"))
+			fmt.Fprintf(color.Error, "%s %s\n", color.YellowString("Please remove the following lines from:"), shellConfigFile)
+			fmt.Fprintf(color.Error, "\t%s\n", strings.ReplaceAll(string(shellConfigSnippet.Find(shellConfig)), "\n", "\n\t"))
 		}
 	}
 }
