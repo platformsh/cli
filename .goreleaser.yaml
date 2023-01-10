@@ -124,6 +124,7 @@ scoop:
 
 nfpms:
   - homepage: https://docs.platform.sh/administration/cli.html
+    package_name: platformsh-cli
     description: Platform.sh CLI
     maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
     license: MIT
