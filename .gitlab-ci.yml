@@ -118,6 +118,7 @@ release:
   before_script:
     - export PATH="/opt/homebrew/bin:$PATH"
     - brew install gon goreleaser wget
+    - git remote set-url origin https://github.com/platformsh/cli
   script:
     - make release
   dependencies:

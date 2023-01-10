@@ -55,11 +55,7 @@ snapshot:
 
 changelog:
   sort: asc
-  use: github
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
+  use: github-native
 
 universal_binaries:
   - id: platform-macos
