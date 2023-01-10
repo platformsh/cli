@@ -1,3 +1,19 @@
+psh-go (4.0.2) unstable; urgency=medium
+
+  [ Fabien Potencier ]
+  * Send warning on stderr
+
+  [ Antonis Kalipetis ]
+  * Improve release notes generation
+
+  [ Patrick Dawkins ]
+  * Update wrapped CLI to 4.0.2
+
+  [ Antonis Kalipetis ]
+  * Rename the Linux package to platformsh-cli for clarity
+
+ -- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Tue, 10 Jan 2023 09:07:26 +0000
+
 psh-go (4.0.1) unstable; urgency=medium
 
   * Change the way changelog is displayed to be GitHub style
