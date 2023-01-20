@@ -1,11 +1,12 @@
 # Commands to start on workspace startup
 tasks:
-  - name: Prepare for dev
-    init: make php
-  - name: Preparing Go
-    init: go install
-  - name: All set!
-    init: echo "Try running go run main.go auth:api-token-login"
+  - name: Preparing Environment
+    init: | 
+      make php
+      make
+      go install
+      echo "Try running go run main.go auth:api-token-login"
+      echo "Also, you may run the following: alias platfarm=\"go run main.go\""
 
 
 # Ports to expose on workspace startup
