@@ -1,0 +1,15 @@
+# Commands to start on workspace startup
+tasks:
+  - name: Prepare for dev
+    init: make php
+  - name: Preparing Go
+    init: go install
+  - name: All set!
+    init: echo "Try running go run main.go auth:api-token-login"
+
+
+# Ports to expose on workspace startup
+ports:
+  - port: 5000
+    name: Platform Login Port
+    description: The port to map `platform login` to.
