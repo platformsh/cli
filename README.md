@@ -23,6 +23,41 @@ scoop bucket add platformsh https://github.com/platformsh/homebrew-tap.git
 scoop install platform
 ```
 
+### Bash installer
+
+Use the bash installer for an automated installation, using the most preferable way for your system.
+
+```console
+curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
+```
+
+The installer is configurable using the following environment variables:
+
+* `INSTALL_LOG` - the install log file
+* `INSTALL_METHOD` - force a specific installation method, possible values are `brew` and `raw`
+* `INSTALL_DIR` - the installation directory for the `raw` installation method, for example you can use `INSTALL_DIR=$HOME/.local/bin` for a single user installation
+* `VERSION` - the version of the CLI to install, if you need a version other than the latest one
+
+#### Installation configuration examples
+
+<details>
+    <summary>Force the CLI to be installed using the raw method</summary>
+
+    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | INSTALL_METHOD=raw bash
+</details>
+
+<details>
+    <summary>Install a specific version</summary>
+
+    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VERSION=4.0.1 bash
+</details>
+
+<details>
+    <summary>Install the CLI in a user owned directory</summary>
+
+    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | INSTALL_METHOD=raw INSTALL_DIR=$HOME/.local/bin bash
+</details>
+
 ### Manual installation
 
 For manual installation, you can also [download the latest binaries](https://github.com/platformsh/cli/releases/latest).
