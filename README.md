@@ -10,11 +10,18 @@ This repository hosts the source code and releases of the new CLI.
 
 To install the CLI, use either [Homebrew](https://brew.sh/) (on Linux, macOS, or the Windows Subsystem for Linux) or [Scoop](https://scoop.sh/) (on Windows):
 
-### HomeBrew
+### Homebrew
 
 ```console
 brew install platformsh/tap/platformsh-cli
 ```
+
+After installing or updating platformsh-cli via Homebrew, make sure you have the right `platform` in your path by issuing
+```bash
+hash -r && ls -l $(which platform)
+```
+
+You should see a path that involves homebrew, `/opt/homebrew/bin/platform` on M1 mac, `/usr/local/Homebrew/bin/platform` on Intel mac, `/home/linuxbrew/.linuxbrew/bin/platform` on Linux. If you don't see that, then delete the target that you are seeing with `sudo rm $(which platform) && hash -r` and then you should see the correct `platform` tool in `which platform`.
 
 ### Scoop
 
