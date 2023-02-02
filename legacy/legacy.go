@@ -2,6 +2,9 @@ package legacy
 
 import (
 	"bytes"
+
+	"github.com/gofrs/flock"
+
 	"context"
 	_ "embed"
 	"fmt"
@@ -67,6 +70,12 @@ func (c *LegacyCLIWrapper) Init() error {
 			return fmt.Errorf("could not create temporary directory: %w", err)
 		}
 	}
+	fileLock := flock.New(path.Join(c.cacheDir(), ".lock"))
+	if err := fileLock.Lock(); err != nil {
+		return fmt.Errorf("could not acquire lock: %w", err)
+	}
+	c.debugLog("lock acquired: %s", fileLock.Path())
+	defer fileLock.Unlock()
 
 	if _, err := os.Stat(c.PSHPath()); os.IsNotExist(err) {
 		if c.CustomPshCliPath != "" {
