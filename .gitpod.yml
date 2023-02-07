@@ -6,7 +6,7 @@ tasks:
       make
       go install
       echo "Try running go run main.go auth:api-token-login"
-      echo "Also, you may run the following: alias platfarm=\"go run main.go\""
+      echo "Also, you may run the following: alias platform=\"go run main.go\""
 
 
 # Ports to expose on workspace startup
