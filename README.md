@@ -16,7 +16,7 @@ To install the CLI, use either [Homebrew](https://brew.sh/) (on Linux, macOS, or
 brew install platformsh/tap/platformsh-cli
 ```
 
-> If you have issues with missing libraries on a Mac, see how to [troubleshoot CLI installation on M1/M2 Macs]([url](https://community.platform.sh/t/troubleshoot-cli-installation-on-m1-macs/1202)).
+> If you have issues with missing libraries on a Mac, see how to [troubleshoot CLI installation on M1/M2 Macs](https://community.platform.sh/t/troubleshoot-cli-installation-on-m1-macs/1202).
 
 ### Scoop
 
