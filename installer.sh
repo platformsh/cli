@@ -109,7 +109,7 @@ function outro() {
 
     output "\nWhat's next?" "heading"
 
-    output "  Get started with: platform welcome" "output"
+    output "  To use the CLI, run: platform" "output"
 
     output "\nUseful links:" "heading"
     output "  CLI introduction: https://docs.platform.sh/get-started/introduction.html#cli"
