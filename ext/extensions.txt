@@ -17,7 +17,7 @@ filter
 ^inotify
 ^json
 ^libxml
-mbstring
+^mbstring
 ^mongodb
 ^mysqlnd
 openssl

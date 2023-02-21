@@ -1,8 +1,8 @@
 set -ex
 
-brew install bison openssl@1.1 oniguruma pkg-config coreutils autoconf
+brew install bison openssl@1.1 pkg-config coreutils autoconf
 BREW_PREFIX=$(brew --prefix)
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_PREFIX/opt/openssl@1.1/lib/pkgconfig:$BREW_PREFIX/opt/oniguruma/lib/pkgconfig"
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_PREFIX/opt/openssl@1.1/lib/pkgconfig"
 
 DIR=$2
 mkdir -p $DIR
@@ -16,7 +16,6 @@ rm -f sapi/cli/php
   --disable-shared \
   --enable-embed=static \
   --enable-filter \
-  --enable-mbstring \
   --enable-pcntl \
   --enable-phar \
   --enable-posix \
