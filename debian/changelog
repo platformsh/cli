@@ -1,3 +1,10 @@
+psh-go (4.1.2) unstable; urgency=medium
+
+  [ Antonis Kalipetis ]
+  * Bump Platform.sh version to 4.1.2 (#45)
+
+ -- Patrick Dawkins <patrick@platform.sh>  Wed, 22 Feb 2023 12:39:20 +0000
+
 psh-go (4.1.1) unstable; urgency=medium
 
   [ Antonis Kalipetis ]
