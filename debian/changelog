@@ -1,3 +1,24 @@
+psh-go (4.1.1) unstable; urgency=medium
+
+  [ Antonis Kalipetis ]
+  * Lock during legacy CLI initialization
+
+  [ Jérôme Vieilledent ]
+  * Add link to the install troubleshoot article for M1 macs
+  * Fix link
+
+  [ Antonis Kalipetis ]
+  * Bump legacy CLI version to 4.1.0 (#42)
+
+  [ Jérôme Vieilledent ]
+  * Remove mbstring extension for built-in PHP
+
+  [ Antonis Kalipetis ]
+  * Introduce installer using bash (#38)
+  * Bump Platform.sh version to 4.1.1 (#44)
+
+ -- Antonis Kalipetis <antonis.kalipetis@platform.sh>  Wed, 22 Feb 2023 10:39:43 +0000
+
 psh-go (4.0.2) unstable; urgency=medium
 
   [ Fabien Potencier ]
