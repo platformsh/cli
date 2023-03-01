@@ -21,7 +21,7 @@ After installing or updating platformsh-cli via Homebrew, make sure you have the
 hash -r && ls -l $(which platform)
 ```
 
-You should see a path that involves homebrew, `/opt/homebrew/bin/platform` on an Apple Silicon Mac (M1/M2), `/usr/local/bin/platform` on an Intel Mac, `/home/linuxbrew/.linuxbrew/bin/platform` on Linux. If you don't see that, then delete the target that you are seeing with `sudo rm $(which platform) && hash -r` and then you should see the correct `platform` tool in `which platform`.
+You should see a path that involves homebrew, `/opt/homebrew/bin/platform` on an Apple Silicon Mac (M1/M2), `/usr/local/bin/platform` on an Intel Mac, `/home/linuxbrew/.linuxbrew/bin/platform` on Linux. If you don't see that, then delete the target that you are seeing with `sudo rm "$(which platform)" && hash -r` and then you should see the correct `platform` tool in `which platform`.
 
 ### Scoop
 
