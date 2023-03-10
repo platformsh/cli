@@ -1,7 +1,7 @@
-legacy/archives/*
+internal/legacy/archives/*
 dist/
 php-*
-!legacy/archives/windows_php.ini.tpl
+!internal/legacy/archives/windows_php.ini.tpl
 psh-go
 completion
 
