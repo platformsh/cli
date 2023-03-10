@@ -1,5 +1,5 @@
 PHP_VERSION = 8.0.28
-PSH_VERSION = 4.2.0
+PSH_VERSION = 4.2.1
 GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ifeq ($(GOOS), darwin)
 	GORELEASER_ID=platform-macos
@@ -45,11 +45,14 @@ legacy/archives/cacert.pem:
 
 php: $(PHP_BINARY_PATH)
 
-single: legacy/archives/platform.phar php
+single: clean-phar legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --rm-dist
 
-snapshot: legacy/archives/platform.phar php
+snapshot: clean-phar legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --snapshot --rm-dist
 
-release: legacy/archives/platform.phar php
+clean-phar:
+	rm -f legacy/archives/platform.phar
+
+release: clean-phar legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser release --rm-dist --auto-snapshot
