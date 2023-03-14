@@ -125,6 +125,7 @@ func CheckForUpdate(repo, currentVersion string) (*ReleaseInfo, error) {
 		if err == nil {
 			state.Updates.LastChecked = int(time.Now().Unix())
 			state.Updates.LatestRelease = releaseInfo
+			//nolint:errcheck // not being able to set the state should have no impact on the rest of the program
 			setState(stateFilePath, state)
 		}
 	}

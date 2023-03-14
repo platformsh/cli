@@ -56,6 +56,9 @@ var RootCmd = &cobra.Command{
 			Version:          version,
 			CustomPshCliPath: viper.GetString("phar-path"),
 			Debug:            viper.GetBool("debug"),
+			Stdout:           cmd.OutOrStdout(),
+			Stderr:           cmd.ErrOrStderr(),
+			Stdin:            cmd.InOrStdin(),
 		}
 		if err := c.Init(); err != nil {
 			debugLog("%s\n", color.RedString(err.Error()))
