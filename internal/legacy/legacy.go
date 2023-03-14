@@ -145,6 +145,9 @@ func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
 	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_MIGRATE_CHECK=0")
 	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_APPLICATION_PROMPT_SELF_INSTALL=0")
 	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_WRAPPED=1")
+	if c.Debug {
+		cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_DEBUG=1")
+	}
 	cmd.Env = append(cmd.Env, fmt.Sprintf(
 		"PLATFORMSH_CLI_USER_AGENT={APP_NAME_DASH}/%s ({UNAME_S}; {UNAME_R}; PHP %s; WRAPPER psh-go/%s)",
 		PSHVersion,
