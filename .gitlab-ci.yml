@@ -16,12 +16,12 @@ build-php-linux-x86:
     - docker:20.10-dind
   before_script:
     - apk add -U make
-    - mkdir -p legacy/archives
+    - mkdir -p internal/legacy/archives
   script:
     - make php
   artifacts:
     paths:
-      - legacy/archives/*
+      - internal/legacy/archives/*
     expire_in: 1 day
 
 build-php-linux-arm:
@@ -31,12 +31,12 @@ build-php-linux-arm:
     - docker:20.10-dind
   before_script:
     - apk add -U make
-    - mkdir -p legacy/archives
+    - mkdir -p internal/legacy/archives
   script:
     - make php
   artifacts:
     paths:
-      - legacy/archives/*
+      - internal/legacy/archives/*
     expire_in: 1 day
   tags:
     - arm-high-cpu
@@ -46,12 +46,12 @@ build-php-windows:
   image: docker:20.10-git
   before_script:
     - apk add -U make wget
-    - mkdir -p legacy/archives
+    - mkdir -p internal/legacy/archives
   script:
     - make php GOOS=windows GOARCH=amd64
   artifacts:
     paths:
-      - legacy/archives/*
+      - internal/legacy/archives/*
     expire_in: 1 day
 
 build-php-macos-arm:
@@ -62,7 +62,7 @@ build-php-macos-arm:
     - make php
   artifacts:
     paths:
-      - legacy/archives/*
+      - internal/legacy/archives/*
     expire_in: 1 day
   tags:
     - macos-arm
@@ -73,7 +73,7 @@ build-php-macos-x86:
     - make php
   artifacts:
     paths:
-      - legacy/archives/*
+      - internal/legacy/archives/*
     expire_in: 1 day
   tags:
     - macos-x86
