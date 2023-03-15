@@ -71,13 +71,19 @@ Upgrade using the same tool:
 ### HomeBrew
 
 ```console
-brew upgrade platformsh-cli
+brew update && brew upgrade platformsh-cli
 ```
 
 ### Scoop
 
 ```console
 scoop update platform
+```
+
+### Bash installer
+
+```console
+curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
 ```
 
 ## Under the hood
