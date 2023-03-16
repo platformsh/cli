@@ -93,7 +93,7 @@ func ParseVersion(version string) (*Version, error) {
 	minor, _ := strconv.Atoi(result[versionRegex.SubexpIndex("minor")])
 	patch, _ := strconv.Atoi(result[versionRegex.SubexpIndex("patch")])
 	preRelease := result[versionRegex.SubexpIndex("preRelease")]
-	var preReleaseParts []string = nil
+	var preReleaseParts []string
 	if preRelease != "" {
 		preReleaseParts = strings.Split(preRelease, ".")
 	}
@@ -121,8 +121,8 @@ func CheckForUpdate(repo, currentVersion string) (*ReleaseInfo, error) {
 		if state == nil {
 			state = &stateEntry{}
 		}
-		releaseInfo, err := getLatestReleaseInfo(repo)
-		if err == nil {
+		releaseInfo, releaseInfoErr := getLatestReleaseInfo(repo)
+		if releaseInfoErr == nil {
 			state.Updates.LastChecked = int(time.Now().Unix())
 			state.Updates.LatestRelease = releaseInfo
 			//nolint:errcheck // not being able to set the state should have no impact on the rest of the program
@@ -150,7 +150,8 @@ func CheckForUpdate(repo, currentVersion string) (*ReleaseInfo, error) {
 	return nil, nil
 }
 
-// shouldCheckForUpdate makes sure that we're not running in CI, this is a Terminal window and PLATFORMSH_CLI_UPDATES_CHECK is not 0
+// shouldCheckForUpdate makes sure that we're not running in CI, this is a Terminal window and
+// PLATFORMSH_CLI_UPDATES_CHECK is not 0
 func shouldCheckForUpdate() bool {
 	if os.Getenv("PLATFORMSH_CLI_UPDATES_CHECK") == "0" {
 		return false
@@ -171,7 +172,7 @@ func isTerminal(f *os.File) bool {
 
 // getLatestReleaseInfo from GitHub
 func getLatestReleaseInfo(repo string) (*ReleaseInfo, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", repo), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", repo), http.NoBody)
 	if err != nil {
 		return nil, err
 	}
@@ -180,6 +181,7 @@ func getLatestReleaseInfo(repo string) (*ReleaseInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

@@ -31,7 +31,7 @@ func getState(statePath string) (*stateEntry, error) {
 }
 
 func setState(statePath string, state *stateEntry) error {
-	if err := os.MkdirAll(path.Dir(statePath), 0755); err != nil {
+	if err := os.MkdirAll(path.Dir(statePath), 0o755); err != nil {
 		return err
 	}
 
@@ -40,5 +40,5 @@ func setState(statePath string, state *stateEntry) error {
 		return err
 	}
 
-	return os.WriteFile(statePath, data, 0600)
+	return os.WriteFile(statePath, data, 0o600)
 }

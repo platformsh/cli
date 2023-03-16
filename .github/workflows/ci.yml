@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          # do not enable cache here, because golangci-linter
+          # has its own internal cache with better performance
+          go-version: 1.20.x
+
+      - name: Create fake PHP and .phar files
+        run: |
+          # These are needed so that the linter does not complain
+          touch internal/legacy/archives/platform.phar
+          touch internal/legacy/archives/php_windows_amd64
+          touch internal/legacy/archives/php_linux_amd64
+          touch internal/legacy/archives/php_linux_arm64
+          touch internal/legacy/archives/php_darwin_amd64
+          touch internal/legacy/archives/php_darwin_arm64
+
+      - name: Run linter
+        uses: golangci/golangci-lint-action@v3

@@ -10,9 +10,10 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/platformsh/cli/internal/legacy"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/platformsh/cli/internal/legacy"
 )
 
 func init() {
@@ -29,7 +30,7 @@ var CompletionCmd = &cobra.Command{
 			completionArgs = append(completionArgs, "--shell-type", args[0])
 		}
 		var b bytes.Buffer
-		c := &legacy.LegacyCLIWrapper{
+		c := &legacy.CLIWrapper{
 			Version:          version,
 			CustomPshCliPath: viper.GetString("phar-path"),
 			Debug:            viper.GetBool("debug"),

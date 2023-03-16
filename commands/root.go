@@ -3,7 +3,6 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -12,10 +11,11 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/platformsh/cli/internal"
-	"github.com/platformsh/cli/internal/legacy"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/platformsh/cli/internal"
+	"github.com/platformsh/cli/internal/legacy"
 )
 
 func init() {
@@ -52,7 +52,7 @@ var RootCmd = &cobra.Command{
 		}()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		c := &legacy.LegacyCLIWrapper{
+		c := &legacy.CLIWrapper{
 			Version:          version,
 			CustomPshCliPath: viper.GetString("phar-path"),
 			Debug:            viper.GetBool("debug"),
@@ -105,7 +105,7 @@ func checkShellConfigLeftovers() {
 			continue
 		}
 
-		shellConfig, err := ioutil.ReadFile(shellConfigFile)
+		shellConfig, err := os.ReadFile(shellConfigFile)
 		if err != nil {
 			continue
 		}
@@ -126,14 +126,14 @@ func printUpdateMessage(newRelease *internal.ReleaseInfo) {
 		return
 	}
 
-	executable, _ := os.Executable()
 	fmt.Fprintf(color.Error, "\n\n%s %s → %s\n",
 		color.YellowString("A new release of the Platform.sh CLI is available:"),
 		color.CyanString(version),
 		color.CyanString(newRelease.Version),
 	)
 
-	if isUnderHomebrew(executable) {
+	executable, err := os.Executable()
+	if err == nil && isUnderHomebrew(executable) {
 		fmt.Fprintf(color.Error, "To upgrade, run: %s\n", "brew upgrade platformsh/tap/platformsh-cli")
 	}
 

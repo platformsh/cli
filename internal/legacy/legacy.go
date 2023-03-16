@@ -19,8 +19,10 @@ import (
 //go:embed archives/platform.phar
 var pshCLI []byte
 
-var PSHVersion string = "0.0.0"
-var PHPVersion string = "0.0.0"
+var (
+	PSHVersion = "0.0.0"
+	PHPVersion = "0.0.0"
+)
 
 const prefix = "psh-go"
 
@@ -48,8 +50,8 @@ func copyFile(destination string, fin []byte) error {
 	return nil
 }
 
-// LegacyCLIWrapper wraps the legacy CLI
-type LegacyCLIWrapper struct {
+// CLIWrapper wraps the legacy CLI
+type CLIWrapper struct {
 	Stdout           io.Writer
 	Stderr           io.Writer
 	Stdin            io.Reader
@@ -58,15 +60,15 @@ type LegacyCLIWrapper struct {
 	Debug            bool
 }
 
-func (c *LegacyCLIWrapper) cacheDir() string {
+func (c *CLIWrapper) cacheDir() string {
 	return path.Join(os.TempDir(), fmt.Sprintf("%s-%s-%s", prefix, PHPVersion, PSHVersion))
 }
 
 // Init the CLI wrapper, creating a temporary directory and copying over files
-func (c *LegacyCLIWrapper) Init() error {
+func (c *CLIWrapper) Init() error {
 	if _, err := os.Stat(c.cacheDir()); os.IsNotExist(err) {
 		c.debugLog("cache directory does not exist, creating: %s", c.cacheDir())
-		if err := os.Mkdir(c.cacheDir(), 0700); err != nil {
+		if err := os.Mkdir(c.cacheDir(), 0o700); err != nil {
 			return fmt.Errorf("could not create temporary directory: %w", err)
 		}
 	}
@@ -94,7 +96,7 @@ func (c *LegacyCLIWrapper) Init() error {
 		if err := c.copyPHP(); err != nil {
 			return fmt.Errorf("could not copy files: %w", err)
 		}
-		if err := os.Chmod(c.PHPPath(), 0700); err != nil {
+		if err := os.Chmod(c.PHPPath(), 0o700); err != nil {
 			return fmt.Errorf("could not make PHP executable: %w", err)
 		}
 	}
@@ -103,7 +105,7 @@ func (c *LegacyCLIWrapper) Init() error {
 }
 
 // Cleanup the CLI wrapper, removing the cache directory that was created and any other related directory
-func (c *LegacyCLIWrapper) Cleanup() error {
+func (c *CLIWrapper) Cleanup() error {
 	files, err := os.ReadDir(os.TempDir())
 	if err != nil {
 		return fmt.Errorf("could not list temporary directory: %w", err)
@@ -122,7 +124,7 @@ func (c *LegacyCLIWrapper) Cleanup() error {
 }
 
 // Exec a legacy CLI command with the given arguments
-func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
+func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 	args = append([]string{c.PSHPath()}, args...)
 	cmd := exec.CommandContext(ctx, c.PHPPath(), args...)
 	if c.Stdin != nil {
@@ -141,10 +143,13 @@ func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
 		cmd.Stderr = os.Stderr
 	}
 	cmd.Env = append(cmd.Env, os.Environ()...)
-	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_UPDATES_CHECK=0")
-	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_MIGRATE_CHECK=0")
-	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_APPLICATION_PROMPT_SELF_INSTALL=0")
-	cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_WRAPPED=1")
+	cmd.Env = append(
+		cmd.Env,
+		"PLATFORMSH_CLI_UPDATES_CHECK=0",
+		"PLATFORMSH_CLI_MIGRATE_CHECK=0",
+		"PLATFORMSH_CLI_APPLICATION_PROMPT_SELF_INSTALL=0",
+		"PLATFORMSH_CLI_WRAPPED=1",
+	)
 	if c.Debug {
 		cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_DEBUG=1")
 	}
@@ -162,7 +167,7 @@ func (c *LegacyCLIWrapper) Exec(ctx context.Context, args ...string) error {
 }
 
 // PSHPath returns the path that the PSH CLI will reside
-func (c *LegacyCLIWrapper) PSHPath() string {
+func (c *CLIWrapper) PSHPath() string {
 	if c.CustomPshCliPath != "" {
 		return c.CustomPshCliPath
 	}
@@ -171,7 +176,7 @@ func (c *LegacyCLIWrapper) PSHPath() string {
 }
 
 // copyPSH to destination, if it does not exist
-func (c *LegacyCLIWrapper) copyPSH() error {
+func (c *CLIWrapper) copyPSH() error {
 	// Do not copy the file, if a custom path was given
 	if c.CustomPshCliPath != "" {
 		return nil
@@ -185,7 +190,7 @@ func (c *LegacyCLIWrapper) copyPSH() error {
 }
 
 // debugLog logs a debugging message, if debug is enabled
-func (c *LegacyCLIWrapper) debugLog(msg string, v ...any) {
+func (c *CLIWrapper) debugLog(msg string, v ...any) {
 	if c.Debug {
 		log.Printf(msg, v...)
 	}

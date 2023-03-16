@@ -23,7 +23,7 @@ var phpIniTemplate string
 var caCert []byte
 
 // copyPHP to destination, if it does not exist
-func (c *LegacyCLIWrapper) copyPHP() error {
+func (c *CLIWrapper) copyPHP() error {
 	dest := path.Join(c.cacheDir(), "php")
 	br := bytes.NewReader(phpCLI)
 	r, err := zip.NewReader(br, int64(len(phpCLI)))
@@ -72,7 +72,7 @@ func (c *LegacyCLIWrapper) copyPHP() error {
 	return nil
 }
 
-// PSHPath returns the path that the PHP CLI will reside
-func (c *LegacyCLIWrapper) PHPPath() string {
+// PHPPath returns the path that the PHP CLI will reside
+func (c *CLIWrapper) PHPPath() string {
 	return path.Join(c.cacheDir(), "php", "php.exe")
 }
