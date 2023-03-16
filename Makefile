@@ -27,13 +27,15 @@ internal/legacy/archives/php_darwin_$(GOARCH):
 
 internal/legacy/archives/php_linux_$(GOARCH):
 	cp ext/extensions.txt ext/static-php-cli/docker
-	cd ext/static-php-cli/docker ;\
-	sed -i 's/alpine:latest/alpine:3.16/g' Dockerfile;\
-	docker build --platform=linux/$(GOARCH) -t static-php . --build-arg USE_BACKUP_ADDRESS=yes --progress=plain
-	mkdir -p internal/legacy/archives
-	docker run --rm --platform=linux/$(GOARCH) -v ${PWD}/internal/legacy/archives:/dist -e USE_BACKUP_ADDRESS=yes static-php build-php no-mirror $(PHP_VERSION) all /dist
-	mv -f internal/legacy/archives/php legacy/archives/php_linux_$(GOARCH)
-	rm -f internal/legacy/archives/micro.sfx
+	docker buildx build \
+		--build-arg GOARCH=$(GOARCH) \
+		--build-arg PHP_VERSION=$(PHP_VERSION) \
+		--build-arg USE_BACKUP_ADDRESS=yes \
+		--file=./Dockerfile.php \
+		--platform=linux/$(GOARCH) \
+		--output=type=local,dest=./internal/legacy/archives/ \
+		--progress=plain \
+		ext/static-php-cli/docker
 
 internal/legacy/archives/php_windows.zip:
 	mkdir -p internal/legacy/archives
