@@ -66,7 +66,7 @@ var RootCmd = &cobra.Command{
 			return
 		}
 
-		if err := c.Exec(cmd.Context(), args...); err != nil {
+		if err := c.Exec(cmd.Context(), os.Args[1:]...); err != nil {
 			debugLog("%s\n", color.RedString(err.Error()))
 			exitCode := 1
 			var execErr *exec.ExitError
