@@ -6,7 +6,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/gofrs/flock v0.8.1
 	github.com/mattn/go-isatty v0.0.16
-	github.com/platformsh/platformify v0.0.0-20230421081514-dc62d99b4a33
+	github.com/platformsh/platformify v0.1.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29

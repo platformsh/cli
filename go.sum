@@ -188,12 +188,8 @@ github.com/pelletier/go-toml/v2 v2.0.6 h1:nrzqCb7j9cDFj2coyLNLaZuJTLjWjlaz6nvTvI
 github.com/pelletier/go-toml/v2 v2.0.6/go.mod h1:eumQOmlWiOPt5WriQQqoM5y18pDHwha2N+QD+EUNTek=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qRg=
-github.com/platformsh/platformify v0.0.0-20230421052743-1965eb6f7867 h1:vOUnr3PK+pYLogU7s6HQppoBtS/A/U3g3z23KukaeP0=
-github.com/platformsh/platformify v0.0.0-20230421052743-1965eb6f7867/go.mod h1:uWB44/Fmq2eOXIMosOfl0EURBh6KtbD1IK5URvrxPhI=
-github.com/platformsh/platformify v0.0.0-20230421052825-c651db812844 h1:mI4s6QTmb8Jh6ASJP9JUx6NpdylSjZUo8gP6BOREXjo=
-github.com/platformsh/platformify v0.0.0-20230421052825-c651db812844/go.mod h1:aKJTwrdeWpPCfhldHFlY5+/6kW/kdsvB5R0Tg7QMZKA=
-github.com/platformsh/platformify v0.0.0-20230421081514-dc62d99b4a33 h1:G+8XIRgd6UOUMba0yefiUps63M8rdtcax49i6mmK1p0=
-github.com/platformsh/platformify v0.0.0-20230421081514-dc62d99b4a33/go.mod h1:uWB44/Fmq2eOXIMosOfl0EURBh6KtbD1IK5URvrxPhI=
+github.com/platformsh/platformify v0.1.0 h1:g8l/U76KHLiM/HJ2tStWgAhOQ01OWkqKrD7/TUfmq+I=
+github.com/platformsh/platformify v0.1.0/go.mod h1:uWB44/Fmq2eOXIMosOfl0EURBh6KtbD1IK5URvrxPhI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
