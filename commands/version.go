@@ -31,7 +31,7 @@ var VersionCmd = &cobra.Command{
 				color.CyanString(legacy.PSHVersion),
 			)
 		} else {
-			fmt.Fprintf(color.Output, "Platform.sh CLI %s\n", color.CyanString(version))
+			fmt.Fprintf(color.Output, "Platform.sh CLI %s (Wrapped)\n", color.CyanString(version))
 		}
 
 		if viper.GetBool("debug") {
