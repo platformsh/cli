@@ -58,3 +58,13 @@ clean-phar:
 
 release: clean-phar internal/legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser release --rm-dist --auto-snapshot
+
+.PHONY: test
+test: ## Run unit tests
+	go clean -testcache
+	go test -v -race -mod=readonly -cover ./...
+
+.PHONY: lint
+lint: ## Run linter
+	command -v golangci-lint >/dev/null || go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	golangci-lint run --timeout=10m --verbose
