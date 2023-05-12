@@ -12,6 +12,8 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      GOPRIVATE: github.com/platformsh/platformify
 
     steps:
       - name: Check out repository code
@@ -23,6 +25,11 @@ jobs:
           # do not enable cache here, because golangci-linter
           # has its own internal cache with better performance
           go-version: 1.20.x
+
+      - name: Configure git for private modules
+        env:
+          TOKEN: ${{ secrets.AKALIPETIS_PAT }}
+        run: git config --global url."https://akalipetis:${TOKEN}@github.com".insteadOf "https://github.com"
 
       - name: Create fake PHP and .phar files
         run: |
