@@ -23,12 +23,13 @@ builds:
         goarch: arm64
     ldflags:
       - -s -w
-      - -X "github.com/platformsh/cli/legacy.PHPVersion={{.Env.PHP_VERSION}}"
-      - -X "github.com/platformsh/cli/legacy.PSHVersion={{.Env.PSH_VERSION}}"
-      - -X main.version={{.Version}}
-      - -X main.commit={{.Commit}}
-      - -X main.date={{.Date}}
-      - -X main.builtBy=goreleaser`.
+      - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "github.com/platformsh/cli/internal/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X "github.com/platformsh/cli/commands.version={{.Version}}"
+      - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
+      - -X "github.com/platformsh/cli/commands.date={{.Date}}"
+      - -X "github.com/platformsh/cli/commands.builtBy=goreleaser"
+    main: ./cmd/platform
   - binary: platform
     id: platform-macos
     env:
@@ -40,12 +41,13 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X "github.com/platformsh/cli/legacy.PHPVersion={{.Env.PHP_VERSION}}"
-      - -X "github.com/platformsh/cli/legacy.PSHVersion={{.Env.PSH_VERSION}}"
-      - -X main.version={{.Version}}
-      - -X main.commit={{.Commit}}
-      - -X main.date={{.Date}}
-      - -X main.builtBy=goreleaser`.
+      - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "github.com/platformsh/cli/internal/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X "github.com/platformsh/cli/commands.version={{.Version}}"
+      - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
+      - -X "github.com/platformsh/cli/commands.date={{.Date}}"
+      - -X "github.com/platformsh/cli/commands.builtBy=goreleaser"
+    main: ./cmd/platform
 
 checksum:
   name_template: checksums.txt

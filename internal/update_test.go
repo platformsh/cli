@@ -84,10 +84,28 @@ func TestParseVersion(t *testing.T) {
 		want    *Version
 		wantErr bool
 	}{
-		{version: "0.1.2", want: &Version{VersionParts: [3]int{0, 1, 2}}, wantErr: false},
-		{version: "0.01.02", want: &Version{VersionParts: [3]int{0, 1, 2}}, wantErr: false},
-		{version: "0.01.02-beta.1", want: &Version{VersionParts: [3]int{0, 1, 2}, PreReleaseParts: []string{"beta", "1"}}, wantErr: false},
-		{version: "00.01.02-beta.001.pre", want: &Version{VersionParts: [3]int{0, 1, 2}, PreReleaseParts: []string{"beta", "001", "pre"}}, wantErr: false},
+		{
+			version: "0.1.2",
+			want:    &Version{VersionParts: [3]int{0, 1, 2}},
+			wantErr: false,
+		},
+		{
+			version: "0.01.02",
+			want:    &Version{VersionParts: [3]int{0, 1, 2}},
+			wantErr: false,
+		},
+		{
+			version: "0.01.02-beta.1",
+			want: &Version{VersionParts: [3]int{0, 1, 2},
+				PreReleaseParts: []string{"beta", "1"}},
+			wantErr: false,
+		},
+		{
+			version: "00.01.02-beta.001.pre",
+			want: &Version{VersionParts: [3]int{0, 1, 2},
+				PreReleaseParts: []string{"beta", "001", "pre"}},
+			wantErr: false,
+		},
 
 		{version: "01.02-beta.001.pre", want: nil, wantErr: true},
 		{version: "222.01", want: nil, wantErr: true},
