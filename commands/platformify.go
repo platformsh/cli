@@ -12,7 +12,7 @@ func init() {
 var PlatformifyCmd = &cobra.Command{
 	Use:           "project:init",
 	Short:         "Initialize the needed YAML files for your Platform.sh project",
-	Aliases:       []string{"ify"},
+	Aliases:       []string{"p:init", "ify"},
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	RunE:          commands.PlatformifyCmd.RunE,
