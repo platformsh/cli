@@ -1,13 +1,24 @@
 set -ex
 
-brew install bison openssl@1.1 pkg-config coreutils autoconf
-BREW_PREFIX=$(brew --prefix)
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_PREFIX/opt/openssl@1.1/lib/pkgconfig"
+DIR=$1
+PHP_VERSION=$2
+OPENSSL_VERSION=$3
 
-DIR=$2
-mkdir -p $DIR
-curl -fSsl https://www.php.net/distributions/php-$1.tar.gz | tar  xzf - -C $DIR
-cd $DIR/php-$1
+brew install bison pkg-config coreutils autoconf
+
+SSL_DIR_PATH=$(pwd)/"$DIR"/ssl
+mkdir -p "$SSL_DIR_PATH"
+
+curl -fSsl https://www.openssl.org/source/openssl-"$OPENSSL_VERSION".tar.gz | tar  xzf - -C "$DIR"
+cd "$DIR"/openssl-"$OPENSSL_VERSION"
+
+./config no-shared --prefix="$SSL_DIR_PATH" --openssldir="$SSL_DIR_PATH"
+make
+make install
+
+cd ../..
+curl -fSsl https://www.php.net/distributions/php-"$PHP_VERSION".tar.gz | tar  xzf - -C "$DIR"
+cd "$DIR"/php-"$PHP_VERSION"
 
 rm -f sapi/cli/php
 
@@ -25,6 +36,8 @@ rm -f sapi/cli/php
   --with-openssl \
   --with-pear=no \
   --without-pcre-jit \
-  --disable-all
+  --disable-all \
+OPENSSL_CFLAGS="-I$SSL_DIR_PATH/include" \
+OPENSSL_LIBS="-L$SSL_DIR_PATH/lib -lssl -lcrypto"
 
-make -j$(nproc) cli
+make -j"$(nproc)" cli
