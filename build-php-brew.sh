@@ -3,6 +3,9 @@ set -ex
 DIR=$1
 PHP_VERSION=$2
 OPENSSL_VERSION=$3
+
+brew install bison pkg-config coreutils autoconf
+
 SSL_DIR_PATH=$(pwd)/"$DIR"/ssl
 mkdir -p "$SSL_DIR_PATH"
 
