@@ -103,6 +103,7 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+    rlcp: true
 
 brews:
   - name: platformsh-cli
@@ -125,8 +126,6 @@ brews:
     dependencies:
       - name: git
         type: optional
-      - name: oniguruma
-      - name: openssl@1.1
 
     install: |
       bin.install "platform"
@@ -135,20 +134,20 @@ brews:
     test: |
       system "#{bin}/platform --version"
 
-scoop:
-  bucket:
-    owner: platformsh
-    name: homebrew-tap
-    token: "{{ .Env.GITHUB_TOKEN }}"
+scoops:
+  - bucket:
+      owner: platformsh
+      name: homebrew-tap
+      token: "{{ .Env.GITHUB_TOKEN }}"
 
-  folder: Scoops
-  commit_author:
-    name: Antonis Kalipetis
-    email: antonis.kalipetis@platform.sh
+    folder: Scoops
+    commit_author:
+      name: Antonis Kalipetis
+      email: antonis.kalipetis@platform.sh
 
-  homepage: https://docs.platform.sh/administration/cli.html
-  description: Platform.sh CLI
-  license: MIT
+    homepage: https://docs.platform.sh/administration/cli.html
+    description: Platform.sh CLI
+    license: MIT
 
 nfpms:
   - homepage: https://docs.platform.sh/administration/cli.html
