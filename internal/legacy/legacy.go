@@ -2,9 +2,6 @@ package legacy
 
 import (
 	"bytes"
-
-	"github.com/gofrs/flock"
-
 	"context"
 	_ "embed"
 	"fmt"
@@ -14,6 +11,8 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+
+	"github.com/gofrs/flock"
 )
 
 //go:embed archives/platform.phar

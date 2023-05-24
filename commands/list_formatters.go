@@ -51,7 +51,7 @@ func (f *TXTListFormatter) Format(list *List) ([]byte, error) {
 		fmt.Fprintln(writer, color.YellowString("Available commands:"))
 	}
 
-	cmds := make(map[string][]Command)
+	cmds := make(map[string][]*Command)
 	for _, cmd := range list.Commands {
 		cmds[cmd.Name.Namespace] = append(cmds[cmd.Name.Namespace], cmd)
 	}
@@ -68,8 +68,8 @@ func (f *TXTListFormatter) Format(list *List) ([]byte, error) {
 		}
 		for _, cmd := range cmds[namespace] {
 			name := color.GreenString(cmd.Name.String())
-			if len(cmd.Usage) > 1 {
-				name = name + " (" + strings.Join(cmd.Usage[1:], ", ") + ")"
+			if len(cmd.Aliases) > 0 {
+				name = name + " (" + strings.Join(cmd.Aliases, ", ") + ")"
 			}
 			fmt.Fprintf(writer, "  %s\t%s\n", name, cmd.Description.String())
 		}
@@ -98,7 +98,7 @@ func (f *MDListFormatter) Format(list *List) ([]byte, error) {
 	b := md.NewBuilder()
 	b.H1(list.Application.Name + " " + list.Application.Version)
 
-	cmds := make(map[string][]Command)
+	cmds := make(map[string][]*Command)
 	for _, cmd := range list.Commands {
 		cmds[cmd.Name.Namespace] = append(cmds[cmd.Name.Namespace], cmd)
 	}
@@ -123,26 +123,28 @@ func (f *MDListFormatter) Format(list *List) ([]byte, error) {
 		b.H2(md.Code(cmd.Name.String()))
 		b.Paragraph(cmd.Description.String()).Ln()
 
-		if len(cmd.Usage) > 1 {
-			aliases := make([]string, 0, len(cmd.Usage[1:]))
-			for _, alias := range cmd.Usage[1:] {
+		if len(cmd.Aliases) > 0 {
+			aliases := make([]string, 0, len(cmd.Aliases))
+			for _, alias := range cmd.Aliases {
 				aliases = append(aliases, md.Code(alias))
 			}
 			b.Paragraph("Aliases: " + strings.Join(aliases, ", ")).Ln()
 		}
 
-		b.H3("Usage")
-		if len(cmd.Usage[0]) > 0 {
-			b.CodeBlock(cmd.Usage[0])
+		if len(cmd.Usage) > 0 {
+			b.H3("Usage")
+			for _, usage := range cmd.Usage {
+				b.CodeBlock(usage)
+			}
+			b.Ln()
 		}
-		b.Ln()
 
 		if cmd.Help != "" {
 			b.Paragraph(cmd.Help.String()).Ln()
 		}
 
 		if cmd.Definition.Arguments != nil && cmd.Definition.Arguments.Len() > 0 {
-			b.H3("Arguments")
+			b.H4("Arguments")
 			for pair := cmd.Definition.Arguments.Oldest(); pair != nil; pair = pair.Next() {
 				arg := pair.Value
 				line := md.Code(arg.Name)
@@ -164,19 +166,29 @@ func (f *MDListFormatter) Format(list *List) ([]byte, error) {
 			}
 		}
 
-		b.H3("Options")
-		for pair := cmd.Definition.Options.Oldest(); pair != nil; pair = pair.Next() {
-			opt := pair.Value
-			line := md.Code(opt.Name)
-			if opt.Shortcut != "" {
-				line += " (" + md.Code(opt.Shortcut) + ")"
+		if cmd.Definition.Options != nil && cmd.Definition.Options.Len() > 0 {
+			b.H4("Options")
+			for pair := cmd.Definition.Options.Oldest(); pair != nil; pair = pair.Next() {
+				opt := pair.Value
+				line := md.Code(opt.Name)
+				if opt.Shortcut != "" {
+					line += " (" + md.Code(opt.Shortcut) + ")"
+				}
+				if opt.AcceptValue {
+					line += " (expects a value)"
+				}
+				b.ListItem(line)
+				if opt.Description != "" {
+					b.Paragraph("  " + opt.Description.String()).Ln()
+				}
 			}
-			if opt.AcceptValue {
-				line += " (expects a value)"
-			}
-			b.ListItem(line)
-			if opt.Description != "" {
-				b.Paragraph("  " + opt.Description.String())
+		}
+
+		if len(cmd.Examples) > 0 {
+			b.H3("Examples")
+			for _, example := range cmd.Examples {
+				b.ListItem(example.Description.String() + ":")
+				b.CodeBlock(RootCmd.Name() + " " + cmd.Name.String() + " " + example.Commandline).Ln()
 			}
 		}
 	}

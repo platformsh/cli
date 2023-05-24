@@ -21,10 +21,18 @@ var (
 		},
 		Usage: []string{
 			"platform project:init",
+		},
+		Aliases: []string{
 			"ify",
 		},
 		Description: "Initialize a project",
 		Help:        "",
+		Examples: []Example{
+			{
+				Commandline: "",
+				Description: "Initialize the needed YAML files for your Platform.sh project",
+			},
+		},
 		Definition: Definition{
 			Arguments: &orderedmap.OrderedMap[string, Argument]{},
 			Options: orderedmap.New[string, Option](orderedmap.WithInitialData[string, Option](
@@ -59,7 +67,7 @@ var (
 
 type List struct {
 	Application Application `json:"application"`
-	Commands    []Command   `json:"commands"`
+	Commands    []*Command  `json:"commands"`
 	Namespace   string      `json:"namespace,omitempty"`
 	Namespaces  []Namespace `json:"namespaces,omitempty"`
 }
@@ -71,9 +79,11 @@ type Application struct {
 
 type Command struct {
 	Name        CommandName `json:"name"`
-	Usage       []string    `json:"usage"` // + aliases
+	Usage       []string    `json:"usage"`
+	Aliases     []string    `json:"aliases"`
 	Description CleanString `json:"description"`
 	Help        CleanString `json:"help"`
+	Examples    []Example   `json:"examples"`
 	Definition  Definition  `json:"definition"`
 	Hidden      bool        `json:"hidden"`
 }
@@ -174,6 +184,11 @@ func (s *CleanString) UnmarshalJSON(text []byte) error {
 	return nil
 }
 
+type Example struct {
+	Commandline string      `json:"commandline"`
+	Description CleanString `json:"description"`
+}
+
 type Definition struct {
 	Arguments *orderedmap.OrderedMap[string, Argument] `json:"arguments"`
 	Options   *orderedmap.OrderedMap[string, Option]   `json:"options"`
@@ -264,7 +279,7 @@ func (l *List) AddCommand(cmd *Command) {
 		}
 	}
 
-	l.Commands = append(l.Commands, *cmd)
+	l.Commands = append(l.Commands, cmd)
 	sort.Slice(l.Commands, func(i, j int) bool {
 		switch {
 		case !l.Commands[i].Name.ContainsNamespace() && l.Commands[j].Name.ContainsNamespace():
