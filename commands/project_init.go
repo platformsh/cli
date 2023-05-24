@@ -24,7 +24,7 @@ var ProjectInitCmd = &cobra.Command{
 	RunE:          commands.PlatformifyCmd.RunE,
 }
 
-func projectInitHelpFn(cmd *cobra.Command, args []string) {
+func projectInitHelpFn(cmd *cobra.Command, _ []string) {
 	var b bytes.Buffer
 	writer := tabwriter.NewWriter(&b, 0, 8, 1, ' ', 0)
 
