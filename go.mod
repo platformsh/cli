@@ -6,7 +6,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/gofrs/flock v0.8.1
 	github.com/mattn/go-isatty v0.0.16
-	github.com/platformsh/platformify v0.1.0
+	github.com/platformsh/platformify v0.1.1
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/wk8/go-ordered-map/v2 v2.1.7
