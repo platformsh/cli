@@ -134,7 +134,8 @@ func (c *Command) HelpPage() string {
 		fmt.Fprintln(writer, color.YellowString("Examples:"))
 		for _, example := range c.Examples {
 			fmt.Fprintln(writer, " "+example.Description.String()+":")
-			fmt.Fprintln(writer, color.GreenString(fmt.Sprintf("   %s %s %s", RootCmd.Name(), c.Name.String(), example.Commandline)))
+			fmt.Fprintln(writer,
+				color.GreenString(fmt.Sprintf("   %s %s %s", RootCmd.Name(), c.Name.String(), example.Commandline)))
 			fmt.Fprintln(writer, "")
 		}
 	}
