@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +12,6 @@ var HelpCmd = &cobra.Command{
 	Use:                "help",
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.SetContext(context.Background())
 		cmd, _, e := cmd.Root().Find(args)
 		if cmd == nil || e != nil {
 			cmd.Printf("Unknown help topic %#q\n", args)

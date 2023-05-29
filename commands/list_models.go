@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/fatih/color"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
@@ -30,7 +31,7 @@ var (
 		Examples: []Example{
 			{
 				Commandline: "",
-				Description: "Initialize the needed YAML files for your Platform.sh project",
+				Description: "Creates Platform.sh-related starter YAML files for your project",
 			},
 		},
 		Definition: Definition{
@@ -86,6 +87,61 @@ type Command struct {
 	Examples    []Example   `json:"examples"`
 	Definition  Definition  `json:"definition"`
 	Hidden      bool        `json:"hidden"`
+}
+
+func (c *Command) HelpPage() string {
+	var b bytes.Buffer
+	writer := tabwriter.NewWriter(&b, 0, 8, 1, ' ', 0)
+
+	fmt.Fprintln(writer, color.YellowString("Command: ")+c.Name.String())
+	fmt.Fprintln(writer, color.YellowString("Description: ")+c.Description.String())
+	fmt.Fprintln(writer, "")
+	if len(c.Usage) > 0 {
+		fmt.Fprintln(writer, color.YellowString("Usage:"))
+		for _, usage := range c.Usage {
+			fmt.Fprintln(writer, " "+usage)
+		}
+		fmt.Fprintln(writer, "")
+	}
+	if c.Definition.Arguments != nil && c.Definition.Arguments.Len() > 0 {
+		fmt.Fprintln(writer, color.YellowString("Arguments:"))
+		for pair := c.Definition.Arguments.Oldest(); pair != nil; pair = pair.Next() {
+			arg := pair.Value
+			fmt.Fprintf(writer, "  %s\t%s\n", color.GreenString(arg.Name), arg.Description)
+		}
+		fmt.Fprintln(writer, "")
+	}
+	if c.Definition.Options != nil && c.Definition.Options.Len() > 0 {
+		fmt.Fprintln(writer, color.YellowString("Options:"))
+		for pair := c.Definition.Options.Oldest(); pair != nil; pair = pair.Next() {
+			opt := pair.Value
+			shortcut := opt.Shortcut
+			if shortcut == "" {
+				shortcut = "   "
+			} else {
+				shortcut += ","
+			}
+			fmt.Fprintf(writer, "  %s %s\t%s\n", color.GreenString(shortcut), color.GreenString(opt.Name), opt.Description)
+		}
+		fmt.Fprintln(writer, "")
+	}
+	if c.Help != "" {
+		fmt.Fprintln(writer, color.YellowString("Help:"))
+		fmt.Fprintln(writer, " "+c.Help)
+		fmt.Fprintln(writer, "")
+	}
+	if len(c.Examples) > 0 {
+		fmt.Fprintln(writer, color.YellowString("Examples:"))
+		for _, example := range c.Examples {
+			fmt.Fprintln(writer, " "+example.Description.String()+":")
+			fmt.Fprintln(writer, color.GreenString(fmt.Sprintf("   %s %s %s", RootCmd.Name(), c.Name.String(), example.Commandline)))
+			fmt.Fprintln(writer, "")
+		}
+	}
+
+	writer.Flush()
+
+	return b.String()
 }
 
 type CommandName struct {

@@ -93,11 +93,16 @@ var RootCmd = &cobra.Command{
 }
 
 func rootHelpFn(cmd *cobra.Command, args []string) {
-	cmd.SetContext(context.Background())
+	if cmd.Context() == nil {
+		cmd.SetContext(context.Background())
+	}
 
 	if len(args) == 0 {
-		args = []string{"list"}
-	} else if !slices.Contains(args, "--help") && !slices.Contains(args, "-h") {
+		ListCmd.Run(cmd, args)
+		return
+	}
+
+	if !slices.Contains(args, "--help") && !slices.Contains(args, "-h") {
 		args = append([]string{"help"}, args...)
 	}
 
