@@ -71,7 +71,7 @@ Upgrade using the same tool:
 ### HomeBrew
 
 ```console
-brew update && brew upgrade platformsh-cli
+brew update && brew upgrade platformsh/tap/platformsh-cli
 ```
 
 ### Scoop

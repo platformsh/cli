@@ -134,7 +134,10 @@ func printUpdateMessage(newRelease *internal.ReleaseInfo) {
 
 	executable, err := os.Executable()
 	if err == nil && isUnderHomebrew(executable) {
-		fmt.Fprintf(color.Error, "To upgrade, run: %s\n", "brew upgrade platformsh/tap/platformsh-cli")
+		fmt.Fprintf(
+			color.Error,
+			"To upgrade, run: %s\n", "brew update && brew upgrade platformsh/tap/platformsh-cli",
+		)
 	}
 
 	fmt.Fprintf(color.Error, "%s\n\n", color.YellowString(newRelease.URL))
