@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -13,12 +14,14 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slices"
 
 	"github.com/platformsh/cli/internal"
 	"github.com/platformsh/cli/internal/legacy"
 )
 
 func init() {
+	RootCmd.SetHelpFunc(rootHelpFn)
 	RootCmd.PersistentFlags().BoolP("version", "V", false, "Displays the Platform.sh CLI version")
 	RootCmd.PersistentFlags().String("phar-path", "", "Uses a local .phar file for the Legacy Platform.sh CLI")
 	RootCmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
@@ -40,6 +43,7 @@ var RootCmd = &cobra.Command{
 	Use:                "platform",
 	Short:              "Platform.sh CLI",
 	Args:               cobra.ArbitraryArgs,
+	DisableFlagParsing: true,
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if viper.GetBool("version") {
@@ -66,7 +70,7 @@ var RootCmd = &cobra.Command{
 			return
 		}
 
-		if err := c.Exec(cmd.Context(), os.Args[1:]...); err != nil {
+		if err := c.Exec(cmd.Context(), args...); err != nil {
 			debugLog("%s\n", color.RedString(err.Error()))
 			exitCode := 1
 			var execErr *exec.ExitError
@@ -86,6 +90,23 @@ var RootCmd = &cobra.Command{
 		default:
 		}
 	},
+}
+
+func rootHelpFn(cmd *cobra.Command, args []string) {
+	if cmd.Context() == nil {
+		cmd.SetContext(context.Background())
+	}
+
+	if len(args) == 0 {
+		ListCmd.Run(cmd, args)
+		return
+	}
+
+	if !slices.Contains(args, "--help") && !slices.Contains(args, "-h") {
+		args = append([]string{"help"}, args...)
+	}
+
+	RootCmd.Run(cmd, args)
 }
 
 // checkShellConfigLeftovers checks .zshrc and .bashrc for any leftovers from the legacy CLI

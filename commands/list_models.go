@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/fatih/color"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
@@ -21,10 +22,18 @@ var (
 		},
 		Usage: []string{
 			"platform project:init",
+		},
+		Aliases: []string{
 			"ify",
 		},
 		Description: "Initialize a project",
 		Help:        "",
+		Examples: []Example{
+			{
+				Commandline: "",
+				Description: "Creates Platform.sh-related starter YAML files for your project",
+			},
+		},
 		Definition: Definition{
 			Arguments: &orderedmap.OrderedMap[string, Argument]{},
 			Options: orderedmap.New[string, Option](orderedmap.WithInitialData[string, Option](
@@ -59,7 +68,7 @@ var (
 
 type List struct {
 	Application Application `json:"application"`
-	Commands    []Command   `json:"commands"`
+	Commands    []*Command  `json:"commands"`
 	Namespace   string      `json:"namespace,omitempty"`
 	Namespaces  []Namespace `json:"namespaces,omitempty"`
 }
@@ -71,11 +80,69 @@ type Application struct {
 
 type Command struct {
 	Name        CommandName `json:"name"`
-	Usage       []string    `json:"usage"` // + aliases
+	Usage       []string    `json:"usage"`
+	Aliases     []string    `json:"aliases"`
 	Description CleanString `json:"description"`
 	Help        CleanString `json:"help"`
+	Examples    []Example   `json:"examples"`
 	Definition  Definition  `json:"definition"`
 	Hidden      bool        `json:"hidden"`
+}
+
+func (c *Command) HelpPage() string {
+	var b bytes.Buffer
+	writer := tabwriter.NewWriter(&b, 0, 8, 1, ' ', 0)
+
+	fmt.Fprintln(writer, color.YellowString("Command: ")+c.Name.String())
+	fmt.Fprintln(writer, color.YellowString("Description: ")+c.Description.String())
+	fmt.Fprintln(writer, "")
+	if len(c.Usage) > 0 {
+		fmt.Fprintln(writer, color.YellowString("Usage:"))
+		for _, usage := range c.Usage {
+			fmt.Fprintln(writer, " "+usage)
+		}
+		fmt.Fprintln(writer, "")
+	}
+	if c.Definition.Arguments != nil && c.Definition.Arguments.Len() > 0 {
+		fmt.Fprintln(writer, color.YellowString("Arguments:"))
+		for pair := c.Definition.Arguments.Oldest(); pair != nil; pair = pair.Next() {
+			arg := pair.Value
+			fmt.Fprintf(writer, "  %s\t%s\n", color.GreenString(arg.Name), arg.Description)
+		}
+		fmt.Fprintln(writer, "")
+	}
+	if c.Definition.Options != nil && c.Definition.Options.Len() > 0 {
+		fmt.Fprintln(writer, color.YellowString("Options:"))
+		for pair := c.Definition.Options.Oldest(); pair != nil; pair = pair.Next() {
+			opt := pair.Value
+			shortcut := opt.Shortcut
+			if shortcut == "" {
+				shortcut = "   "
+			} else {
+				shortcut += ","
+			}
+			fmt.Fprintf(writer, "  %s %s\t%s\n", color.GreenString(shortcut), color.GreenString(opt.Name), opt.Description)
+		}
+		fmt.Fprintln(writer, "")
+	}
+	if c.Help != "" {
+		fmt.Fprintln(writer, color.YellowString("Help:"))
+		fmt.Fprintln(writer, " "+c.Help)
+		fmt.Fprintln(writer, "")
+	}
+	if len(c.Examples) > 0 {
+		fmt.Fprintln(writer, color.YellowString("Examples:"))
+		for _, example := range c.Examples {
+			fmt.Fprintln(writer, " "+example.Description.String()+":")
+			fmt.Fprintln(writer,
+				color.GreenString(fmt.Sprintf("   %s %s %s", RootCmd.Name(), c.Name.String(), example.Commandline)))
+			fmt.Fprintln(writer, "")
+		}
+	}
+
+	writer.Flush()
+
+	return b.String()
 }
 
 type CommandName struct {
@@ -174,6 +241,11 @@ func (s *CleanString) UnmarshalJSON(text []byte) error {
 	return nil
 }
 
+type Example struct {
+	Commandline string      `json:"commandline"`
+	Description CleanString `json:"description"`
+}
+
 type Definition struct {
 	Arguments *orderedmap.OrderedMap[string, Argument] `json:"arguments"`
 	Options   *orderedmap.OrderedMap[string, Option]   `json:"options"`
@@ -264,7 +336,7 @@ func (l *List) AddCommand(cmd *Command) {
 		}
 	}
 
-	l.Commands = append(l.Commands, *cmd)
+	l.Commands = append(l.Commands, cmd)
 	sort.Slice(l.Commands, func(i, j int) bool {
 		switch {
 		case !l.Commands[i].Name.ContainsNamespace() && l.Commands[j].Name.ContainsNamespace():
