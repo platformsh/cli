@@ -1,5 +1,5 @@
 PHP_VERSION = 8.0.28
-PSH_VERSION = 4.6.1
+PSH_VERSION = 4.7.0
 # The OpenSSL version must be compatible with the PHP version.
 # See: https://www.php.net/manual/en/openssl.requirements.php
 OPENSSL_VERSION = 1.1.1t
