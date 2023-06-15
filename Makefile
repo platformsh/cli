@@ -51,15 +51,18 @@ internal/legacy/archives/cacert.pem:
 php: $(PHP_BINARY_PATH)
 
 single: internal/legacy/archives/platform.phar php
+	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser@latest
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --clean
 
 snapshot: internal/legacy/archives/platform.phar php
+	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser@latest
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --snapshot --clean
 
 clean-phar:
 	rm -f internal/legacy/archives/platform.phar
 
 release: clean-phar internal/legacy/archives/platform.phar php
+	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser@latest
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser release --clean --auto-snapshot
 
 .PHONY: test
