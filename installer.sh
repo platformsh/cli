@@ -24,6 +24,11 @@ set -euo pipefail
 # GitHub token check
 : "${GITHUB_TOKEN:=}"
 
+# CI specifics
+: "${CI:=}"
+: "${BUILD_NUMBER:=}"
+: "${RUN_ID:=}"
+
 # global variables
 binary="platform"
 cmd_shasum=""
@@ -234,7 +239,19 @@ function check_architecture() {
 function check_install_method() {
     if [ "linux" = "$kernel" ]; then
         if [ -z "${INSTALL_METHOD}" ]; then
-            INSTALL_METHOD="raw"
+            if is_ci; then
+                INSTALL_METHOD="raw"
+            elif [ ! -z $VERSION ]; then
+                INSTALL_METHOD="raw"
+            elif command -v apt-get > /dev/null 2>&1; then
+                INSTALL_METHOD="apt"
+            elif command -v yum > /dev/null 2>&1; then
+                INSTALL_METHOD="yum"
+            elif command -v apk > /dev/null 2>&1; then
+                INSTALL_METHOD="apk"
+            else
+                INSTALL_METHOD="raw"
+            fi
         fi
     elif [ "darwin" == $kernel ]; then
         if [ -z "${INSTALL_METHOD}" ]; then
@@ -356,13 +373,13 @@ function check_directories() {
 }
 
 function install_platformsh_homebrew() {
-    output "\nInstalling Platform.sh brew tap" "heading"
+    output "\nInstalling the Platform.sh brew tap" "heading"
     if ! call_user "brew tap ${BREW_TAP}"; then
         output "  could not add tap to brew" "error"
         exit_with_error
     fi
 
-    output "\nInstalling Platform.sh CLI formula" "heading"
+    output "\nInstalling the Platform.sh CLI formula" "heading"
 
     # running on Rosetta2?
     arch=''
@@ -378,6 +395,60 @@ function install_platformsh_homebrew() {
     fi
 }
 
+function install_platformsh_yum() {
+    output "\nSetting up the Platform.sh CLI yum repository" "heading"
+
+    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/setup.rpm.sh' > /tmp/setup.rpm.sh"
+
+    if ! call_root "bash -E /tmp/setup.rpm.sh"; then
+        output "  could not setup the RPM repository the CLI" "error"
+        exit_with_error
+    fi
+
+    output "\nInstalling the Platform.sh CLI" "heading"
+
+    if ! call_root "yum install -y platformsh-cli"; then
+        output "  could not install the CLI" "error"
+        exit_with_error
+    fi
+}
+
+function install_platformsh_apt() {
+    output "\nSetting up the Platform.sh CLI apt repository" "heading"
+
+    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/setup.deb.sh' > /tmp/setup.deb.sh"
+
+    if ! call_root "bash -E /tmp/setup.deb.sh"; then
+        output "  could not setup the APT repository the CLI" "error"
+        exit_with_error
+    fi
+
+    output "\nInstalling the Platform.sh CLI" "heading"
+
+    if ! call_root "apt-get install -y platformsh-cli"; then
+        output "  could not install the CLI" "error"
+        exit_with_error
+    fi
+}
+
+function install_platformsh_apk() {
+    output "\nSetting up the Platform.sh CLI apk repository" "heading"
+
+    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/setup.alpine.sh' > /tmp/setup.alpine.sh"
+
+    if ! call_root "bash -E /tmp/setup.alpine.sh"; then
+        output "  could not setup the APK repository the CLI" "error"
+        exit_with_error
+    fi
+
+    output "\nInstalling the Platform.sh CLI" "heading"
+
+    if ! call_root "apk add platformsh-cli --update-cache"; then
+        output "  could not install the CLI" "error"
+        exit_with_error
+    fi
+}
+
 function github_curl {
     if [ -z "${GITHUB_TOKEN}" ]; then
         curl -fsSL -H "Accept: application/vnd.github+json" $1
@@ -385,6 +456,18 @@ function github_curl {
     else
         curl -fsSL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GITHUB_TOKEN}" $1
         return $?
+    fi
+}
+
+function is_ci {
+    if [ ! -z "${CI}" ]; then # GitHub Actions, Travis CI, CircleCI, Cirrus CI, GitLab CI, AppVeyor, CodeShip, dsari
+        return 0
+    elif [ ! -z "${BUILD_NUMBER}" ]; then # Jenkins, TeamCity
+        return 0
+    elif [ ! -z "${RUN_ID}" ]; then # TaskCluster, dsari
+        return 0
+    else
+        return 1
     fi
 }
 
@@ -420,6 +503,12 @@ function install_platformsh_raw() {
 function install_platformsh() {
     if [ "homebrew" = "${INSTALL_METHOD}" ]; then
        install_platformsh_homebrew
+    elif [ "yum" = "${INSTALL_METHOD}" ]; then
+       install_platformsh_yum
+    elif [ "apt" = "${INSTALL_METHOD}" ]; then
+       install_platformsh_apt
+    elif [ "apk" = "${INSTALL_METHOD}" ]; then
+       install_platformsh_apk
     elif [ "raw" = "${INSTALL_METHOD}" ]; then
        install_platformsh_raw
     fi
@@ -437,6 +526,8 @@ if [ "raw" = "${INSTALL_METHOD}" ]; then
     check_gzip
     check_shasum
     check_directories
+elif [ "apt" = "${INSTALL_METHOD}" ] || [ "yum" = "${INSTALL_METHOD}" ] || [ "apk" = "${INSTALL_METHOD}" ]; then
+    check_curl
 fi
 install_platformsh
 outro
