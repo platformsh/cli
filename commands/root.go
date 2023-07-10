@@ -22,16 +22,13 @@ import (
 
 func init() {
 	RootCmd.SetHelpFunc(rootHelpFn)
+
 	RootCmd.PersistentFlags().BoolP("version", "V", false, "Displays the Platform.sh CLI version")
 	RootCmd.PersistentFlags().String("phar-path", "", "Uses a local .phar file for the Legacy Platform.sh CLI")
 	RootCmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
 
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
-	viper.AutomaticEnv()
 	//nolint:errcheck
 	viper.BindPFlags(RootCmd.PersistentFlags())
-	viper.SetEnvPrefix("platformsh_cli")
-	log.SetOutput(color.Error)
 }
 
 var (
