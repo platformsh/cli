@@ -11,6 +11,10 @@ import (
 	"github.com/platformsh/cli/internal/legacy"
 )
 
+func init() {
+	RootCmd.AddCommand(VersionCmd)
+}
+
 var (
 	version = "0.0.0"
 	commit  = "local"
@@ -49,8 +53,4 @@ var VersionCmd = &cobra.Command{
 			)
 		}
 	},
-}
-
-func init() {
-	RootCmd.AddCommand(VersionCmd)
 }

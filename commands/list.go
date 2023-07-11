@@ -16,15 +16,13 @@ import (
 )
 
 func init() {
-	RootCmd.AddCommand(ListCmd)
-}
-
-func init() {
 	ListCmd.Flags().String("format", "txt", "The output format (txt, json, or md) [default: \"txt\"]")
 	ListCmd.Flags().Bool("raw", false, "To output raw command list")
 	ListCmd.Flags().Bool("all", false, "Show all commands, including hidden ones")
 
 	viper.BindPFlags(ListCmd.Flags()) //nolint:errcheck
+
+	RootCmd.AddCommand(ListCmd)
 }
 
 var ListCmd = &cobra.Command{
