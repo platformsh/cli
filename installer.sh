@@ -4,7 +4,7 @@
 set -euo pipefail
 
 # Location of install log
-: "${INSTALL_LOG:=/tmp/platformsh-install-$(date '+%Y%m%d-%H%M%S')}.log}"
+: "${INSTALL_LOG:=/tmp/platformsh-install-$(date '+%Y%m%d-%H%M%S').log}"
 
 # Define this to force install method
 : "${INSTALL_METHOD:=}"
