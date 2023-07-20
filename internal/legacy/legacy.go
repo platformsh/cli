@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"strings"
 
 	"github.com/gofrs/flock"
 )
@@ -97,25 +96,6 @@ func (c *CLIWrapper) Init() error {
 		}
 		if err := os.Chmod(c.PHPPath(), 0o700); err != nil {
 			return fmt.Errorf("could not make PHP executable: %w", err)
-		}
-	}
-
-	return nil
-}
-
-// Cleanup the CLI wrapper, removing the cache directory that was created and any other related directory
-func (c *CLIWrapper) Cleanup() error {
-	files, err := os.ReadDir(os.TempDir())
-	if err != nil {
-		return fmt.Errorf("could not list temporary directory: %w", err)
-	}
-
-	for _, f := range files {
-		if strings.HasPrefix(f.Name(), prefix) {
-			err := os.RemoveAll(path.Join(os.TempDir(), f.Name()))
-			if err != nil && c.Debug {
-				c.debugLog("could not remove directory: %s", f.Name())
-			}
 		}
 	}
 
