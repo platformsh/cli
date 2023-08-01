@@ -59,8 +59,6 @@ var ListCmd = &cobra.Command{
 			if errors.As(err, &execErr) {
 				exitCode = execErr.ExitCode()
 			}
-			//nolint:errcheck
-			c.Cleanup()
 			os.Exit(exitCode)
 			return
 		}
@@ -101,8 +99,6 @@ var ListCmd = &cobra.Command{
 				if errors.As(err, &execErr) {
 					exitCode = execErr.ExitCode()
 				}
-				//nolint:errcheck
-				c.Cleanup()
 				os.Exit(exitCode)
 			}
 			return
