@@ -12,20 +12,20 @@ import (
 	"path"
 
 	"github.com/gofrs/flock"
+
+	"github.com/platformsh/cli/internal/config"
 )
 
 //go:embed archives/platform.phar
-var pshCLI []byte
+var phar []byte
 
 var (
-	PSHVersion = "0.0.0"
-	PHPVersion = "0.0.0"
+	LegacyCLIVersion = "0.0.0"
+	PHPVersion       = "0.0.0"
 )
 
-const prefix = "psh-go"
-
 var phpPath = fmt.Sprintf("php-%s", PHPVersion)
-var pshPath = fmt.Sprintf("psh-%s", PSHVersion)
+var pharPath = fmt.Sprintf("phar-%s", LegacyCLIVersion)
 
 // copyFile from the given bytes to destination
 func copyFile(destination string, fin []byte) error {
@@ -48,18 +48,38 @@ func copyFile(destination string, fin []byte) error {
 	return nil
 }
 
+// fileChanged checks if a file's content differs from the provided bytes.
+func fileChanged(filename string, content []byte) (bool, error) {
+	stat, err := os.Stat(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return true, nil
+		}
+		return false, fmt.Errorf("could not stat file: %w", err)
+	}
+	if int(stat.Size()) != len(content) {
+		return true, nil
+	}
+	current, err := os.ReadFile(filename)
+	if err != nil {
+		return false, err
+	}
+	return !bytes.Equal(current, content), nil
+}
+
 // CLIWrapper wraps the legacy CLI
 type CLIWrapper struct {
-	Stdout           io.Writer
-	Stderr           io.Writer
-	Stdin            io.Reader
-	Version          string
-	CustomPshCliPath string
-	Debug            bool
+	Stdout         io.Writer
+	Stderr         io.Writer
+	Stdin          io.Reader
+	Config         *config.Config
+	Version        string
+	CustomPharPath string
+	Debug          bool
 }
 
 func (c *CLIWrapper) cacheDir() string {
-	return path.Join(os.TempDir(), fmt.Sprintf("%s-%s-%s", prefix, PHPVersion, PSHVersion))
+	return path.Join(os.TempDir(), fmt.Sprintf("%s-%s-%s", c.Config.Application.Slug, PHPVersion, LegacyCLIVersion))
 }
 
 // Init the CLI wrapper, creating a temporary directory and copying over files
@@ -78,14 +98,29 @@ func (c *CLIWrapper) Init() error {
 	//nolint:errcheck
 	defer fileLock.Unlock()
 
-	if _, err := os.Stat(c.PSHPath()); os.IsNotExist(err) {
-		if c.CustomPshCliPath != "" {
-			return fmt.Errorf("given PSH phar path does not exist: %w", err)
+	if _, err := os.Stat(c.PharPath()); os.IsNotExist(err) {
+		if c.CustomPharPath != "" {
+			return fmt.Errorf("legacy CLI phar file not found: %w", err)
 		}
 
-		c.debugLog("PSH .phar file does not exist, copying: %s", c.PSHPath())
-		if err := c.copyPSH(); err != nil {
-			return fmt.Errorf("could not copy files: %w", err)
+		c.debugLog("phar file does not exist, copying: %s", c.PharPath())
+		if err := copyFile(c.PharPath(), phar); err != nil {
+			return fmt.Errorf("could not copy phar file: %w", err)
+		}
+	}
+
+	// Always write the config.yaml file if it changed.
+	configContent, err := config.LoadYAML()
+	if err != nil {
+		return fmt.Errorf("could not load config for checking: %w", err)
+	}
+	changed, err := fileChanged(c.ConfigPath(), configContent)
+	if err != nil {
+		return fmt.Errorf("could not check config file: %w", err)
+	}
+	if changed {
+		if err := copyFile(c.ConfigPath(), configContent); err != nil {
+			return fmt.Errorf("could not copy config: %w", err)
 		}
 	}
 
@@ -104,7 +139,7 @@ func (c *CLIWrapper) Init() error {
 
 // Exec a legacy CLI command with the given arguments
 func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
-	args = append([]string{c.PSHPath()}, args...)
+	args = append([]string{c.PharPath()}, args...)
 	cmd := exec.CommandContext(ctx, c.PHPPath(), args...) //nolint:gosec
 	if c.Stdin != nil {
 		cmd.Stdin = c.Stdin
@@ -122,19 +157,23 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 		cmd.Stderr = os.Stderr
 	}
 	cmd.Env = append(cmd.Env, os.Environ()...)
+	envPrefix := c.Config.Application.EnvPrefix
 	cmd.Env = append(
 		cmd.Env,
-		"PLATFORMSH_CLI_UPDATES_CHECK=0",
-		"PLATFORMSH_CLI_MIGRATE_CHECK=0",
-		"PLATFORMSH_CLI_APPLICATION_PROMPT_SELF_INSTALL=0",
-		"PLATFORMSH_CLI_WRAPPED=1",
+		"CLI_CONFIG_FILE="+c.ConfigPath(),
+		envPrefix+"UPDATES_CHECK=0",
+		envPrefix+"MIGRATE_CHECK=0",
+		envPrefix+"APPLICATION_PROMPT_SELF_INSTALL=0",
+		envPrefix+"WRAPPED=1",
+		envPrefix+"APPLICATION_VERSION="+LegacyCLIVersion,
 	)
 	if c.Debug {
-		cmd.Env = append(cmd.Env, "PLATFORMSH_CLI_DEBUG=1")
+		cmd.Env = append(cmd.Env, envPrefix+"CLI_DEBUG=1")
 	}
 	cmd.Env = append(cmd.Env, fmt.Sprintf(
-		"PLATFORMSH_CLI_USER_AGENT={APP_NAME_DASH}/%s ({UNAME_S}; {UNAME_R}; PHP %s; WRAPPER psh-go/%s)",
-		PSHVersion,
+		"%sUSER_AGENT={APP_NAME_DASH}/%s ({UNAME_S}; {UNAME_R}; PHP %s; WRAPPER %s)",
+		envPrefix,
+		LegacyCLIVersion,
 		PHPVersion,
 		c.Version,
 	))
@@ -145,27 +184,18 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 	return nil
 }
 
-// PSHPath returns the path that the PSH CLI will reside
-func (c *CLIWrapper) PSHPath() string {
-	if c.CustomPshCliPath != "" {
-		return c.CustomPshCliPath
+// PharPath returns the path to the legacy CLI's Phar file.
+func (c *CLIWrapper) PharPath() string {
+	if c.CustomPharPath != "" {
+		return c.CustomPharPath
 	}
 
-	return path.Join(c.cacheDir(), pshPath)
+	return path.Join(c.cacheDir(), pharPath)
 }
 
-// copyPSH to destination, if it does not exist
-func (c *CLIWrapper) copyPSH() error {
-	// Do not copy the file, if a custom path was given
-	if c.CustomPshCliPath != "" {
-		return nil
-	}
-
-	if err := copyFile(c.PSHPath(), pshCLI); err != nil {
-		return fmt.Errorf("could not copy legacy Platform.sh CLI: %w", err)
-	}
-
-	return nil
+// ConfigPath returns the path to the YAML config file that will be provided to the legacy CLI.
+func (c *CLIWrapper) ConfigPath() string {
+	return path.Join(c.cacheDir(), "config.yaml")
 }
 
 // debugLog logs a debugging message, if debug is enabled

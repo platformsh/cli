@@ -10,16 +10,17 @@ import (
 
 	"github.com/fatih/color"
 
+	"github.com/platformsh/cli/internal/config"
 	"github.com/platformsh/cli/internal/md"
 )
 
-type Formatter[T any] interface {
-	Format(T) ([]byte, error)
+type Formatter interface {
+	Format(*List, *config.Config) ([]byte, error)
 }
 
 type JSONListFormatter struct{}
 
-func (f *JSONListFormatter) Format(list *List) ([]byte, error) {
+func (f *JSONListFormatter) Format(list *List, _ *config.Config) ([]byte, error) {
 	buff := new(bytes.Buffer)
 	encoder := json.NewEncoder(buff)
 	encoder.SetEscapeHTML(false)
@@ -29,13 +30,13 @@ func (f *JSONListFormatter) Format(list *List) ([]byte, error) {
 
 type TXTListFormatter struct{}
 
-func (f *TXTListFormatter) Format(list *List) ([]byte, error) {
+func (f *TXTListFormatter) Format(list *List, cnf *config.Config) ([]byte, error) {
 	var b bytes.Buffer
 	writer := tabwriter.NewWriter(&b, 0, 8, 1, ' ', 0)
 	fmt.Fprintf(writer, "%s %s\n", list.Application.Name, color.GreenString(list.Application.Version))
 	fmt.Fprintln(writer)
 	fmt.Fprintln(writer, color.YellowString("Global options:"))
-	for _, opt := range GlobalOptions {
+	for _, opt := range globalOptions(cnf) {
 		shortcut := opt.Shortcut
 		if shortcut == "" {
 			shortcut = "  "
@@ -81,7 +82,7 @@ func (f *TXTListFormatter) Format(list *List) ([]byte, error) {
 
 type RawListFormatter struct{}
 
-func (f *RawListFormatter) Format(list *List) ([]byte, error) {
+func (f *RawListFormatter) Format(list *List, _ *config.Config) ([]byte, error) {
 	var b bytes.Buffer
 	writer := tabwriter.NewWriter(&b, 0, 8, 16, ' ', 0)
 	for _, cmd := range list.Commands {
@@ -94,7 +95,7 @@ func (f *RawListFormatter) Format(list *List) ([]byte, error) {
 
 type MDListFormatter struct{}
 
-func (f *MDListFormatter) Format(list *List) ([]byte, error) {
+func (f *MDListFormatter) Format(list *List, cnf *config.Config) ([]byte, error) {
 	b := md.NewBuilder()
 	b.H1(list.Application.Name + " " + list.Application.Version)
 
@@ -188,7 +189,7 @@ func (f *MDListFormatter) Format(list *List) ([]byte, error) {
 			b.H3("Examples")
 			for _, example := range cmd.Examples {
 				b.ListItem(example.Description.String() + ":")
-				b.CodeBlock(RootCmd.Name() + " " + cmd.Name.String() + " " + example.Commandline).Ln()
+				b.CodeBlock(cnf.Application.Executable + " " + cmd.Name.String() + " " + example.Commandline).Ln()
 			}
 		}
 	}

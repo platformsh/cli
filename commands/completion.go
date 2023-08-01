@@ -13,59 +13,59 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/platformsh/cli/internal/config"
 	"github.com/platformsh/cli/internal/legacy"
 )
 
-func init() {
-	RootCmd.AddCommand(CompletionCmd)
-}
-
-var CompletionCmd = &cobra.Command{
-	Use:   "completion",
-	Short: "Print the completion script for your shell",
-	Args:  cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		completionArgs := []string{"_completion", "-g", "--program", "platform"}
-		if len(args) > 0 {
-			completionArgs = append(completionArgs, "--shell-type", args[0])
-		}
-		var b bytes.Buffer
-		c := &legacy.CLIWrapper{
-			Version:          version,
-			CustomPshCliPath: viper.GetString("phar-path"),
-			Debug:            viper.GetBool("debug"),
-			Stdout:           &b,
-			Stderr:           cmd.ErrOrStderr(),
-			Stdin:            cmd.InOrStdin(),
-		}
-
-		if err := c.Init(); err != nil {
-			debugLog("%s\n", color.RedString(err.Error()))
-			os.Exit(1)
-			return
-		}
-
-		if err := c.Exec(cmd.Context(), completionArgs...); err != nil {
-			debugLog("%s\n", color.RedString(err.Error()))
-			exitCode := 1
-			var execErr *exec.ExitError
-			if errors.As(err, &execErr) {
-				exitCode = execErr.ExitCode()
+func newCompletionCommand(cnf *config.Config) *cobra.Command {
+	return &cobra.Command{
+		Use:   "completion",
+		Short: "Print the completion script for your shell",
+		Args:  cobra.MaximumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			completionArgs := []string{"_completion", "-g", "--program", cnf.Application.Executable}
+			if len(args) > 0 {
+				completionArgs = append(completionArgs, "--shell-type", args[0])
 			}
-			os.Exit(exitCode)
-			return
-		}
+			var b bytes.Buffer
+			c := &legacy.CLIWrapper{
+				Config:         cnf,
+				Version:        version,
+				CustomPharPath: viper.GetString("phar-path"),
+				Debug:          viper.GetBool("debug"),
+				Stdout:         &b,
+				Stderr:         cmd.ErrOrStderr(),
+				Stdin:          cmd.InOrStdin(),
+			}
 
-		completions := strings.ReplaceAll(
-			strings.ReplaceAll(
-				b.String(),
-				c.PSHPath(),
-				"platform",
-			),
-			path.Base(c.PSHPath()),
-			"platform",
-		)
-		fmt.Fprintln(cmd.OutOrStdout(), "#compdef platform")
-		fmt.Fprintln(cmd.OutOrStdout(), completions)
-	},
+			if err := c.Init(); err != nil {
+				debugLog("%s\n", color.RedString(err.Error()))
+				os.Exit(1)
+				return
+			}
+
+			if err := c.Exec(cmd.Context(), completionArgs...); err != nil {
+				debugLog("%s\n", color.RedString(err.Error()))
+				exitCode := 1
+				var execErr *exec.ExitError
+				if errors.As(err, &execErr) {
+					exitCode = execErr.ExitCode()
+				}
+				os.Exit(exitCode)
+				return
+			}
+
+			completions := strings.ReplaceAll(
+				strings.ReplaceAll(
+					b.String(),
+					c.PharPath(),
+					cnf.Application.Executable,
+				),
+				path.Base(c.PharPath()),
+				cnf.Application.Executable,
+			)
+			fmt.Fprintln(cmd.OutOrStdout(), "#compdef "+cnf.Application.Executable)
+			fmt.Fprintln(cmd.OutOrStdout(), completions)
+		},
+	}
 }

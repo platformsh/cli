@@ -66,7 +66,7 @@ func (c *CLIWrapper) copyPHP() error {
 		return fmt.Errorf("could not open php.ini file for writing: %w", err)
 	}
 	defer w.Close()
-	template.Must(template.New("php.ini").Parse(phpIniTemplate)).Execute(w, map[string]string{"PSHDir": c.cacheDir()})
+	template.Must(template.New("php.ini").Parse(phpIniTemplate)).Execute(w, map[string]string{"CLIDir": c.cacheDir()})
 	copyFile(path.Join(c.cacheDir(), "php", "extras", "cacert.pem"), caCert)
 
 	return nil

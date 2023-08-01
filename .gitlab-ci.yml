@@ -32,7 +32,7 @@ unit-test-lint:
   extends: .go-cache
   script:
     # Fake some files to avoid the compiler or "typecheck" linter complaining about a missing embedded file.
-    - touch internal/legacy/archives/php_linux_amd64 internal/legacy/archives/platform.phar
+    - touch internal/legacy/archives/php_linux_amd64 internal/legacy/archives/platform.phar internal/config/embedded-config.yaml
     - export PATH=$PATH:$GOPATH/bin
     - make lint test
   coverage: '/total:\s+\(statements\)\s+\d+.\d+%/'

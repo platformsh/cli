@@ -12,16 +12,20 @@ import (
 
 	"github.com/fatih/color"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
+
+	"github.com/platformsh/cli/internal/config"
 )
 
-var (
-	ProjectInitCommand = Command{
+func innerProjectInitCommand(cnf *config.Config) Command {
+	noInteractionOption := NoInteractionOption(cnf)
+
+	return Command{
 		Name: CommandName{
 			Namespace: "project",
 			Command:   "init",
 		},
 		Usage: []string{
-			"platform project:init",
+			cnf.Application.Executable + " project:init",
 		},
 		Aliases: []string{
 			"ify",
@@ -31,7 +35,7 @@ var (
 		Examples: []Example{
 			{
 				Commandline: "",
-				Description: "Creates Platform.sh-related starter YAML files for your project",
+				Description: "Creates starter YAML files for your project",
 			},
 		},
 		Definition: Definition{
@@ -54,17 +58,14 @@ var (
 					Value: YesOption,
 				},
 				orderedmap.Pair[string, Option]{
-					Key:   NoInteractionOption.GetName(),
-					Value: NoInteractionOption,
+					Key:   noInteractionOption.GetName(),
+					Value: noInteractionOption,
 				},
 			)),
 		},
 		Hidden: false,
 	}
-	//nolint:lll
-	regexColor = regexp.MustCompile(`<((?:fg=(?P<fg>\w+);?)?(?:bg=(?P<bg>\w+);?)?(?:options=(?P<options>\w+);?)?)?>(?P<label>.*?)</>`)
-	regexTag   = regexp.MustCompile(`<.*?>`)
-)
+}
 
 type List struct {
 	Application Application `json:"application"`
@@ -74,8 +75,9 @@ type List struct {
 }
 
 type Application struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name       string `json:"name"`
+	Version    string `json:"version"`
+	Executable string `json:"executable"`
 }
 
 type Command struct {
@@ -89,7 +91,7 @@ type Command struct {
 	Hidden      bool        `json:"hidden"`
 }
 
-func (c *Command) HelpPage() string {
+func (c *Command) HelpPage(cnf *config.Config) string {
 	var b bytes.Buffer
 	writer := tabwriter.NewWriter(&b, 0, 8, 1, ' ', 0)
 
@@ -135,7 +137,7 @@ func (c *Command) HelpPage() string {
 		for _, example := range c.Examples {
 			fmt.Fprintln(writer, " "+example.Description.String()+":")
 			fmt.Fprintln(writer,
-				color.GreenString(fmt.Sprintf("   %s %s %s", RootCmd.Name(), c.Name.String(), example.Commandline)))
+				color.GreenString(fmt.Sprintf("   %s %s %s", cnf.Application.Executable, c.Name.String(), example.Commandline)))
 			fmt.Fprintln(writer, "")
 		}
 	}
@@ -195,6 +197,12 @@ func (s *CleanString) MarshalJSON() ([]byte, error) {
 	err := encoder.Encode(s.String())
 	return buff.Bytes(), err
 }
+
+var (
+	//nolint:lll
+	regexColor = regexp.MustCompile(`<((?:fg=(?P<fg>\w+);?)?(?:bg=(?P<bg>\w+);?)?(?:options=(?P<options>\w+);?)?)?>(?P<label>.*?)</>`)
+	regexTag   = regexp.MustCompile(`<.*?>`)
+)
 
 func (s *CleanString) UnmarshalJSON(text []byte) error {
 	var str string
