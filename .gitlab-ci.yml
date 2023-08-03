@@ -1,13 +1,30 @@
 stages:
+  - check
   - php
   - build
-  - test
+  - behave-test
   - release
 
 variables:
   DOCKER_HOST: tcp://docker:2375
   GIT_DEPTH: 10
   GIT_SUBMODULE_STRATEGY: recursive
+
+unit-test-lint:
+  stage: check
+  image: cimg/go:1.20
+  before_script:
+    - git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' >> ~/.ssh/known_hosts
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_ed25519.pub
+    - chmod 400 ~/.ssh/id_*
+  script:
+    # Fake some files to avoid the compiler or "typecheck" linter complaining about a missing embedded file.
+    - touch internal/legacy/archives/php_linux_amd64 internal/legacy/archives/platform.phar
+    - make lint test
+  coverage: '/total:\s+\(statements\)\s+\d+.\d+%/'
 
 build-php-linux-x86:
   stage: php
@@ -98,8 +115,8 @@ build:
   tags:
     - macos-arm
 
-test-linux:
-  stage: test
+behave-test-linux:
+  stage: behave-test
   dependencies:
     - build
   variables:
@@ -122,7 +139,8 @@ release:
   script:
     - make release
   dependencies:
-    - test-linux
+    - unit-test-lint
+    - behave-test-linux
     - build-php-linux-arm
     - build-php-linux-x86
     - build-php-macos-arm
