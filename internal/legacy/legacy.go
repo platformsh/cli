@@ -1,20 +1,23 @@
 package legacy
 
 import (
-	"bytes"
 	"context"
 	_ "embed"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/gofrs/flock"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/platformsh/cli/internal/config"
+	"github.com/platformsh/cli/internal/file"
 )
 
 //go:embed archives/platform.phar
@@ -25,45 +28,7 @@ var (
 	PHPVersion       = "0.0.0"
 )
 
-// copyFile from the given bytes to destination
-func copyFile(destination string, fin []byte) error {
-	if _, err := os.Stat(destination); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("could not stat file: %w", err)
-	}
-
-	fout, err := os.Create(destination)
-	if err != nil {
-		return fmt.Errorf("could not create file: %w", err)
-	}
-	defer fout.Close()
-
-	r := bytes.NewReader(fin)
-
-	if _, err := io.Copy(fout, r); err != nil {
-		return fmt.Errorf("could copy file: %w", err)
-	}
-
-	return nil
-}
-
-// fileChanged checks if a file's content differs from the provided bytes.
-func fileChanged(filename string, content []byte) (bool, error) {
-	stat, err := os.Stat(filename)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return true, nil
-		}
-		return false, fmt.Errorf("could not stat file: %w", err)
-	}
-	if int(stat.Size()) != len(content) {
-		return true, nil
-	}
-	current, err := os.ReadFile(filename)
-	if err != nil {
-		return false, err
-	}
-	return !bytes.Equal(current, content), nil
-}
+const configBasename = "config.yaml"
 
 // CLIWrapper wraps the legacy CLI
 type CLIWrapper struct {
@@ -76,7 +41,8 @@ type CLIWrapper struct {
 	DisableInteraction bool
 	DebugLogFunc       func(string, ...any)
 
-	initOnce sync.Once
+	initOnce  sync.Once
+	_cacheDir string
 }
 
 func (c *CLIWrapper) debug(msg string, args ...any) {
@@ -85,8 +51,20 @@ func (c *CLIWrapper) debug(msg string, args ...any) {
 	}
 }
 
-func (c *CLIWrapper) cacheDir() string {
-	return path.Join(os.TempDir(), fmt.Sprintf("%s-%s-%s", c.Config.Application.Slug, PHPVersion, LegacyCLIVersion))
+func (c *CLIWrapper) cacheDir() (string, error) {
+	if c._cacheDir == "" {
+		cd, err := c.Config.TempDir()
+		if err != nil {
+			return "", err
+		}
+		cd = filepath.Join(cd, fmt.Sprintf("legacy-%s-%s", PHPVersion, LegacyCLIVersion))
+		if err := os.Mkdir(cd, 0o700); err != nil && !errors.Is(err, fs.ErrExist) {
+			return "", err
+		}
+		c._cacheDir = cd
+	}
+
+	return c._cacheDir, nil
 }
 
 // runInitOnce runs the init method, only once for this object.
@@ -100,51 +78,41 @@ func (c *CLIWrapper) runInitOnce() error {
 func (c *CLIWrapper) init() error {
 	preInit := time.Now()
 
-	if _, err := os.Stat(c.cacheDir()); os.IsNotExist(err) {
-		c.debug("Cache directory does not exist, creating: %s", c.cacheDir())
-		if err := os.Mkdir(c.cacheDir(), 0o700); err != nil {
-			return fmt.Errorf("could not create temporary directory: %w", err)
-		}
-	}
-	preLock := time.Now()
-	fileLock := flock.New(path.Join(c.cacheDir(), ".lock"))
-	if err := fileLock.Lock(); err != nil {
-		return fmt.Errorf("could not acquire lock: %w", err)
-	}
-	c.debug("Lock acquired (%s): %s", time.Since(preLock), fileLock.Path())
-	//nolint:errcheck
-	defer fileLock.Unlock()
-
-	if _, err := os.Stat(c.PharPath()); os.IsNotExist(err) {
-		c.debug("Phar file does not exist, copying: %s", c.PharPath())
-		if err := copyFile(c.PharPath(), phar); err != nil {
-			return fmt.Errorf("could not copy phar file: %w", err)
-		}
-	}
-
-	// Always write the config.yaml file if it changed.
-	configContent, err := c.Config.Raw()
+	cacheDir, err := c.cacheDir()
 	if err != nil {
 		return err
 	}
-	changed, err := fileChanged(c.ConfigPath(), configContent)
-	if err != nil {
-		return fmt.Errorf("could not check config file: %w", err)
-	}
-	if changed {
-		if err := copyFile(c.ConfigPath(), configContent); err != nil {
-			return fmt.Errorf("could not copy config: %w", err)
-		}
-	}
 
-	if _, err := os.Stat(c.PHPPath()); os.IsNotExist(err) {
-		c.debug("PHP binary does not exist, copying: %s", c.PHPPath())
-		if err := c.copyPHP(); err != nil {
-			return fmt.Errorf("could not copy files: %w", err)
+	preLock := time.Now()
+	fileLock := flock.New(filepath.Join(cacheDir, ".lock"))
+	if err := fileLock.Lock(); err != nil {
+		return fmt.Errorf("could not acquire lock: %w", err)
+	}
+	c.debug("lock acquired (%s): %s", time.Since(preLock), fileLock.Path())
+	defer fileLock.Unlock() //nolint:errcheck
+
+	g := errgroup.Group{}
+	g.Go(func() error {
+		if err := file.WriteIfNeeded(c.pharPath(cacheDir), phar, 0o644); err != nil {
+			return fmt.Errorf("could not copy phar file: %w", err)
 		}
-		if err := os.Chmod(c.PHPPath(), 0o700); err != nil {
-			return fmt.Errorf("could not make PHP executable: %w", err)
+		return nil
+	})
+	g.Go(func() error {
+		configContent, err := c.Config.Raw()
+		if err != nil {
+			return fmt.Errorf("could not load config for checking: %w", err)
 		}
+		if err := file.WriteIfNeeded(filepath.Join(cacheDir, configBasename), configContent, 0o644); err != nil {
+			return fmt.Errorf("could not write config: %w", err)
+		}
+		return nil
+	})
+
+	g.Go(newPHPManager(cacheDir).copy)
+
+	if err := g.Wait(); err != nil {
+		return err
 	}
 
 	c.debug("Initialized PHP CLI (%s)", time.Since(preInit))
@@ -157,8 +125,11 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 	if err := c.runInitOnce(); err != nil {
 		return fmt.Errorf("failed to initialize PHP CLI: %w", err)
 	}
-
-	cmd := c.makeCmd(ctx, args)
+	cacheDir, err := c.cacheDir()
+	if err != nil {
+		return err
+	}
+	cmd := c.makeCmd(ctx, args, cacheDir)
 	if c.Stdin != nil {
 		cmd.Stdin = c.Stdin
 	} else {
@@ -178,7 +149,7 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 	envPrefix := c.Config.Application.EnvPrefix
 	cmd.Env = append(
 		cmd.Env,
-		"CLI_CONFIG_FILE="+c.ConfigPath(),
+		"CLI_CONFIG_FILE="+filepath.Join(cacheDir, configBasename),
 		envPrefix+"UPDATES_CHECK=0",
 		envPrefix+"MIGRATE_CHECK=0",
 		envPrefix+"APPLICATION_PROMPT_SELF_INSTALL=0",
@@ -196,37 +167,39 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 		c.Version,
 	))
 	if err := cmd.Run(); err != nil {
-		// Cleanup cache directory
-		c.debug("Removing cache directory: %s", c.cacheDir())
-		os.RemoveAll(c.cacheDir())
-		return fmt.Errorf("could not run legacy CLI command: %w", err)
+		return fmt.Errorf("could not run PHP CLI command: %w", err)
 	}
 
 	return nil
 }
 
 // makeCmd makes a legacy CLI command with the given context and arguments.
-func (c *CLIWrapper) makeCmd(ctx context.Context, args []string) *exec.Cmd {
-	iniSettings := c.phpSettings()
-	var cmdArgs = make([]string, 0, len(args)+2+len(iniSettings)*2)
-	for _, s := range iniSettings {
+func (c *CLIWrapper) makeCmd(ctx context.Context, args []string, cacheDir string) *exec.Cmd {
+	phpMgr := newPHPManager(cacheDir)
+	settings := phpMgr.settings()
+	var cmdArgs = make([]string, 0, len(args)+2+len(settings)*2)
+	for _, s := range settings {
 		cmdArgs = append(cmdArgs, "-d", s)
 	}
-	cmdArgs = append(cmdArgs, c.PharPath())
+	cmdArgs = append(cmdArgs, c.pharPath(cacheDir))
 	cmdArgs = append(cmdArgs, args...)
-	return exec.CommandContext(ctx, c.PHPPath(), cmdArgs...) //nolint:gosec
+	return exec.CommandContext(ctx, phpMgr.binPath(), cmdArgs...) //nolint:gosec
 }
 
 // PharPath returns the path to the legacy CLI's Phar file.
-func (c *CLIWrapper) PharPath() string {
+func (c *CLIWrapper) PharPath() (string, error) {
+	cacheDir, err := c.cacheDir()
+	if err != nil {
+		return "", err
+	}
+
+	return c.pharPath(cacheDir), nil
+}
+
+func (c *CLIWrapper) pharPath(cacheDir string) string {
 	if customPath := os.Getenv(c.Config.Application.EnvPrefix + "PHAR_PATH"); customPath != "" {
 		return customPath
 	}
 
-	return path.Join(c.cacheDir(), c.Config.Application.Executable+".phar")
-}
-
-// ConfigPath returns the path to the YAML config file that will be provided to the legacy CLI.
-func (c *CLIWrapper) ConfigPath() string {
-	return path.Join(c.cacheDir(), "config.yaml")
+	return filepath.Join(cacheDir, c.Config.Application.Executable+".phar")
 }

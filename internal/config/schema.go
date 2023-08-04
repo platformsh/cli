@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -64,7 +62,9 @@ type Config struct {
 		DomainWildcards []string `validate:"required" yaml:"domain_wildcards"` // e.g. ["*.platform.sh"]
 	} `validate:"required"`
 
-	raw []byte `yaml:"-"`
+	raw             []byte `yaml:"-"`
+	tempDir         string `yaml:"-"`
+	writableUserDir string `yaml:"-"`
 }
 
 // applyDefaults applies defaults to config before parsing.
@@ -83,26 +83,6 @@ func (c *Config) applyDynamicDefaults() {
 	if c.Application.WritableUserDir == "" {
 		c.Application.WritableUserDir = c.Application.UserConfigDir
 	}
-}
-
-// WritableUserDir returns the path to a writable user-level directory.
-func (c *Config) WritableUserDir() (string, error) {
-	// Attempt to create the directory under $HOME first.
-	if homeDir, err := os.UserHomeDir(); err == nil {
-		path := filepath.Join(homeDir, c.Application.WritableUserDir)
-		if err := os.Mkdir(path, 0o700); err != nil && !os.IsExist(err) {
-			return "", err
-		}
-		return path, nil
-	}
-
-	// Otherwise,attempt to create it in the temporary directory.
-	path := filepath.Join(os.TempDir(), c.Application.TempSubDir)
-	if err := os.Mkdir(path, 0o700); err != nil && !os.IsExist(err) {
-		return "", err
-	}
-
-	return path, nil
 }
 
 // Raw returns the config before it was unmarshalled, or a marshaled version if that is not available.
