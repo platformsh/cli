@@ -1,7 +1,6 @@
 package legacy
 
 import (
-	"bytes"
 	"context"
 	_ "embed"
 	"fmt"
@@ -14,6 +13,7 @@ import (
 	"github.com/gofrs/flock"
 
 	"github.com/platformsh/cli/internal/config"
+	"github.com/platformsh/cli/internal/file"
 )
 
 //go:embed archives/platform.phar
@@ -24,48 +24,8 @@ var (
 	PHPVersion       = "0.0.0"
 )
 
-var phpPath = fmt.Sprintf("php-%s", PHPVersion)
-var pharPath = fmt.Sprintf("phar-%s", LegacyCLIVersion)
-
-// copyFile from the given bytes to destination
-func copyFile(destination string, fin []byte) error {
-	if _, err := os.Stat(destination); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("could not stat file: %w", err)
-	}
-
-	fout, err := os.Create(destination)
-	if err != nil {
-		return fmt.Errorf("could not create file: %w", err)
-	}
-	defer fout.Close()
-
-	r := bytes.NewReader(fin)
-
-	if _, err := io.Copy(fout, r); err != nil {
-		return fmt.Errorf("could copy file: %w", err)
-	}
-
-	return nil
-}
-
-// fileChanged checks if a file's content differs from the provided bytes.
-func fileChanged(filename string, content []byte) (bool, error) {
-	stat, err := os.Stat(filename)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return true, nil
-		}
-		return false, fmt.Errorf("could not stat file: %w", err)
-	}
-	if int(stat.Size()) != len(content) {
-		return true, nil
-	}
-	current, err := os.ReadFile(filename)
-	if err != nil {
-		return false, err
-	}
-	return !bytes.Equal(current, content), nil
-}
+var phpPath = "php"
+var pharPath = "legacy-cli.phar"
 
 // CLIWrapper wraps the legacy CLI
 type CLIWrapper struct {
@@ -80,11 +40,11 @@ type CLIWrapper struct {
 }
 
 func (c *CLIWrapper) cacheDir() string {
-	return path.Join(os.TempDir(), fmt.Sprintf("%s-%s-%s", c.Config.Application.Slug, PHPVersion, LegacyCLIVersion))
+	return path.Join(os.TempDir(), c.Config.Application.Slug)
 }
 
-// Init the CLI wrapper, creating a temporary directory and copying over files
-func (c *CLIWrapper) Init() error {
+// Initialize the CLI wrapper, creating a temporary directory and copying over files.
+func (c *CLIWrapper) init() error {
 	if _, err := os.Stat(c.cacheDir()); os.IsNotExist(err) {
 		c.debugLog("cache directory does not exist, creating: %s", c.cacheDir())
 		if err := os.Mkdir(c.cacheDir(), 0o700); err != nil {
@@ -96,18 +56,10 @@ func (c *CLIWrapper) Init() error {
 		return fmt.Errorf("could not acquire lock: %w", err)
 	}
 	c.debugLog("lock acquired: %s", fileLock.Path())
-	//nolint:errcheck
-	defer fileLock.Unlock()
+	defer fileLock.Unlock() //nolint:errcheck
 
-	if _, err := os.Stat(c.PharPath()); os.IsNotExist(err) {
-		if c.CustomPharPath != "" {
-			return fmt.Errorf("legacy CLI phar file not found: %w", err)
-		}
-
-		c.debugLog("phar file does not exist, copying: %s", c.PharPath())
-		if err := copyFile(c.PharPath(), phar); err != nil {
-			return fmt.Errorf("could not copy phar file: %w", err)
-		}
+	if err := file.CopyIfChanged(c.PharPath(), phar, 0o644); err != nil {
+		return fmt.Errorf("could not copy phar file: %w", err)
 	}
 
 	// Always write the config.yaml file if it changed.
@@ -115,27 +67,11 @@ func (c *CLIWrapper) Init() error {
 	if err != nil {
 		return fmt.Errorf("could not load config for checking: %w", err)
 	}
-	changed, err := fileChanged(c.ConfigPath(), configContent)
-	if err != nil {
-		return fmt.Errorf("could not check config file: %w", err)
-	}
-	if changed {
-		if err := copyFile(c.ConfigPath(), configContent); err != nil {
-			return fmt.Errorf("could not copy config: %w", err)
-		}
+	if err := file.CopyIfChanged(c.ConfigPath(), configContent, 0o644); err != nil {
+		return fmt.Errorf("could not write config: %w", err)
 	}
 
-	if _, err := os.Stat(c.PHPPath()); os.IsNotExist(err) {
-		c.debugLog("PHP binary does not exist, copying: %s", c.PHPPath())
-		if err := c.copyPHP(); err != nil {
-			return fmt.Errorf("could not copy files: %w", err)
-		}
-		if err := os.Chmod(c.PHPPath(), 0o700); err != nil {
-			return fmt.Errorf("could not make PHP executable: %w", err)
-		}
-	}
-
-	return nil
+	return c.copyPHP()
 }
 
 // Exec a legacy CLI command with the given arguments

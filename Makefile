@@ -49,14 +49,21 @@ internal/legacy/archives/php_linux_$(GOARCH):
 		--progress=plain \
 		ext/static-php-cli/docker
 
+PHP_WINDOWS_REMOTE_FILENAME := "php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip"
 internal/legacy/archives/php_windows.zip:
-	mkdir -p internal/legacy/archives
-	wget https://windows.php.net/downloads/releases/php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip -O internal/legacy/archives/php_windows.zip
+	( \
+	  mkdir -p internal/legacy/archives ;\
+	  cd internal/legacy/archives ;\
+	  # Using curl (instead of wget) because it's built in to things like Git Bash.
+	  curl "https://windows.php.net/downloads/releases/$(PHP_WINDOWS_REMOTE_FILENAME)" > php_windows.zip ;\
+	  curl https://windows.php.net/downloads/releases/sha256sum.txt | grep "$(PHP_WINDOWS_REMOTE_FILENAME)" | sed s/"$(PHP_WINDOWS_REMOTE_FILENAME)"/"php_windows.zip"/g > php_windows.zip.sha256 ;\
+	  sha256sum -c php_windows.zip.sha256 ;\
+	)
 
 .PHONY: internal/legacy/archives/cacert.pem
 internal/legacy/archives/cacert.pem:
 	mkdir -p internal/legacy/archives
-	wget https://curl.se/ca/cacert.pem -O internal/legacy/archives/cacert.pem
+	curl https://curl.se/ca/cacert.pem > internal/legacy/archives/cacert.pem
 
 php: $(PHP_BINARY_PATH)
 

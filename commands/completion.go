@@ -2,14 +2,10 @@ package commands
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"os"
-	"os/exec"
 	"path"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -39,21 +35,8 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 				Stdin:              cmd.InOrStdin(),
 			}
 
-			if err := c.Init(); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				os.Exit(1)
-				return
-			}
-
 			if err := c.Exec(cmd.Context(), completionArgs...); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				exitCode := 1
-				var execErr *exec.ExitError
-				if errors.As(err, &execErr) {
-					exitCode = execErr.ExitCode()
-				}
-				os.Exit(exitCode)
-				return
+				handleLegacyError(err)
 			}
 
 			completions := strings.ReplaceAll(

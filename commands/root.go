@@ -231,8 +231,19 @@ func debugLog(format string, v ...any) {
 	log.Printf(format, v...)
 }
 
-func runLegacyCLI(ctx context.Context, cnf *config.Config, stdout, stderr io.Writer, stdin io.Reader, args []string) {
-	c := &legacy.CLIWrapper{
+func handleLegacyError(err error) {
+	var execErr *exec.ExitError
+	if errors.As(err, &execErr) {
+		exitCode := execErr.ExitCode()
+		debugLog("%s\n", err)
+		os.Exit(exitCode)
+	}
+	log.Println(color.RedString(err.Error()))
+	os.Exit(1)
+}
+
+func makeLegacyCLIWrapper(cnf *config.Config, stdout, stderr io.Writer, stdin io.Reader) *legacy.CLIWrapper {
+	return &legacy.CLIWrapper{
 		Config:             cnf,
 		Version:            version,
 		CustomPharPath:     viper.GetString("phar-path"),
@@ -242,18 +253,11 @@ func runLegacyCLI(ctx context.Context, cnf *config.Config, stdout, stderr io.Wri
 		Stderr:             stderr,
 		Stdin:              stdin,
 	}
-	if err := c.Init(); err != nil {
-		fmt.Fprintln(stderr, color.RedString(err.Error()))
-		os.Exit(1)
-	}
+}
 
+func runLegacyCLI(ctx context.Context, cnf *config.Config, stdout, stderr io.Writer, stdin io.Reader, args []string) {
+	c := makeLegacyCLIWrapper(cnf, stdout, stderr, stdin)
 	if err := c.Exec(ctx, args...); err != nil {
-		debugLog("%s\n", color.RedString(err.Error()))
-		exitCode := 1
-		var execErr *exec.ExitError
-		if errors.As(err, &execErr) {
-			exitCode = execErr.ExitCode()
-		}
-		os.Exit(exitCode)
+		handleLegacyError(err)
 	}
 }

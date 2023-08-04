@@ -3,10 +3,8 @@ package commands
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -33,11 +31,6 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				Stderr:             cmd.ErrOrStderr(),
 				Stdin:              cmd.InOrStdin(),
 			}
-			if err := c.Init(); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				os.Exit(1)
-				return
-			}
 
 			arguments := []string{"list", "--format=json"}
 			if viper.GetBool("all") {
@@ -46,15 +39,9 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 			if len(args) > 0 {
 				arguments = append(arguments, args[0])
 			}
+
 			if err := c.Exec(cmd.Context(), arguments...); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				exitCode := 1
-				var execErr *exec.ExitError
-				if errors.As(err, &execErr) {
-					exitCode = execErr.ExitCode()
-				}
-				os.Exit(exitCode)
-				return
+				handleLegacyError(err)
 			}
 
 			var list List
@@ -99,13 +86,7 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				c.Stdout = cmd.OutOrStdout()
 				arguments := []string{"list", "--format=" + format}
 				if err := c.Exec(cmd.Context(), arguments...); err != nil {
-					debugLog("%s\n", color.RedString(err.Error()))
-					exitCode := 1
-					var execErr *exec.ExitError
-					if errors.As(err, &execErr) {
-						exitCode = execErr.ExitCode()
-					}
-					os.Exit(exitCode)
+					handleLegacyError(err)
 				}
 				return
 			}
