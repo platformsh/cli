@@ -29,7 +29,10 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 				exitWithError(err)
 			}
 
-			pharPath := c.PharPath()
+			pharPath, err := c.PharPath()
+			if err != nil {
+				exitWithError(err)
+			}
 
 			completions := strings.ReplaceAll(
 				strings.ReplaceAll(
