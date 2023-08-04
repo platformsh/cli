@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/platformsh/cli/internal/config"
 )
@@ -58,17 +59,13 @@ func TestLegacyCLI(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Contains(t, stdout.String(), "Displays help for a command")
 
-	assert.Equal(
-		t,
-		filepath.Join(os.TempDir(), "test-cli-test_php_version-test_legacy_cli_version", "platform-test.phar"),
-		wrapper.PharPath(),
-	)
+	cacheDir, err := wrapper.cacheDir()
+	require.NoError(t, err)
 
-	assert.Equal(
-		t,
-		filepath.Join(os.TempDir(), "test-cli-test_php_version-test_legacy_cli_version", "php"),
-		wrapper.PHPPath(),
-	)
+	pharPath, err := wrapper.PharPath()
+	require.NoError(t, err)
+
+	assert.Equal(t, filepath.Join(cacheDir, "platform-test.phar"), pharPath)
 
 	stdout.Reset()
 	err = wrapper.Exec(context.Background(), "--version")
