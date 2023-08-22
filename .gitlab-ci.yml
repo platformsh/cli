@@ -5,6 +5,15 @@ stages:
   - behave-test
   - release
 
+.go-cache:
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+  before_script:
+    - mkdir -p .go
+  cache:
+    paths:
+      - .go/pkg/mod/
+
 variables:
   DOCKER_HOST: tcp://docker:2375
   GIT_DEPTH: 10
@@ -13,6 +22,7 @@ variables:
 unit-test-lint:
   stage: check
   image: cimg/go:1.20
+  extends: .go-cache
   before_script:
     - git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
@@ -27,6 +37,12 @@ unit-test-lint:
   coverage: '/total:\s+\(statements\)\s+\d+.\d+%/'
 
 build-php-linux-x86:
+  cache:
+    - key:
+        files:
+          - Makefile
+      paths:
+        - internal/legacy/archives/php_linux_amd64
   stage: php
   image: docker:20.10-git
   services:
@@ -42,6 +58,8 @@ build-php-linux-x86:
     expire_in: 1 day
 
 build-php-linux-arm:
+  rules:
+    - if: $CI_COMMIT_TAG
   stage: php
   image: docker:20.10-git
   services:
@@ -59,6 +77,8 @@ build-php-linux-arm:
     - arm-high-cpu
 
 build-php-windows:
+  rules:
+    - if: $CI_COMMIT_TAG
   stage: php
   image: docker:20.10-git
   before_script:
@@ -72,6 +92,8 @@ build-php-windows:
     expire_in: 1 day
 
 build-php-macos-arm:
+  rules:
+    - if: $CI_COMMIT_TAG
   stage: php
   before_script:
     - export PATH="/opt/homebrew/bin:$PATH"
@@ -85,6 +107,8 @@ build-php-macos-arm:
     - macos-arm
 
 build-php-macos-x86:
+  rules:
+    - if: $CI_COMMIT_TAG
   stage: php
   script:
     - make php
@@ -97,23 +121,23 @@ build-php-macos-x86:
 
 build:
   stage: build
+  image: cimg/go:1.20
+  extends: .go-cache
   before_script:
-    - export PATH="/opt/homebrew/bin:$PATH"
-    - brew install gon goreleaser wget
+    - git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' >> ~/.ssh/known_hosts
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_ed25519.pub
+    - chmod 400 ~/.ssh/id_*
   script:
-    - make snapshot
+    - make single
   dependencies:
-    - build-php-linux-arm
     - build-php-linux-x86
-    - build-php-macos-arm
-    - build-php-macos-x86
-    - build-php-windows
   artifacts:
     paths:
       - dist/
     expire_in: 1 day
-  tags:
-    - macos-arm
 
 behave-test-linux:
   stage: behave-test
