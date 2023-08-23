@@ -40,6 +40,12 @@ jobs:
           touch internal/legacy/archives/php_linux_arm64
           touch internal/legacy/archives/php_darwin_amd64
           touch internal/legacy/archives/php_darwin_arm64
+          touch internal/legacy/archives/platform.phar.sha256
+          touch internal/legacy/archives/php_windows_amd64.sha256
+          touch internal/legacy/archives/php_linux_amd64.sha256
+          touch internal/legacy/archives/php_linux_arm64.sha256
+          touch internal/legacy/archives/php_darwin_amd64.sha256
+          touch internal/legacy/archives/php_darwin_arm64.sha256
 
       - name: Run linter
         uses: golangci/golangci-lint-action@v3

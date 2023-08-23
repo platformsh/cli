@@ -52,7 +52,12 @@ internal/legacy/archives/cacert.pem:
 	mkdir -p internal/legacy/archives
 	wget https://curl.se/ca/cacert.pem -O internal/legacy/archives/cacert.pem
 
-php: $(PHP_BINARY_PATH)
+.PHONY: archive-hashes
+archive-hashes:
+	cd internal/legacy/archives
+	for f in $(ls -1 | grep -v sha256); do shasum -a 256 "$f"  | awk '{print $1}' > "$f".sha256; done
+
+php: $(PHP_BINARY_PATH) archive-hashes
 
 goreleaser:
 	go install github.com/goreleaser/goreleaser@$(GORELEASER_VERSION)

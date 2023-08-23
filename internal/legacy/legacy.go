@@ -1,7 +1,6 @@
 package legacy
 
 import (
-	"bytes"
 	"context"
 	_ "embed"
 	"fmt"
@@ -12,10 +11,15 @@ import (
 	"path"
 
 	"github.com/gofrs/flock"
+
+	"github.com/platformsh/cli/internal/file"
 )
 
 //go:embed archives/platform.phar
 var pshCLI []byte
+
+//go:embed archives/platform.phar.sha256
+var pshCLIHash string
 
 var (
 	PSHVersion = "0.0.0"
@@ -26,27 +30,6 @@ const prefix = "psh-go"
 
 var phpPath = fmt.Sprintf("php-%s", PHPVersion)
 var pshPath = fmt.Sprintf("psh-%s", PSHVersion)
-
-// copyFile from the given bytes to destination
-func copyFile(destination string, fin []byte) error {
-	if _, err := os.Stat(destination); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("could not stat file: %w", err)
-	}
-
-	fout, err := os.Create(destination)
-	if err != nil {
-		return fmt.Errorf("could not create file: %w", err)
-	}
-	defer fout.Close()
-
-	r := bytes.NewReader(fin)
-
-	if _, err := io.Copy(fout, r); err != nil {
-		return fmt.Errorf("could copy file: %w", err)
-	}
-
-	return nil
-}
 
 // CLIWrapper wraps the legacy CLI
 type CLIWrapper struct {
@@ -78,28 +61,11 @@ func (c *CLIWrapper) Init() error {
 	//nolint:errcheck
 	defer fileLock.Unlock()
 
-	if _, err := os.Stat(c.PSHPath()); os.IsNotExist(err) {
-		if c.CustomPshCliPath != "" {
-			return fmt.Errorf("given PSH phar path does not exist: %w", err)
-		}
-
-		c.debugLog("PSH .phar file does not exist, copying: %s", c.PSHPath())
-		if err := c.copyPSH(); err != nil {
-			return fmt.Errorf("could not copy files: %w", err)
-		}
+	if err := c.copyPSH(); err != nil {
+		return fmt.Errorf("could not copy files: %w", err)
 	}
 
-	if _, err := os.Stat(c.PHPPath()); os.IsNotExist(err) {
-		c.debugLog("PHP binary does not exist, copying: %s", c.PHPPath())
-		if err := c.copyPHP(); err != nil {
-			return fmt.Errorf("could not copy files: %w", err)
-		}
-		if err := os.Chmod(c.PHPPath(), 0o700); err != nil {
-			return fmt.Errorf("could not make PHP executable: %w", err)
-		}
-	}
-
-	return nil
+	return c.copyPHP()
 }
 
 // Exec a legacy CLI command with the given arguments
@@ -156,16 +122,7 @@ func (c *CLIWrapper) PSHPath() string {
 
 // copyPSH to destination, if it does not exist
 func (c *CLIWrapper) copyPSH() error {
-	// Do not copy the file, if a custom path was given
-	if c.CustomPshCliPath != "" {
-		return nil
-	}
-
-	if err := copyFile(c.PSHPath(), pshCLI); err != nil {
-		return fmt.Errorf("could not copy legacy Platform.sh CLI: %w", err)
-	}
-
-	return nil
+	return file.CopyIfChanged(c.PSHPath(), pshCLI, pshCLIHash)
 }
 
 // debugLog logs a debugging message, if debug is enabled

@@ -11,10 +11,15 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/platformsh/cli/internal/file"
 )
 
 //go:embed archives/php_windows.zip
 var phpCLI []byte
+
+//go:embed archives/php_windows.zip.sha256
+var phpCLIHash string
 
 //go:embed archives/windows_php.ini.tpl
 var phpIniTemplate string
@@ -25,6 +30,9 @@ var caCert []byte
 // copyPHP to destination, if it does not exist
 func (c *CLIWrapper) copyPHP() error {
 	dest := path.Join(c.cacheDir(), "php")
+	if hashOK, err := file.CheckHash(path.Join(dest, "hash"), phpCLIHash); hashOK || err != nil {
+		return err
+	}
 	br := bytes.NewReader(phpCLI)
 	r, err := zip.NewReader(br, int64(len(phpCLI)))
 	if err != nil {
@@ -67,9 +75,12 @@ func (c *CLIWrapper) copyPHP() error {
 	}
 	defer w.Close()
 	template.Must(template.New("php.ini").Parse(phpIniTemplate)).Execute(w, map[string]string{"PSHDir": c.cacheDir()})
-	copyFile(path.Join(c.cacheDir(), "php", "extras", "cacert.pem"), caCert)
 
-	return nil
+	if err := os.WriteFile(path.Join(c.cacheDir(), "php", "extras", "cacert.pem"), caCert, 0o644); err != nil {
+		return err
+	}
+
+	return file.SaveHash(path.Join(dest, "hash"), phpCLIHash)
 }
 
 // PHPPath returns the path that the PHP CLI will reside
