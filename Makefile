@@ -18,6 +18,10 @@ ifeq ($(GOARCH), aarch64)
 endif
 PHP_BINARY_PATH := internal/legacy/archives/php_$(GOOS)_$(GOARCH)
 
+# Tooling versions
+GORELEASER_VERSION=v1.20
+GOLANGCI_LINT_VERSION=v1.52
+
 internal/legacy/archives/platform.phar:
 	curl -L https://github.com/platformsh/legacy-cli/releases/download/v$(PSH_VERSION)/platform.phar -o internal/legacy/archives/platform.phar
 
@@ -50,27 +54,29 @@ internal/legacy/archives/cacert.pem:
 
 php: $(PHP_BINARY_PATH)
 
-single: internal/legacy/archives/platform.phar php
-	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser@latest
+goreleaser:
+	go install github.com/goreleaser/goreleaser@$(GORELEASER_VERSION)
+
+single: goreleaser internal/legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --clean
 
-snapshot: internal/legacy/archives/platform.phar php
-	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser@latest
+snapshot: goreleaser internal/legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser build --snapshot --clean
 
 clean-phar:
 	rm -f internal/legacy/archives/platform.phar
 
-release: clean-phar internal/legacy/archives/platform.phar php
-	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser@latest
-	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser release --clean --auto-snapshot
+release: goreleaser clean-phar internal/legacy/archives/platform.phar php
+	PHP_VERSION=$(PHP_VERSION) PSH_VERSION=$(PSH_VERSION) goreleaser release --clean
 
 .PHONY: test
 test: ## Run unit tests
 	go clean -testcache
 	go test -v -race -mod=readonly -cover ./...
 
+golangci-lint:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
+
 .PHONY: lint
-lint: ## Run linter
-	command -v golangci-lint >/dev/null || go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+lint: golangci-lint ## Run linter
 	golangci-lint run --timeout=10m --verbose

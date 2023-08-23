@@ -105,7 +105,7 @@ func (c *CLIWrapper) Init() error {
 // Exec a legacy CLI command with the given arguments
 func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 	args = append([]string{c.PSHPath()}, args...)
-	cmd := exec.CommandContext(ctx, c.PHPPath(), args...)
+	cmd := exec.CommandContext(ctx, c.PHPPath(), args...) //nolint:gosec
 	if c.Stdin != nil {
 		cmd.Stdin = c.Stdin
 	} else {

@@ -55,8 +55,6 @@ linters:
     # - asciicheck
     # checks whether HTTP response body is closed successfully
     - bodyclose
-    # Go linter that checks if package imports are in a list of acceptable packages
-    - depguard
     # Checks assignments with too many blank identifiers (e.g. x, , , _, := f())
     - dogsled
     # Tool for code clone detection
@@ -96,7 +94,7 @@ linters:
     # Checks that printf-like functions are named with f at the end
     - goprintffuncname
     # Inspects source code for security problems
-    # - gosec
+    - gosec
     # Linter for Go source code that specializes in simplifying a code
     - gosimple
     # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
