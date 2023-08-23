@@ -9,7 +9,14 @@ stages:
   variables:
     GOPATH: $CI_PROJECT_DIR/.go
   before_script:
+    - git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' >> ~/.ssh/known_hosts
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_ed25519.pub
+    - chmod 400 ~/.ssh/id_*
     - mkdir -p .go
+    - export PATH=$PATH:$GOPATH/bin
   cache:
     paths:
       - .go/pkg/mod/
@@ -23,16 +30,10 @@ unit-test-lint:
   stage: check
   image: cimg/go:1.20
   extends: .go-cache
-  before_script:
-    - git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
-    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
-    - echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' >> ~/.ssh/known_hosts
-    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-    - echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_ed25519.pub
-    - chmod 400 ~/.ssh/id_*
   script:
     # Fake some files to avoid the compiler or "typecheck" linter complaining about a missing embedded file.
     - touch internal/legacy/archives/php_linux_amd64 internal/legacy/archives/platform.phar
+    - export PATH=$PATH:$GOPATH/bin
     - make lint test
   coverage: '/total:\s+\(statements\)\s+\d+.\d+%/'
 
@@ -123,13 +124,6 @@ build:
   stage: build
   image: cimg/go:1.20
   extends: .go-cache
-  before_script:
-    - git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
-    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
-    - echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' >> ~/.ssh/known_hosts
-    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-    - echo "$SSH_PUBLIC_KEY" > ~/.ssh/id_ed25519.pub
-    - chmod 400 ~/.ssh/id_*
   script:
     - make single
   dependencies:
@@ -156,11 +150,11 @@ release:
   stage: release
   rules:
     - if: $CI_COMMIT_TAG
-  before_script:
-    - export PATH="/opt/homebrew/bin:$PATH"
-    - brew install gon goreleaser wget
-    - git remote set-url origin https://github.com/platformsh/cli
+  extends: .go-cache
   script:
+    - export PATH="/opt/homebrew/bin:$PATH"
+    - brew install gon wget
+    - git remote set-url origin https://github.com/platformsh/cli
     - make release
   dependencies:
     - unit-test-lint
