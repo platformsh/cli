@@ -1,0 +1,337 @@
+# GoReleaser configuration for the Platform.sh CLI.
+project_name: platform
+
+before:
+  hooks:
+    - go generate ./...
+    - bash scripts/generate_completions.sh
+
+builds:
+  - binary: platform
+    id: platform
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
+      - -X "github.com/platformsh/cli/commands.version={{.Version}}"
+      - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
+      - -X "github.com/platformsh/cli/commands.date={{.Date}}"
+      - -X "github.com/platformsh/cli/commands.builtBy=goreleaser"
+    main: ./cmd/platform
+  - binary: platform
+    id: platform-macos
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
+      - -X "github.com/platformsh/cli/commands.version={{.Version}}"
+      - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
+      - -X "github.com/platformsh/cli/commands.date={{.Date}}"
+      - -X "github.com/platformsh/cli/commands.builtBy=goreleaser"
+    main: ./cmd/platform
+
+  - binary: upsun
+    id: upsun
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    tags:
+      - vendor
+      - upsun
+    ldflags:
+      - -s -w
+      - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
+      - -X "github.com/platformsh/cli/commands.version={{.Version}}"
+      - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
+      - -X "github.com/platformsh/cli/commands.date={{.Date}}"
+      - -X "github.com/platformsh/cli/commands.builtBy=goreleaser"
+    main: ./cmd/platform
+  - binary: upsun
+    id: upsun-macos
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    tags:
+      - vendor
+      - upsun
+    ldflags:
+      - -s -w
+      - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
+      - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
+      - -X "github.com/platformsh/cli/commands.version={{.Version}}"
+      - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
+      - -X "github.com/platformsh/cli/commands.date={{.Date}}"
+      - -X "github.com/platformsh/cli/commands.builtBy=goreleaser"
+    main: ./cmd/platform
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  name_template: '{{ incpatch .Version }}-{{ .Now.Format "2006-01-02" }}-{{ .ShortCommit }}-next'
+
+changelog:
+  sort: asc
+  use: github-native
+
+universal_binaries:
+  - id: platform-macos
+    name_template: plaform
+    replace: true
+  - id: upsun-macos
+    name_template: upsun
+    replace: true
+
+release:
+  github:
+    owner: platformsh
+    name: cli
+  footer: |
+    * * *
+    **Legacy CLI release Notes**: https://github.com/platformsh/legacy-cli/releases/v{{ .Tag }}
+    **Full Legacy CLI changelog**: https://github.com/platformsh/legacy-cli/compare/v{{ .PreviousTag }}...v{{ .Tag }}
+    * * *
+    ## Upgrade
+
+    <details>
+
+    <summary>Platform.sh</summary>
+
+    Upgrade using the same tool you used for installing the CLI:
+
+    ### HomeBrew
+
+    ```console
+    brew update && brew upgrade platformsh/tap/platformsh-cli
+    ```
+
+    ### Scoop
+
+    ```console
+    scoop update platform
+    ```
+
+    ### Bash installer
+
+    ```console
+    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
+    ```
+
+    </details>
+
+    <details>
+
+    <summary>Upsun</summary>
+
+    Upgrade using the same tool you used for installing the CLI:
+
+    ### HomeBrew
+
+    ```console
+    brew update && brew upgrade platformsh/tap/upsun-cli
+    ```
+
+    ### Scoop
+
+    ```console
+    scoop update upsun
+    ```
+
+    ### Bash installer
+
+    ```console
+    curl -fsSL https://raw.githubusercontent.com/platformsh/upsun-cli/main/installer.sh | bash
+    ```
+
+    </summary>
+
+archives:
+  - id: platform
+    name_template: "platform_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - completion/*
+    format_overrides:
+      - goos: windows
+        format: zip
+    builds:
+      - platform
+      - platform-macos
+
+  - id: upsun
+    name_template: "upsun_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - completion/*
+    format_overrides:
+      - goos: windows
+        format: zip
+    builds:
+      - upsun
+      - upsun-macos
+
+brews:
+  - name: platformsh-cli
+    repository:
+      owner: platformsh
+      name: homebrew-tap
+      token: "{{ .Env.GITHUB_TOKEN }}"
+    ids:
+      - platform
+
+    goarm: "7"
+    folder: Formula
+
+    commit_author:
+      name: Antonis Kalipetis
+      email: antonis.kalipetis@platform.sh
+
+    homepage: https://docs.platform.sh/administration/cli.html
+    description: Platform.sh CLI
+    license: MIT
+
+    dependencies:
+      - name: git
+        type: optional
+
+    install: |
+      bin.install "platform"
+      generate_completions_from_executable(bin/"platform", "completion", shells: [:bash, :zsh])
+
+    test: |
+      system "#{bin}/platform --version"
+
+  - name: upsun-cli
+    repository:
+      owner: platformsh
+      name: homebrew-tap
+      token: "{{ .Env.GITHUB_TOKEN }}"
+    ids:
+      - upsun
+
+    goarm: "7"
+    folder: Formula
+
+    commit_author:
+      name: Antonis Kalipetis
+      email: antonis.kalipetis@platform.sh
+
+    homepage: https://docs.deployfriday.net/administration/cli.html
+    description: Upsun CLI
+    license: MIT
+
+    dependencies:
+      - name: git
+        type: optional
+
+    install: |
+      bin.install "upsun"
+      generate_completions_from_executable(bin/"upsun", "completion", shells: [:bash, :zsh])
+
+    test: |
+      system "#{bin}/upsun --version"
+
+scoops:
+  - name: platform
+    repository:
+      owner: platformsh
+      name: homebrew-tap
+      token: "{{ .Env.GITHUB_TOKEN }}"
+    ids:
+      - platform
+
+    folder: Scoops
+    commit_author:
+      name: Antonis Kalipetis
+      email: antonis.kalipetis@platform.sh
+
+    homepage: https://docs.platform.sh/administration/cli.html
+    description: Platform.sh CLI
+    license: MIT
+
+  - name: upsun
+    repository:
+      owner: platformsh
+      name: homebrew-tap
+      token: "{{ .Env.GITHUB_TOKEN }}"
+    ids:
+      - upsun
+
+    folder: Scoops
+    commit_author:
+      name: Antonis Kalipetis
+      email: antonis.kalipetis@platform.sh
+
+    homepage: https://docs.deployfriday.net/administration/cli.html
+    description: Upsun CLI
+    license: MIT
+
+nfpms:
+  - id: platform
+    homepage: https://docs.platform.sh/administration/cli.html
+    package_name: platformsh-cli
+    description: Platform.sh CLI
+    maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
+    license: MIT
+    vendor: Platform.sh
+    builds:
+      - platform
+    formats:
+      - apk
+      - deb
+      - rpm
+    contents:
+      - src: completion/bash/platform.bash
+        dst: /etc/bash_completion.d/platform
+      - src: completion/zsh/_platform
+        dst: /usr/local/share/zsh/site-functions/_platform
+
+  - id: upsun
+    homepage: https://docs.deployfriday.net/administration/cli.html
+    package_name: upsun-cli
+    description: Upsun CLI
+    maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
+    license: MIT
+    vendor: Platform.sh
+    builds:
+      - upsun
+    formats:
+      - apk
+      - deb
+      - rpm
+    contents:
+      - src: completion/bash/upsun.bash
+        dst: /etc/bash_completion.d/upsun
+      - src: completion/zsh/_upsun
+        dst: /usr/local/share/zsh/site-functions/_upsun

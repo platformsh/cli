@@ -1,0 +1,92 @@
+# Platform.sh CLI configuration
+#
+# Based on the legacy CLI config in https://github.com/platformsh/legacy-cli/blob/main/config.yaml
+#
+# See ../internal/config/schema.go for the required keys
+wrapper:
+  homebrew_tap: platformsh/tap/platformsh-cli
+  github_repo: platformsh/cli
+
+application:
+  name: 'Platform.sh CLI'
+  slug: 'platformsh-cli'
+  executable: 'platform'
+  env_prefix: 'PLATFORMSH_CLI_'
+  user_config_dir: '.platformsh'
+
+  package_name: 'platformsh/cli'
+  installer_url: 'https://platform.sh/cli/installer'
+  manifest_url: 'https://platform.sh/cli/manifest.json'
+  github_repo: 'platformsh/legacy-cli'
+
+  disabled_commands:
+    - self:install
+    - self:update
+
+local:
+  # A legacy project config file from versions < 3.
+  project_config_legacy: 'platform-project.yaml'
+
+service:
+  name: 'Platform.sh'
+  slug: 'platformsh'
+  env_prefix: 'PLATFORM_'
+  header_prefix: 'X-Platform'
+
+  project_config_dir: '.platform'
+  app_config_file: '.platform.app.yaml'
+  project_config_flavor: 'platform'
+
+  console_url: 'https://console.platform.sh'
+
+  docs_url: 'https://docs.platform.sh'
+  docs_search_url: 'https://docs.platform.sh/search.html?q={{ terms }}'
+
+  register_url: 'https://auth.api.platform.sh/register'
+  reset_password_url: 'https://auth.api.platform.sh/reset-password'
+
+  pricing_url: 'https://platform.sh/pricing'
+
+  activity_type_list_url: 'https://docs.platform.sh/integrations/activity/reference.html#type'
+
+  runtime_operations_help_url: 'https://docs.platform.sh/create-apps/runtime-operations.html'
+
+  available_plans:
+    - development
+    - standard
+    - medium
+    - large
+
+api:
+  base_url: 'https://api.platform.sh'
+
+  auth_url: 'https://auth.api.platform.sh'
+  oauth2_client_id: 'platform-cli'
+
+  ssh_domain_wildcards: ['*.platform.sh']
+
+  invitations: true
+  organizations: true
+  centralized_permissions: true
+  user_verification: true
+  metrics: true
+
+  vendor_filter: 'platformsh'
+
+detection:
+  git_remote_name: 'platform'
+  git_domain: 'platform.sh' # matches git.eu-5.platform.sh, etc.
+  site_domains: ['platform.sh', 'platformsh.site', 'tst.site']
+  api_domain_suffix: 'platform.sh' # matches api.platform.sh, eu-5.platform.sh, etc.
+
+migrate:
+  prompt: true
+  docs_url: https://docs.platform.sh/administration/cli.html
+
+warnings:
+  non_production_domains_msg: |
+    This feature is only available to Enterprise and Elite customers.
+    If you're an Enterprise or Elite customer, contact support to enable the feature.
+    Otherwise contact sales first to upgrade your plan.
+
+    See: https://docs.platform.sh/overview/get-support.html

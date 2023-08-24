@@ -1,14 +1,10 @@
 PHP_VERSION = 8.0.30
 LEGACY_CLI_VERSION = 4.10.2
 
-# Override these environment variables to build with alternative configuration.
-CLI_CONFIG_FILE ?= config/platformsh-cli.yaml
-GORELEASER_CONFIG_FILE ?= config/platformsh-cli-goreleaser.yaml
+GORELEASER_ID ?= platform
 
 ifeq ($(GOOS), darwin)
-	GORELEASER_ID=platform-macos
-else
-	GORELEASER_ID=platform
+	GORELEASER_ID=$(GORELEASER_ID)-macos
 endif
 
 # The OpenSSL version must be compatible with the PHP version.
@@ -67,21 +63,21 @@ php: $(PHP_BINARY_PATH)
 goreleaser:
 	go install github.com/goreleaser/goreleaser@$(GORELEASER_VERSION)
 
-.PHONY: copy-config-file
-copy-config-file:
-	cp "$(CLI_CONFIG_FILE)" internal/config/embedded-config.yaml
+.PHONY: single
+single: goreleaser internal/legacy/archives/platform.phar php ## Build a single target release for Platform.sh or Upsun
+	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --clean
 
-single: goreleaser internal/legacy/archives/platform.phar php copy-config-file
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser build --single-target --config="$(GORELEASER_CONFIG_FILE)" --id=$(GORELEASER_ID) --snapshot --clean
+.PHONY: snapshot ## Build a snapshot release for Platform.sh and Upsun
+snapshot: goreleaser internal/legacy/archives/platform.phar php
+	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser build --snapshot --clean
 
-snapshot: goreleaser internal/legacy/archives/platform.phar php copy-config-file
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser build --snapshot --clean --config="$(GORELEASER_CONFIG_FILE)"
-
-clean-phar:
+.PHONY: clean-phar
+clean-phar: ## Clean up the legacy CLI phar
 	rm -f internal/legacy/archives/platform.phar
 
-release: goreleaser clean-phar internal/legacy/archives/platform.phar php copy-config-file
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser release --clean --config="$(GORELEASER_CONFIG_FILE)"
+.PHONY: release
+release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Release the Platform.sh and Upsun CLIs
+	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser release --clean
 	VERSION=$(VERSION) bash cloudsmith.sh
 
 .PHONY: test
@@ -95,3 +91,23 @@ golangci-lint:
 .PHONY: lint
 lint: golangci-lint ## Run linter
 	golangci-lint run --timeout=10m --verbose
+
+.goreleaser.vendor.yaml: check-vendor
+	cat .goreleaser.vendor.yaml.tpl | envsubst > .goreleaser.vendor.yaml
+
+.PHONY: check-vendor
+check-vendor: ## Check that the vendor CLI variables are set
+ifndef VENDOR_NAME
+	$(error VENDOR_NAME is undefined)
+endif
+ifndef VENDOR_BINARY
+	$(error VENDOR_BINARY is undefined)
+endif
+
+.PHONY: vendor-release
+vendor-release:  check-vendor .goreleaser.vendor.yaml goreleaser clean-phar internal/legacy/archives/platform.phar php ## Release a vendor CLI
+	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) VENDOR_BINARY="$(VENDOR_BINARY)" VENDOR_NAME="$(VENDOR_NAME)" goreleaser release --clean --config=.goreleaser.vendor.yaml
+
+.PHONY: vendor-snapshot
+vendor-snapshot: .goreleaser.vendor.yaml goreleaser internal/legacy/archives/platform.phar php ## Build a vendor CLI snapshot
+	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) VENDOR_BINARY="$(VENDOR_BINARY)" VENDOR_NAME="$(VENDOR_NAME)" goreleaser build --snapshot --clean --config=.goreleaser.vendor.yaml

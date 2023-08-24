@@ -2,16 +2,12 @@ package config
 
 import (
 	"context"
-	_ "embed"
 	"fmt"
 	"os"
 
 	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
 )
-
-//go:embed embedded-config.yaml
-var embedded []byte
 
 // LoadYAML reads the configuration file from the environment if specified, falling back to the embedded file.
 func LoadYAML() ([]byte, error) {
