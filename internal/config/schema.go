@@ -47,5 +47,6 @@ type Config struct {
 		EnvPrefix        string `validate:"required" yaml:"env_prefix"`         // e.g. "PLATFORM_"
 		ProjectConfigDir string `validate:"required" yaml:"project_config_dir"` // e.g. ".platform"
 		ConsoleURL       string `validate:"omitempty,url" yaml:"console_url"`   // e.g. "https://console.platform.sh"
+		DocsURL          string `validate:"omitempty,url" yaml:"docs_url"`      // e.g. "https://docs.platform.sh"
 	} `validate:"required,dive"`
 }

@@ -16,6 +16,8 @@ service:
 
   console_url: 'https://console.example.com'
 
+  docs_url: 'https://docs.example.com'
+
 api:
   base_url: 'https://api.example.com'
   auth_url: 'https://auth.example.com'
