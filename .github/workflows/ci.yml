@@ -40,6 +40,7 @@ jobs:
           touch internal/legacy/archives/php_linux_arm64
           touch internal/legacy/archives/php_darwin_amd64
           touch internal/legacy/archives/php_darwin_arm64
+          touch internal/config/embedded-config.yaml
 
       - name: Run linter
         uses: golangci/golangci-lint-action@v3

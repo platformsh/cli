@@ -1,8 +1,41 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/fatih/color"
+
+	"github.com/platformsh/cli/internal/config"
 )
+
+func globalOptions(cnf *config.Config) []Option {
+	return []Option{
+		HelpOption,
+		VerboseOption,
+		VersionOption,
+		YesOption,
+		NoInteractionOption(cnf),
+		AnsiOption,
+		NoAnsiOption,
+		NoOption,
+		QuietOption,
+	}
+}
+
+func NoInteractionOption(cnf *config.Config) Option {
+	return Option{
+		Name:            "--no-interaction",
+		Shortcut:        "",
+		AcceptValue:     false,
+		IsValueRequired: false,
+		IsMultiple:      false,
+		Description: CleanString("Do not ask any interactive questions; accept default values. " +
+			"Equivalent to using the environment variable: " +
+			color.YellowString(fmt.Sprintf("%sNO_INTERACTION=1", cnf.Application.EnvPrefix))),
+		Default: Any{false},
+		Hidden:  false,
+	}
+}
 
 var (
 	HelpOption = Option{
@@ -46,17 +79,6 @@ var (
 		Default: Any{false},
 		Hidden:  false,
 	}
-	NoInteractionOption = Option{
-		Name:            "--no-interaction",
-		Shortcut:        "",
-		AcceptValue:     false,
-		IsValueRequired: false,
-		IsMultiple:      false,
-		Description: CleanString("Do not ask any interactive questions; accept default values. " +
-			"Equivalent to using the environment variable: " + color.YellowString("PLATFORMSH_CLI_NO_INTERACTION=1")),
-		Default: Any{false},
-		Hidden:  false,
-	}
 	AnsiOption = Option{
 		Name:            "--ansi",
 		Shortcut:        "",
@@ -97,19 +119,5 @@ var (
 		Description:     "Do not output any message",
 		Default:         Any{false},
 		Hidden:          true,
-	}
-)
-
-var (
-	GlobalOptions = []Option{
-		HelpOption,
-		VerboseOption,
-		VersionOption,
-		YesOption,
-		NoInteractionOption,
-		AnsiOption,
-		NoAnsiOption,
-		NoOption,
-		QuietOption,
 	}
 )

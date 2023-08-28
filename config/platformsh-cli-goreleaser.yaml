@@ -1,5 +1,4 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
+# GoReleaser configuration for the Platform.sh CLI.
 project_name: platform
 
 before:
@@ -24,7 +23,7 @@ builds:
     ldflags:
       - -s -w
       - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
-      - -X "github.com/platformsh/cli/internal/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
       - -X "github.com/platformsh/cli/commands.version={{.Version}}"
       - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
       - -X "github.com/platformsh/cli/commands.date={{.Date}}"
@@ -42,7 +41,7 @@ builds:
     ldflags:
       - -s -w
       - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
-      - -X "github.com/platformsh/cli/internal/legacy.PSHVersion={{.Env.PSH_VERSION}}"
+      - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
       - -X "github.com/platformsh/cli/commands.version={{.Version}}"
       - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
       - -X "github.com/platformsh/cli/commands.date={{.Date}}"

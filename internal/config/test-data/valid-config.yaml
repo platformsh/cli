@@ -1,0 +1,34 @@
+# Example minimal valid CLI configuration for testing.
+application:
+  name: 'Example CLI'
+  slug: 'example-cli'
+  executable: 'example'
+  env_prefix: 'EXAMPLE_CLI_'
+  user_config_dir: '.example-cli'
+
+service:
+  name: 'Example Service'
+  slug: 'example'
+  env_prefix: 'EXAMPLE_'
+  header_prefix: 'X-Example'
+
+  project_config_dir: '.example'
+
+  console_url: 'https://console.example.com'
+
+api:
+  base_url: 'https://api.example.com'
+  auth_url: 'https://auth.example.com'
+
+  ssh_domain_wildcards: ['*.example.com']
+
+  centralized_permissions: true
+  invitations: true
+  metrics: true
+  organizations: true
+  user_verification: true
+
+detection:
+  git_remote_name: 'example'
+  git_domain: 'example.com'
+  site_domains: ['example.site']
