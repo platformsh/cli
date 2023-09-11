@@ -380,10 +380,10 @@ function install_platformsh_homebrew() {
 
 function github_curl {
     if [ -z "${GITHUB_TOKEN}" ]; then
-        curl -fsSL $1
+        curl -fsSL -H "Accept: application/vnd.github+json" $1
         return $?
     else
-        curl -fsSL -H "Authorization: Bearer ${GITHUB_TOKEN}" $1
+        curl -fsSL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GITHUB_TOKEN}" $1
         return $?
     fi
 }
