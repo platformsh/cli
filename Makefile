@@ -25,6 +25,7 @@ ifeq ($(GOARCH), aarch64)
 endif
 
 PHP_BINARY_PATH := internal/legacy/archives/php_$(GOOS)_$(GOARCH)
+VERSION := $(shell git describe --always)
 
 # Tooling versions
 GORELEASER_VERSION=v1.20
@@ -80,7 +81,8 @@ clean-phar:
 	rm -f internal/legacy/archives/platform.phar
 
 release: goreleaser clean-phar internal/legacy/archives/platform.phar php copy-config-file
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser release --clean --auto-snapshot --config="$(GORELEASER_CONFIG_FILE)"
+	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser release --clean --config="$(GORELEASER_CONFIG_FILE)"
+	VERSION=$(VERSION) bash cloudsmith.sh
 
 .PHONY: test
 test: ## Run unit tests

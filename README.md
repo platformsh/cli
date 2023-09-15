@@ -60,6 +60,72 @@ The installer is configurable using the following environment variables:
     curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | INSTALL_METHOD=raw INSTALL_DIR=$HOME/.local/bin bash
 </details>
 
+### Alpine
+
+```console
+sudo apk add --no-cache bash
+curl -1sLf \
+  'https://dl.cloudsmith.io/public/platformsh/cli/setup.alpine.sh' \
+  | sudo -E bash
+```
+
+<details>
+    <summary>Manual setup</summary>
+
+    apk add --no-cache curl
+    curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/rsa.4F1C2AC5106DA770.key' > /etc/apk/keys/cli@platformsh-4F1C2AC5106DA770.rsa.pub
+    curl -1sLf "https://dl.cloudsmith.io/public/platformsh/cli/config.alpine.txt" >> /etc/apk/repositories
+    apk update
+
+</details>
+
+```console
+# Install the CLI
+apk add platformsh-cli
+```
+
+### Ubuntu/Debian
+
+```console
+apt-get update
+apt-get install -y apt-transport-https curl
+curl -1sLf \
+  'https://dl.cloudsmith.io/public/platformsh/cli/setup.deb.sh' \
+  | sudo -E bash
+```
+
+<details>
+    <summary>Manual setup</summary>
+
+    apt-get update
+
+    # Only needed for Debian
+    apt-get install -y debian-keyring debian-archive-keyring
+
+    apt-get install -y apt-transport-https curl gnupg
+    curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/gpg.6ED8A90E60ABD941.key' |  gpg --dearmor >> /usr/share/keyrings/platformsh-cli-archive-keyring.gpg
+    # If you use an Ubuntu derivative distro, such as Linux Mint, you may need to use UBUNTU_CODENAME instead of VERSION_CODENAME below.
+    curl -1sLf "https://dl.cloudsmith.io/public/platformsh/cli/config.deb.txt?distro=$(. /etc/os-release && echo "$ID")&codename=$(. /etc/os-release && echo "$VERSION_CODENAME")" > /etc/apt/sources.list.d/platformsh-cli.list
+    apt-get update
+
+</details>
+
+```console
+# Install the CLI
+apt-get install -y platformsh-cli
+```
+
+### CentOS/RHEL/Fedora
+
+```console
+curl -1sLf \
+  'https://dl.cloudsmith.io/public/platformsh/cli/setup.rpm.sh' \
+  | sudo -E bash
+
+# Install the CLI
+yum install -y platformsh-cli
+```
+
 ### Manual installation
 
 For manual installation, you can also [download the latest binaries](https://github.com/platformsh/cli/releases/latest).
@@ -84,6 +150,24 @@ scoop update platform
 
 ```console
 curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
+```
+
+### Alpine
+
+```console
+apk add -l platformsh-cli
+```
+
+### Ubuntu/Debian
+
+```console
+apt-get upgrade platformsh-cli
+```
+
+### CentOS/RHEL/Fedora
+
+```console
+yum upgrade -y platformsh-cli
 ```
 
 ## Under the hood

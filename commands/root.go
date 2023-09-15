@@ -168,15 +168,19 @@ func printUpdateMessage(newRelease *internal.ReleaseInfo, cnf *config.Config) {
 		color.CyanString(newRelease.Version),
 	)
 
-	if cnf.Wrapper.HomebrewTap != "" {
-		executable, err := os.Executable()
-		if err == nil && isUnderHomebrew(executable) {
-			fmt.Fprintf(
-				color.Error,
-				"To upgrade, run: brew update && brew upgrade %s\n",
-				color.YellowString(cnf.Wrapper.HomebrewTap),
-			)
-		}
+	executable, err := os.Executable()
+	if err == nil && cnf.Wrapper.HomebrewTap != "" && isUnderHomebrew(executable) {
+		fmt.Fprintf(
+			color.Error,
+			"To upgrade, run: brew update && brew upgrade %s\n",
+			color.YellowString(cnf.Wrapper.HomebrewTap),
+		)
+	} else if cnf.Wrapper.GitHubRepo != "" {
+		fmt.Fprintf(
+			color.Error,
+			"To upgrade, follow the instructions at: https://github.com/%s#upgrade\n",
+			cnf.Wrapper.GitHubRepo,
+		)
 	}
 
 	fmt.Fprintf(color.Error, "%s\n\n", color.YellowString(newRelease.URL))
