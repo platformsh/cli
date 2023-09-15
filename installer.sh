@@ -183,7 +183,7 @@ function check_gzip() {
 
 function check_version() {
     if [ -z "${VERSION}" ]; then
-        version=$(github_curl https://api.github.com/repos/platformsh/cli/releases/latest | sed -n 's/.*"tag_name":.\?"\([^"]*\)".*/\1/p')
+        version=$(curl -I https://github.com/platformsh/cli/releases/latest 2>/dev/null | awk -F/ -v RS='\r\n' '/platformsh.cli.releases.tag/ {printf "%s", $NF}')
         output "  [*] No version specified, using latest ($version)" "success"
     else
         output "  [*] Version ${VERSION} specified" "success"
