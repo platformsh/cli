@@ -12,6 +12,8 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/platformsh/platformify/commands"
+	"github.com/platformsh/platformify/vendorization"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
@@ -23,11 +25,20 @@ import (
 
 // Execute is the main entrypoint to run the CLI.
 func Execute(cnf *config.Config) error {
-	ctx := config.ToContext(context.Background(), cnf)
-	return newRootCommand(cnf).ExecuteContext(ctx)
+	assets := &vendorization.VendorAssets{
+		Use:          "project:init",
+		Binary:       cnf.Application.Executable,
+		ConfigFlavor: cnf.Application.Executable,
+		EnvPrefix:    strings.TrimSuffix(cnf.Service.EnvPrefix, "_"),
+		ServiceName:  cnf.Service.Name,
+		DocsBaseURL:  cnf.Service.DocsURL,
+	}
+
+	ctx := vendorization.WithVendorAssets(config.ToContext(context.Background(), cnf), assets)
+	return newRootCommand(cnf, assets).ExecuteContext(ctx)
 }
 
-func newRootCommand(cnf *config.Config) *cobra.Command {
+func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cobra.Command {
 	var (
 		updateMessageChan = make(chan *internal.ReleaseInfo, 1)
 		versionCommand    = newVersionCommand(cnf)
@@ -38,6 +49,8 @@ func newRootCommand(cnf *config.Config) *cobra.Command {
 		Args:               cobra.ArbitraryArgs,
 		DisableFlagParsing: false,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+		SilenceUsage:       true,
+		SilenceErrors:      true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if viper.GetBool("version") {
 				versionCommand.Run(cmd, []string{})
@@ -104,12 +117,17 @@ func newRootCommand(cnf *config.Config) *cobra.Command {
 	)
 	cmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
 
+	validateCmd := commands.NewValidateCommand(assets)
+	validateCmd.Use = "app:config-validate"
+	validateCmd.Aliases = []string{"validate"}
+
 	// Add subcommands.
 	cmd.AddCommand(
 		newCompletionCommand(cnf),
 		newHelpCommand(cnf),
 		newListCommand(cnf),
-		newProjectInitCommand(cnf),
+		commands.NewPlatformifyCmd(assets),
+		validateCmd,
 		versionCommand,
 	)
 
