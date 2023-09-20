@@ -1,4 +1,4 @@
-PHP_VERSION = 8.0.29
+PHP_VERSION = 8.0.30
 LEGACY_CLI_VERSION = 4.10.1
 
 # Override these environment variables to build with alternative configuration.
