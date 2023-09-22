@@ -1,5 +1,5 @@
 PHP_VERSION = 8.0.30
-LEGACY_CLI_VERSION = 4.10.1
+LEGACY_CLI_VERSION = 4.10.2
 
 # Override these environment variables to build with alternative configuration.
 CLI_CONFIG_FILE ?= config/platformsh-cli.yaml
