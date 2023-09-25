@@ -117,16 +117,26 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 	)
 	cmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
 
+	projectInitCmd := commands.NewPlatformifyCmd(assets)
+	projectInitCmd.SetHelpFunc(func(_ *cobra.Command, args []string) {
+		internalCmd := innerProjectInitCommand(cnf)
+		fmt.Println(internalCmd.HelpPage(cnf))
+	})
+
 	validateCmd := commands.NewValidateCommand(assets)
 	validateCmd.Use = "app:config-validate"
 	validateCmd.Aliases = []string{"validate"}
+	validateCmd.SetHelpFunc(func(_ *cobra.Command, args []string) {
+		internalCmd := innerAppConfigValidateCommand(cnf)
+		fmt.Println(internalCmd.HelpPage(cnf))
+	})
 
 	// Add subcommands.
 	cmd.AddCommand(
 		newCompletionCommand(cnf),
 		newHelpCommand(cnf),
 		newListCommand(cnf),
-		commands.NewPlatformifyCmd(assets),
+		projectInitCmd,
 		validateCmd,
 		versionCommand,
 	)
