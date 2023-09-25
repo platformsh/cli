@@ -35,7 +35,58 @@ func innerProjectInitCommand(cnf *config.Config) Command {
 		Examples: []Example{
 			{
 				Commandline: "",
-				Description: "Creates starter YAML files for your project",
+				Description: "Create the starter YAML files for your project",
+			},
+		},
+		Definition: Definition{
+			Arguments: &orderedmap.OrderedMap[string, Argument]{},
+			Options: orderedmap.New[string, Option](orderedmap.WithInitialData[string, Option](
+				orderedmap.Pair[string, Option]{
+					Key:   HelpOption.GetName(),
+					Value: HelpOption,
+				},
+				orderedmap.Pair[string, Option]{
+					Key:   VerboseOption.GetName(),
+					Value: VerboseOption,
+				},
+				orderedmap.Pair[string, Option]{
+					Key:   VersionOption.GetName(),
+					Value: VersionOption,
+				},
+				orderedmap.Pair[string, Option]{
+					Key:   YesOption.GetName(),
+					Value: YesOption,
+				},
+				orderedmap.Pair[string, Option]{
+					Key:   noInteractionOption.GetName(),
+					Value: noInteractionOption,
+				},
+			)),
+		},
+		Hidden: false,
+	}
+}
+
+func innerAppConfigValidateCommand(cnf *config.Config) Command {
+	noInteractionOption := NoInteractionOption(cnf)
+
+	return Command{
+		Name: CommandName{
+			Namespace: "app",
+			Command:   "config-validate",
+		},
+		Usage: []string{
+			cnf.Application.Executable + " app:config-validate",
+		},
+		Aliases: []string{
+			"validate",
+		},
+		Description: "Validate the config files of a project",
+		Help:        "",
+		Examples: []Example{
+			{
+				Commandline: "",
+				Description: "Validate the project configuration files in your current directory",
 			},
 		},
 		Definition: Definition{
