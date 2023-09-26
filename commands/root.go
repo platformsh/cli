@@ -25,14 +25,10 @@ import (
 
 // Execute is the main entrypoint to run the CLI.
 func Execute(cnf *config.Config) error {
-	configFlavor := cnf.Service.ProjectConfigFlavor
-	if configFlavor == "" {
-		configFlavor = "platform"
-	}
 	assets := &vendorization.VendorAssets{
 		Use:          "project:init",
 		Binary:       cnf.Application.Executable,
-		ConfigFlavor: configFlavor,
+		ConfigFlavor: cnf.Service.ProjectConfigFlavor,
 		EnvPrefix:    strings.TrimSuffix(cnf.Service.EnvPrefix, "_"),
 		ServiceName:  cnf.Service.Name,
 		DocsBaseURL:  cnf.Service.DocsURL,

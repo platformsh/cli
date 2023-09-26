@@ -67,6 +67,7 @@ func (c *Config) applyDefaults() {
 	c.Application.UserStateFile = "state.json"
 	c.Updates.Check = true
 	c.Updates.CheckInterval = 3600
+	c.Service.ProjectConfigFlavor = "platform"
 }
 
 // applyDynamicDefaults applies defaults to config after parsing and validating.

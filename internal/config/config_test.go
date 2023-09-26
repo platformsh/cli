@@ -31,6 +31,7 @@ func TestFromYAML(t *testing.T) {
 		assert.Equal(t, 3600, cnf.Updates.CheckInterval)
 		assert.Equal(t, cnf.Application.UserConfigDir, cnf.Application.WritableUserDir)
 		assert.Equal(t, "example-cli-tmp", cnf.Application.TempSubDir)
+		assert.Equal(t, "platform", cnf.Service.ProjectConfigFlavor)
 
 		writableDir, err := cnf.WritableUserDir()
 		assert.NoError(t, err)
