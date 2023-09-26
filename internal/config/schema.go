@@ -56,7 +56,7 @@ type Config struct {
 		Slug                string `validate:"required,ascii"`                         // e.g. "platformsh"
 		EnvPrefix           string `validate:"required" yaml:"env_prefix"`             // e.g. "PLATFORM_"
 		ProjectConfigDir    string `validate:"required" yaml:"project_config_dir"`     // e.g. ".platform"
-		ProjectConfigFlavor string `validate:"omitempty" yaml:"project_config_flavor"` // e.g. "platform"
+		ProjectConfigFlavor string `validate:"omitempty" yaml:"project_config_flavor"` // default: "platform"
 		ConsoleURL          string `validate:"omitempty,url" yaml:"console_url"`       // e.g. "https://console.platform.sh"
 		DocsURL             string `validate:"omitempty,url" yaml:"docs_url"`          // e.g. "https://docs.platform.sh"
 	} `validate:"required,dive"`
