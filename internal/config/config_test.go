@@ -2,6 +2,8 @@ package config_test
 
 import (
 	_ "embed"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,28 +15,30 @@ import (
 var validConfig string
 
 func TestFromYAML(t *testing.T) {
-	cases := []struct {
-		name               string
-		config             string
-		shouldContainError string
-	}{
-		{
-			"missing_values",
-			"application: {name: Test CLI}",
-			`Error:Field validation for 'EnvPrefix' failed on the 'required' tag`,
-		},
-		{"complete", validConfig, ""},
-	}
+	t.Run("missing_values", func(t *testing.T) {
+		_, err := config.FromYAML([]byte(`application: {name: Test CLI}`))
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), `Error:Field validation for 'EnvPrefix' failed on the 'required' tag`)
+	})
 
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			_, err := config.FromYAML([]byte(c.config))
-			if c.shouldContainError != "" {
-				assert.Error(t, err)
-				assert.Contains(t, err.Error(), c.shouldContainError)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
+	t.Run("complete", func(t *testing.T) {
+		cnf, err := config.FromYAML([]byte(validConfig))
+		assert.NoError(t, err)
+
+		// Test defaults
+		assert.Equal(t, "state.json", cnf.Application.UserStateFile)
+		assert.Equal(t, true, cnf.Updates.Check)
+		assert.Equal(t, 3600, cnf.Updates.CheckInterval)
+		assert.Equal(t, cnf.Application.UserConfigDir, cnf.Application.WritableUserDir)
+		assert.Equal(t, "example-cli-tmp", cnf.Application.TempSubDir)
+
+		writableDir, err := cnf.WritableUserDir()
+		assert.NoError(t, err)
+
+		if homeDir, err := os.UserHomeDir(); err == nil {
+			assert.Equal(t, filepath.Join(homeDir, cnf.Application.WritableUserDir), writableDir)
+		} else {
+			assert.Equal(t, filepath.Join(os.TempDir(), cnf.Application.TempSubDir), writableDir)
+		}
+	})
 }

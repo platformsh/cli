@@ -1,5 +1,10 @@
 package config
 
+import (
+	"os"
+	"path/filepath"
+)
+
 // Config provides YAML configuration for the CLI.
 // This includes some translation strings for vendorization or white-label needs.
 //
@@ -16,14 +21,19 @@ type Config struct {
 
 	Application struct {
 		// Fields required for both the PHP and Go applications.
-		Name       string `validate:"required"`                   // e.g. "Platform.sh CLI"
-		EnvPrefix  string `validate:"required" yaml:"env_prefix"` // e.g. "PLATFORMSH_CLI_"
-		Executable string `validate:"required"`                   // e.g. "platform"
-		Slug       string `validate:"required,ascii"`             // e.g. "platformsh-cli"
-
-		// Fields only needed by the PHP (legacy) CLI, at least for now.
-		UserConfigDir string `validate:"required" yaml:"user_config_dir"` // e.g. ".platformsh"
+		Name            string `validate:"required"`                           // e.g. "Platform.sh CLI"
+		EnvPrefix       string `validate:"required" yaml:"env_prefix"`         // e.g. "PLATFORMSH_CLI_"
+		Executable      string `validate:"required"`                           // e.g. "platform"
+		Slug            string `validate:"required,ascii"`                     // e.g. "platformsh-cli"
+		UserConfigDir   string `validate:"required" yaml:"user_config_dir"`    // e.g. ".platformsh"
+		UserStateFile   string `validate:"omitempty" yaml:"user_state_file"`   // defaults to "state.json"
+		WritableUserDir string `validate:"omitempty" yaml:"writable_user_dir"` // defaults to UserConfigDir
+		TempSubDir      string `validate:"omitempty" yaml:"tmp_sub_dir"`       // defaults to Slug+"-tmp"
 	} `validate:"required,dive"`
+	Updates struct {
+		Check         bool `validate:"omitempty"`                       // defaults to true
+		CheckInterval int  `validate:"omitempty" yaml:"check_interval"` // seconds, defaults to 3600
+	} `validate:"omitempty"`
 
 	// Fields only needed by the PHP (legacy) CLI, at least for now.
 	API struct {
@@ -49,4 +59,41 @@ type Config struct {
 		ConsoleURL       string `validate:"omitempty,url" yaml:"console_url"`   // e.g. "https://console.platform.sh"
 		DocsURL          string `validate:"omitempty,url" yaml:"docs_url"`      // e.g. "https://docs.platform.sh"
 	} `validate:"required,dive"`
+}
+
+// applyDefaults applies defaults to config before parsing.
+func (c *Config) applyDefaults() {
+	c.Application.UserStateFile = "state.json"
+	c.Updates.Check = true
+	c.Updates.CheckInterval = 3600
+}
+
+// applyDynamicDefaults applies defaults to config after parsing and validating.
+func (c *Config) applyDynamicDefaults() {
+	if c.Application.TempSubDir == "" {
+		c.Application.TempSubDir = c.Application.Slug + "-tmp"
+	}
+	if c.Application.WritableUserDir == "" {
+		c.Application.WritableUserDir = c.Application.UserConfigDir
+	}
+}
+
+// WritableUserDir returns the path to a writable user-level directory.
+func (c *Config) WritableUserDir() (string, error) {
+	// Attempt to create the directory under $HOME first.
+	if homeDir, err := os.UserHomeDir(); err == nil {
+		path := filepath.Join(homeDir, c.Application.WritableUserDir)
+		if err := os.Mkdir(path, 0o700); err != nil && !os.IsExist(err) {
+			return "", err
+		}
+		return path, nil
+	}
+
+	// Otherwise,attempt to create it in the temporary directory.
+	path := filepath.Join(os.TempDir(), c.Application.TempSubDir)
+	if err := os.Mkdir(path, 0o700); err != nil && !os.IsExist(err) {
+		return "", err
+	}
+
+	return path, nil
 }

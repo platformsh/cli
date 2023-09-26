@@ -58,7 +58,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 			}
 			if cnf.Wrapper.GitHubRepo != "" {
 				go func() {
-					rel, _ := internal.CheckForUpdate(cnf.Wrapper.GitHubRepo, version)
+					rel, _ := internal.CheckForUpdate(cnf, version)
 					updateMessageChan <- rel
 				}()
 			}

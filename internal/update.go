@@ -6,13 +6,15 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mattn/go-isatty"
+
+	"github.com/platformsh/cli/internal/config"
+	"github.com/platformsh/cli/internal/state"
 )
 
 var versionRegex = regexp.MustCompile(`^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(-(?P<preRelease>.+))?$`)
@@ -105,33 +107,27 @@ func ParseVersion(version string) (*Version, error) {
 }
 
 // CheckForUpdate checks whether this software has had a newer release on GitHub
-func CheckForUpdate(repo, currentVersion string) (*ReleaseInfo, error) {
-	if !shouldCheckForUpdate() {
+func CheckForUpdate(cnf *config.Config, currentVersion string) (*ReleaseInfo, error) {
+	if !shouldCheckForUpdate(cnf) {
 		return nil, nil
 	}
 
-	homeDir, err := os.UserHomeDir()
+	s, err := state.Load(cnf)
+	if err == nil && time.Now().Unix()-s.Updates.LastChecked < int64(cnf.Updates.CheckInterval) {
+		// Updates were already checked recently.
+		return nil, nil
+	}
+
+	defer func() {
+		// After checking, save the last check time.
+		s.Updates.LastChecked = time.Now().Unix()
+		//nolint:errcheck // not being able to set the state should have no impact on the rest of the program
+		state.Save(s, cnf)
+	}()
+
+	releaseInfo, err := getLatestReleaseInfo(cnf.Wrapper.GitHubRepo)
 	if err != nil {
-		return nil, err
-	}
-
-	stateFilePath := filepath.Join(homeDir, ".platformsh", "state.json")
-	state, err := getState(stateFilePath)
-	if err != nil || state == nil || state.Updates.LastChecked < int(time.Now().Add(-1*time.Hour).Unix()) {
-		if state == nil {
-			state = &stateEntry{}
-		}
-		releaseInfo, releaseInfoErr := getLatestReleaseInfo(repo)
-		if releaseInfoErr == nil {
-			state.Updates.LastChecked = int(time.Now().Unix())
-			state.Updates.LatestRelease = releaseInfo
-			//nolint:errcheck // not being able to set the state should have no impact on the rest of the program
-			setState(stateFilePath, state)
-		}
-	}
-
-	if state.Updates.LatestRelease == nil {
-		return nil, fmt.Errorf("could not determine latest release")
+		return nil, fmt.Errorf("could not determine latest release: %w", err)
 	}
 
 	currentVersionParsed, err := ParseVersion(currentVersion)
@@ -139,21 +135,20 @@ func CheckForUpdate(repo, currentVersion string) (*ReleaseInfo, error) {
 		return nil, err
 	}
 
-	latestVersionParsed, err := ParseVersion(state.Updates.LatestRelease.Version)
+	latestVersionParsed, err := ParseVersion(releaseInfo.Version)
 	if err != nil {
 		return nil, err
 	}
 	if CompareVersions(latestVersionParsed, currentVersionParsed) == 1 {
-		return state.Updates.LatestRelease, nil
+		return releaseInfo, nil
 	}
 
 	return nil, nil
 }
 
-// shouldCheckForUpdate makes sure that we're not running in CI, this is a Terminal window and
-// PLATFORMSH_CLI_UPDATES_CHECK is not 0
-func shouldCheckForUpdate() bool {
-	if os.Getenv("PLATFORMSH_CLI_UPDATES_CHECK") == "0" {
+// shouldCheckForUpdate checks updates are not disabled and the environment is a terminal
+func shouldCheckForUpdate(cnf *config.Config) bool {
+	if cnf.Wrapper.GitHubRepo == "" || !cnf.Updates.Check || os.Getenv(cnf.Application.EnvPrefix+"UPDATES_CHECK") == "0" {
 		return false
 	}
 

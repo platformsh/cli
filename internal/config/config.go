@@ -28,6 +28,7 @@ func LoadYAML() ([]byte, error) {
 // FromYAML parses YAML configuration.
 func FromYAML(b []byte) (*Config, error) {
 	c := &Config{}
+	c.applyDefaults()
 	if err := yaml.Unmarshal(b, c); err != nil {
 		return nil, fmt.Errorf("invalid config YAML: %w", err)
 	}
@@ -35,6 +36,7 @@ func FromYAML(b []byte) (*Config, error) {
 	if err := v.Struct(c); err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
+	c.applyDynamicDefaults()
 	return c, nil
 }
 
