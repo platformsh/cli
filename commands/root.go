@@ -131,6 +131,13 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		fmt.Println(internalCmd.HelpPage(cnf))
 	})
 
+	regionsListCmd := commands.NewRegionsCmd(assets)
+	regionsListCmd.Use = "regions:list"
+	regionsListCmd.SetHelpFunc(func(_ *cobra.Command, args []string) {
+		internalCmd := innerRegionsListCommand(cnf)
+		fmt.Println(internalCmd.HelpPage(cnf))
+	})
+
 	// Add subcommands.
 	cmd.AddCommand(
 		newCompletionCommand(cnf),
@@ -138,6 +145,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		newListCommand(cnf),
 		projectInitCmd,
 		validateCmd,
+		regionsList
 		versionCommand,
 	)
 

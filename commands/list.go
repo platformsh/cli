@@ -79,6 +79,12 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				list.AddCommand(&appConfigValidateCommand)
 			}
 
+			regionsListCommand := innerRegionsListCommand(cnf)
+
+			if !list.DescribesNamespace() || list.Namespace == regionsListCommand.Name.Namespace {
+				list.AddCommand(&regionsListCommand)
+			}
+
 			format := viper.GetString("format")
 			raw := viper.GetBool("raw")
 

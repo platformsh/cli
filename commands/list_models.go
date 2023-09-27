@@ -118,6 +118,62 @@ func innerAppConfigValidateCommand(cnf *config.Config) Command {
 	}
 }
 
+type Region struct {
+	Label        string `json:"label"`
+	Zone string `json:"zone"`
+}
+
+func innerRegionsListCommand(cnf *config.Config) Command {
+	noInteractionOption := NoInteractionOption(cnf)
+
+	return Command{
+		Name: CommandName{
+			Namespace: "region",
+			Command:   "list",
+		},
+		Usage: []string{
+			cnf.Application.Executable + " region:list",
+		},
+		Aliases: []string{
+			"regions",
+		},
+		Description: "List available regions",
+		Help:        "",
+		Examples: []Example{
+			{
+				Commandline: "",
+				Description: "List available regions with all their informations (provider, location...)",
+			},
+		},
+		Definition: Definition{
+			Arguments: &orderedmap.OrderedMap[string, Argument]{},
+			Options: orderedmap.New[string, Option](orderedmap.WithInitialData[string, Option](
+				orderedmap.Pair[string, Option]{
+					Key:   HelpOption.GetName(),
+					Value: HelpOption,
+				},
+				orderedmap.Pair[string, Option]{
+					Key:   VerboseOption.GetName(),
+					Value: VerboseOption,
+				},
+				orderedmap.Pair[string, Option]{
+					Key:   VersionOption.GetName(),
+					Value: VersionOption,
+				},
+				orderedmap.Pair[string, Option]{
+					Key:   YesOption.GetName(),
+					Value: YesOption,
+				},
+				orderedmap.Pair[string, Option]{
+					Key:   noInteractionOption.GetName(),
+					Value: noInteractionOption,
+				},
+			)),
+		},
+		Hidden: false,
+	}
+}
+
 type List struct {
 	Application Application `json:"application"`
 	Commands    []*Command  `json:"commands"`
