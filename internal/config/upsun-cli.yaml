@@ -14,9 +14,6 @@ application:
   env_prefix: "UPSUN_CLI_"
   user_config_dir: ".upsun-cli"
 
-  installer_url: "https://cli.upsun.com/installer"
-  manifest_url: "https://cli.upsun.com/manifest.json"
-
   wrapped_disabled_commands:
     - self:install
     - self:update
@@ -55,7 +52,7 @@ api:
   auth_url: "https://auth.upsun.com"
   oauth2_client_id: "upsun-cli"
 
-  ssh_domain_wildcards: ["*.upsun.com"]
+  ssh_domain_wildcards: ["*.platform.sh", "*.upsun.com"]
 
   invitations: true
   organizations: true
@@ -70,9 +67,6 @@ api:
 detection:
   git_remote_name: "upsun"
   git_domain: "upsun.com"
-  site_domains: ["upsun.app"]
-  api_domain_suffix: "upsun.com"
+  site_domains: ["platformsh.site", "tst.site", "upsunapp.com"]
 
-migrate:
-  prompt: true
-  docs_url: https://docs.upsun.com/administration/cli.html
+  api_domain_suffix: "upsun.com"

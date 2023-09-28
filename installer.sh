@@ -46,7 +46,7 @@ machine=""
 version=""
 package="platformsh-cli"
 docs_url="https://docs.platform.sh"
-support_url="https://platform.sh/support"
+support_url="https://platform.sh/contact"
 
 if [ "$VENDOR" == "upsun" ]; then
     BREW_FORMULA="platformsh/tap/upsun-cli"
@@ -54,7 +54,6 @@ if [ "$VENDOR" == "upsun" ]; then
     vendor_name="Upsun"
     package="upsun-cli"
     docs_url="https://docs.upsun.com"
-    support_url="https://console.upsun.com/support"
     cloudsmith_repository="upsun-cli"
 fi
 
