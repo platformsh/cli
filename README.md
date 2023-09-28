@@ -174,7 +174,43 @@ yum upgrade -y platformsh-cli
 
 The New Platform.sh CLI is built with backwards compatibility in mind. This is why we've embedded PHP, so that all Legacy PHP CLI commands can be executed in the exact same way, making sure that nothing breaks when you switch to it.
 
+## Building binaries, snapshots and releases
+
+Build a single binary
+
+```console
+# Build a single binary for Platform.sh
+make single
+# Build a single binary for Upsun
+make single GORELEASER_ID=upsun
+```
+
+Build a snapshot
+
+```console
+# Build and snapshot for Platform.sh and Upsun
+make snapshot
+# Build a snapshot for a vendor
+# Download the config file at internal/config/embedded-config.yaml
+make vendor-snapshot VENDOR_NAME='Upsun staging' VENDOR_BINARY='upsunstg'
+```
+
+Create a release
+
+```console
+# First, create a new tag, if not already on a Git tag
+git tag -f -m 'Release v5.0.0' '5.0.0'
+
+# Create a release for Platform.sh and Upsun
+# Expose a GITHUB_TOKEN to use for the release
+make release
+
+# Create a release for a vendor with the default .gorelease.vendor.yaml.tpl
+# Download the config file at internal/config/embedded-config.yaml
+# Optionally, download the .goreleaser.vendor.yaml file to use a custom one
+make vendor-release VENDOR_NAME='Upsun staging' VENDOR_BINARY='upsunstg'
+```
+
 ## Licenses
 
 This binary redistributes PHP in a binary form, which comes with the [PHP License](https://www.php.net/license/3_01.txt).
-

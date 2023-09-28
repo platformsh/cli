@@ -1,0 +1,76 @@
+# Upsun CLI configuration
+#
+# Based on the legacy CLI config in https://github.com/platformsh/legacy-cli/blob/main/config.yaml
+#
+# See ../internal/config/schema.go for the required keys
+wrapper:
+  homebrew_tap: platformsh/tap/upsun-cli
+  github_repo: platformsh/cli
+
+application:
+  name: "Upsun CLI"
+  slug: "upsun"
+  executable: "upsun"
+  env_prefix: "UPSUN_CLI_"
+  user_config_dir: ".upsun-cli"
+
+  disabled_commands:
+    - self:install
+    - self:update
+    - local:build
+    - local:drush-aliases
+    - project:variable:delete
+    - project:variable:get
+    - project:variable:set
+    - variable:disable
+    - variable:enable
+    - variable:set
+
+service:
+  name: "Upsun"
+  slug: "upsun"
+
+  env_prefix: "PLATFORM_"
+  header_prefix: "X-Upsun"
+
+  project_config_dir: ".upsun"
+  project_config_flavor: "upsun"
+
+  console_url: "https://console.upsun.com"
+
+  docs_url: "https://docs.upsun.com"
+  docs_search_url: "https://docs.upsun.com/search.html?q={{ terms }}"
+
+  register_url: "https://auth.upsun.com/register"
+  reset_password_url: "https://auth.upsun.com/reset-password"
+
+  pricing_url: "https://upsun.com/pricing"
+
+  activity_type_list_url: "https://docs.upsun.com/integrations/activity/reference.html#type"
+
+  runtime_operations_help_url: "https://docs.upsun.com/create-apps/runtime-operations.html"
+
+api:
+  base_url: "https://proxy.upsun.com"
+
+  auth_url: "https://auth.upsun.com"
+  oauth2_client_id: "upsun-cli"
+
+  ssh_domain_wildcards: ["*.platform.sh", "*.upsun.com"]
+
+  invitations: true
+  organizations: true
+  centralized_permissions: true
+  user_verification: true
+  metrics: true
+  sizing: true
+  projects_list_new: true
+
+  vendor_filter: upsun
+
+detection:
+  git_remote_name: "upsun"
+  git_domain: "upsun.com"
+  site_domains: ["platformsh.site", "tst.site", "upsunapp.com"]
+
+  api_domain_suffix: "upsun.com"

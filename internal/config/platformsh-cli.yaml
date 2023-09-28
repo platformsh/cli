@@ -35,6 +35,7 @@ service:
 
   project_config_dir: '.platform'
   app_config_file: '.platform.app.yaml'
+  project_config_flavor: 'platform'
 
   console_url: 'https://console.platform.sh'
 

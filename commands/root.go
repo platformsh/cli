@@ -28,7 +28,7 @@ func Execute(cnf *config.Config) error {
 	assets := &vendorization.VendorAssets{
 		Use:          "project:init",
 		Binary:       cnf.Application.Executable,
-		ConfigFlavor: cnf.Application.Executable,
+		ConfigFlavor: cnf.Service.ProjectConfigFlavor,
 		EnvPrefix:    strings.TrimSuffix(cnf.Service.EnvPrefix, "_"),
 		ServiceName:  cnf.Service.Name,
 		DocsBaseURL:  cnf.Service.DocsURL,

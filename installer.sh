@@ -24,6 +24,9 @@ set -euo pipefail
 # GitHub token check
 : "${GITHUB_TOKEN:=}"
 
+# Platform.sh CLI vendor to install
+: "${VENDOR:=platformsh}"
+
 # CI specifics
 : "${CI:=}"
 : "${BUILD_NUMBER:=}"
@@ -31,6 +34,8 @@ set -euo pipefail
 
 # global variables
 binary="platform"
+vendor_name="Platform.sh"
+cloudsmith_repository="cli"
 cmd_shasum=""
 cmd_sudo=""
 dir_bin="/usr/bin"
@@ -39,9 +44,21 @@ has_sudo=""
 kernel=""
 machine=""
 version=""
+package="platformsh-cli"
+docs_url="https://docs.platform.sh"
+support_url="https://platform.sh/contact"
+
+if [ "$VENDOR" == "upsun" ]; then
+    BREW_FORMULA="platformsh/tap/upsun-cli"
+    binary="upsun"
+    vendor_name="Upsun"
+    package="upsun-cli"
+    docs_url="https://docs.upsun.com"
+    cloudsmith_repository="upsun-cli"
+fi
 
 # create a log file where every output will be pipe to
-pipe=/tmp/platformsh-install-$$.tmp
+pipe=/tmp/$binary-install-$$.tmp
 mkfifo $pipe
 tee < $pipe $INSTALL_LOG &
 exec 1>&-
@@ -86,10 +103,10 @@ function exit_with_error() {
     output "|                                                  |" "error"
     output "+--------------------------------------------------+" "error"
 
-    output "\nGet help with your Platform.sh CLI installation:" "heading"
+    output "\nGet help with your $vendor_name CLI installation:" "heading"
     output "  Inspect the logs: ${INSTALL_LOG}"
-    output "  Read the docs: https://docs.platform.sh/administration/cli.html"
-    output "  Get help: https://platform.sh/support"
+    output "  Read the docs: $docs_url/administration/cli.html"
+    output "  Get help: $support_url"
 
     exit 1
 }
@@ -97,7 +114,7 @@ function exit_with_error() {
 function intro() {
     output "+--------------------------------------------------+" "heading"
     output "|                                                  |" "heading"
-    output "|           Platform.sh CLI Installer              |" "heading"
+    output "|           $vendor_name CLI Installer              |" "heading"
     output "|                                                  |" "heading"
     output "+--------------------------------------------------+" "heading"
 
@@ -108,23 +125,23 @@ function outro() {
     output ""
     output "+--------------------------------------------------+" "success"
     output "|                                                  |" "success"
-    output "| Platform.sh CLI has been installed successfully. |" "success"
+    output "| $vendor_name CLI has been installed successfully. |" "success"
     output "|                                                  |" "success"
     output "+--------------------------------------------------+" "success"
 
     output "\nWhat's next?" "heading"
 
-    output "  To use the CLI, run: platform" "output"
+    output "  To use the CLI, run: $binary" "output"
 
     output "\nUseful links:" "heading"
-    output "  CLI introduction: https://docs.platform.sh/get-started/introduction.html#cli"
+    output "  CLI introduction: $docs_url/get-started/introduction.html#cli"
 
     if [ ! -z "$footer_notes" ]; then
         output "\nWarning during installation:" "heading"
         output "$footer_notes" "warning"
     fi
 
-    output "\nThank you for using Platform.sh!"
+    output "\nThank you for using $vendor_name!"
 }
 
 function add_footer_note() {
@@ -345,7 +362,7 @@ function check_directories() {
     fi
 
     if ! echo $PATH | grep ${dir_bin} > /dev/null; then
-        binary="${dir_bin}/platform"
+        binary="${dir_bin}/$binary"
 
         output "  [ ] ${dir_bin} is not in \$PATH.\n" "warning"
         add_footer_note "  ⚠ The directory \"${dir_bin}\" is not in \$PATH"
@@ -372,14 +389,14 @@ function check_directories() {
     output "  Binary will be installed in ${dir_bin}"
 }
 
-function install_platformsh_homebrew() {
-    output "\nInstalling the Platform.sh brew tap" "heading"
+function install_homebrew() {
+    output "\nInstalling the $vendor_name brew tap" "heading"
     if ! call_user "brew tap ${BREW_TAP}"; then
         output "  could not add tap to brew" "error"
         exit_with_error
     fi
 
-    output "\nInstalling the Platform.sh CLI formula" "heading"
+    output "\nInstalling the $vendor_name CLI formula" "heading"
 
     # running on Rosetta2?
     arch=''
@@ -395,55 +412,55 @@ function install_platformsh_homebrew() {
     fi
 }
 
-function install_platformsh_yum() {
-    output "\nSetting up the Platform.sh CLI yum repository" "heading"
+function install_yum() {
+    output "\nSetting up the $vendor_name CLI yum repository" "heading"
 
-    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/setup.rpm.sh' > /tmp/setup.rpm.sh"
+    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/$cloudsmith_repository/setup.rpm.sh' > /tmp/setup.rpm.sh"
 
     if ! call_root "bash -E /tmp/setup.rpm.sh"; then
         output "  could not setup the RPM repository the CLI" "error"
         exit_with_error
     fi
 
-    output "\nInstalling the Platform.sh CLI" "heading"
+    output "\nInstalling the $vendor_name CLI" "heading"
 
-    if ! call_root "yum install -y platformsh-cli"; then
+    if ! call_root "yum install -y $package"; then
         output "  could not install the CLI" "error"
         exit_with_error
     fi
 }
 
-function install_platformsh_apt() {
-    output "\nSetting up the Platform.sh CLI apt repository" "heading"
+function install_apt() {
+    output "\nSetting up the $vendor_name CLI apt repository" "heading"
 
-    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/setup.deb.sh' > /tmp/setup.deb.sh"
+    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/$cloudsmith_repository/setup.deb.sh' > /tmp/setup.deb.sh"
 
     if ! call_root "bash -E /tmp/setup.deb.sh"; then
         output "  could not setup the APT repository the CLI" "error"
         exit_with_error
     fi
 
-    output "\nInstalling the Platform.sh CLI" "heading"
+    output "\nInstalling the $vendor_name CLI" "heading"
 
-    if ! call_root "apt-get install -y platformsh-cli"; then
+    if ! call_root "apt-get install -y $package"; then
         output "  could not install the CLI" "error"
         exit_with_error
     fi
 }
 
-function install_platformsh_apk() {
-    output "\nSetting up the Platform.sh CLI apk repository" "heading"
+function install_apk() {
+    output "\nSetting up the $vendor_name CLI apk repository" "heading"
 
-    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/setup.alpine.sh' > /tmp/setup.alpine.sh"
+    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/$cloudsmith_repository/setup.alpine.sh' > /tmp/setup.alpine.sh"
 
     if ! call_root "bash -E /tmp/setup.alpine.sh"; then
         output "  could not setup the APK repository the CLI" "error"
         exit_with_error
     fi
 
-    output "\nInstalling the Platform.sh CLI" "heading"
+    output "\nInstalling the $vendor_name CLI" "heading"
 
-    if ! call_root "apk add platformsh-cli --update-cache"; then
+    if ! call_root "apk add $package --update-cache"; then
         output "  could not install the CLI" "error"
         exit_with_error
     fi
@@ -471,14 +488,14 @@ function is_ci {
     fi
 }
 
-function install_platformsh_raw() {
+function install_raw() {
     # Start downloading the right version
-    output "\nDownloading the Platform.sh CLI" "heading"
+    output "\nDownloading the $vendor_name CLI" "heading"
 
-    url="${URL}/${version}/platform_${version}_${kernel}_${machine}.tar.gz"
+    url="${URL}/${version}/${binary}_${version}_${kernel}_${machine}.tar.gz"
     output "  Downloading ${url}";
     tmp_dir=$(mktemp -d)
-    tmp_name="platformsh-"$(date +"%s")
+    tmp_name="$binary-"$(date +"%s")
     if ! github_curl $url > "${tmp_dir}/${tmp_name}.tgz"; then
         output "  the download failed" "error"
         exit_with_error
@@ -488,7 +505,7 @@ function install_platformsh_raw() {
     tar -C ${tmp_dir} -xzf "${tmp_dir}/${tmp_name}.tgz"
 
     output "  Making the binary executable"
-    chmod 0755 "${tmp_dir}/platform"
+    chmod 0755 "${tmp_dir}/$binary"
 
     if [ ! -d $dir_bin ]; then
         output "  Creating ${dir_bin} directory"
@@ -496,21 +513,20 @@ function install_platformsh_raw() {
     fi
 
     output "  Installing the binary under ${dir_bin}"
-    binary="${dir_bin}/platform"
-    call_try_user "mv '${tmp_dir}/platform' '${binary}'" "Failed to move the binary ${binary}"
+    call_try_user "mv '${tmp_dir}/$binary' '${dir_bin}/${binary}'" "Failed to move the binary ${binary}"
 }
 
-function install_platformsh() {
+function install() {
     if [ "homebrew" = "${INSTALL_METHOD}" ]; then
-       install_platformsh_homebrew
+       install_homebrew
     elif [ "yum" = "${INSTALL_METHOD}" ]; then
-       install_platformsh_yum
+       install_yum
     elif [ "apt" = "${INSTALL_METHOD}" ]; then
-       install_platformsh_apt
+       install_apt
     elif [ "apk" = "${INSTALL_METHOD}" ]; then
-       install_platformsh_apk
+       install_apk
     elif [ "raw" = "${INSTALL_METHOD}" ]; then
-       install_platformsh_raw
+       install_raw
     fi
 }
 
@@ -529,5 +545,5 @@ if [ "raw" = "${INSTALL_METHOD}" ]; then
 elif [ "apt" = "${INSTALL_METHOD}" ] || [ "yum" = "${INSTALL_METHOD}" ] || [ "apk" = "${INSTALL_METHOD}" ]; then
     check_curl
 fi
-install_platformsh
+install
 outro
