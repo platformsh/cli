@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.14.1
 	github.com/gofrs/flock v0.8.1
 	github.com/mattn/go-isatty v0.0.16
-	github.com/platformsh/platformify v0.2.2
+	github.com/platformsh/platformify v0.2.3
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.4
