@@ -107,7 +107,7 @@ changelog:
 
 universal_binaries:
   - id: platform-macos
-    name_template: plaform
+    name_template: platform
     replace: true
   - id: upsun-macos
     name_template: upsun
