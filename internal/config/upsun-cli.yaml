@@ -14,7 +14,7 @@ application:
   env_prefix: "UPSUN_CLI_"
   user_config_dir: ".upsun-cli"
 
-  wrapped_disabled_commands:
+  disabled_commands:
     - self:install
     - self:update
 
@@ -26,7 +26,6 @@ service:
   header_prefix: "X-Upsun"
 
   project_config_dir: ".upsun"
-  app_config_file: ".upsun/config.yaml"
   project_config_flavor: "upsun"
 
   console_url: "https://console.upsun.com"
@@ -42,9 +41,6 @@ service:
   activity_type_list_url: "https://docs.upsun.com/integrations/activity/reference.html#type"
 
   runtime_operations_help_url: "https://docs.upsun.com/create-apps/runtime-operations.html"
-
-  available_plans:
-    - flexible
 
 api:
   base_url: "https://proxy.upsun.com"
