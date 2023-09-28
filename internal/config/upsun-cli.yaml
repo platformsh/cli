@@ -17,6 +17,14 @@ application:
   disabled_commands:
     - self:install
     - self:update
+    - local:build
+    - local:drush-aliases
+    - project:variable:delete
+    - project:variable:get
+    - project:variable:set
+    - variable:disable
+    - variable:enable
+    - variable:set
 
 service:
   name: "Upsun"
