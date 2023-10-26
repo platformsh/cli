@@ -40,5 +40,5 @@ posix
 ^xml
 ^xmlreader
 ^xmlwriter
-^zlib
+zlib
 ^zip

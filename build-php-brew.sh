@@ -36,6 +36,7 @@ rm -f sapi/cli/php
   --with-openssl \
   --with-pear=no \
   --without-pcre-jit \
+  --with-zlib \
   --disable-all \
 OPENSSL_CFLAGS="-I$SSL_DIR_PATH/include" \
 OPENSSL_LIBS="-L$SSL_DIR_PATH/lib -lssl -lcrypto"
