@@ -125,6 +125,9 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 	cmd.Flags().Bool("all", false, "Show all commands, including hidden ones")
 
 	viper.BindPFlags(cmd.Flags()) //nolint:errcheck
+	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		cmd.Root().Run(cmd.Root(), append([]string{"help", "list"}, args...))
+	})
 
 	return cmd
 }
