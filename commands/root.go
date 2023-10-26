@@ -116,6 +116,8 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		fmt.Sprintf("Uses a local .phar file for the Legacy %s", cnf.Application.Name),
 	)
 	cmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
+	cmd.PersistentFlags().Bool("no-interaction", false, "Enable non-interactive mode")
+	cmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
 
 	projectInitCmd := commands.NewPlatformifyCmd(assets)
 	projectInitCmd.SetHelpFunc(func(_ *cobra.Command, args []string) {

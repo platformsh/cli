@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -25,23 +24,18 @@ func newVersionCommand(cnf *config.Config) *cobra.Command {
 		Short:              "Print the version number of the " + cnf.Application.Name,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		Run: func(cmd *cobra.Command, args []string) {
-			if strings.Split(version, "-")[0] != strings.Split(legacy.LegacyCLIVersion, "-")[0] {
-				fmt.Fprintf(
-					color.Output,
-					"%s %s (Wrapped legacy CLI %s)\n",
-					cnf.Application.Name,
-					color.CyanString(version),
-					color.CyanString(legacy.LegacyCLIVersion),
-				)
-			} else {
-				fmt.Fprintf(color.Output, "%s %s (Wrapped)\n", cnf.Application.Name, color.CyanString(version))
-			}
+			fmt.Fprintf(color.Output, "%s %s\n", cnf.Application.Name, color.CyanString(version))
 
-			if viper.GetBool("debug") {
+			if viper.GetBool("verbose") {
 				fmt.Fprintf(
 					color.Output,
 					"Embedded PHP version %s\n",
 					color.CyanString(legacy.PHPVersion),
+				)
+				fmt.Fprintf(
+					color.Output,
+					"Embedded Legacy CLI version %s\n",
+					color.CyanString(legacy.LegacyCLIVersion),
 				)
 				fmt.Fprintf(
 					color.Output,
