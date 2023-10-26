@@ -207,12 +207,6 @@ github.com/pelletier/go-toml/v2 v2.0.6 h1:nrzqCb7j9cDFj2coyLNLaZuJTLjWjlaz6nvTvI
 github.com/pelletier/go-toml/v2 v2.0.6/go.mod h1:eumQOmlWiOPt5WriQQqoM5y18pDHwha2N+QD+EUNTek=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qRg=
-github.com/platformsh/platformify v0.2.1 h1:pSxJUGZbtd76HFRNqX7Hy+kyM+wH21E2EWHhnQYpPQw=
-github.com/platformsh/platformify v0.2.1/go.mod h1:OTcTo+D6DJXQswy7D2yfzgx4v3wUai3fU5BGAXr2FjI=
-github.com/platformsh/platformify v0.2.2 h1:pGWI9JqgzaSTyFP+lacrHfOpZQ6yqilx3abVsbmZ7uc=
-github.com/platformsh/platformify v0.2.2/go.mod h1:OTcTo+D6DJXQswy7D2yfzgx4v3wUai3fU5BGAXr2FjI=
-github.com/platformsh/platformify v0.2.3 h1:+0cVerZdBx58U4Ju4AC9j7ynT19/kZMUzkq3yMrFgjM=
-github.com/platformsh/platformify v0.2.3/go.mod h1:OTcTo+D6DJXQswy7D2yfzgx4v3wUai3fU5BGAXr2FjI=
 github.com/platformsh/platformify v0.2.4 h1:YUFBie2Es4vDcOZCuJF1C/xM8c6VXaSpGx+r/DZLmaQ=
 github.com/platformsh/platformify v0.2.4/go.mod h1:OTcTo+D6DJXQswy7D2yfzgx4v3wUai3fU5BGAXr2FjI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
