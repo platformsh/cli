@@ -65,6 +65,7 @@ api:
   metrics: true
   sizing: true
   projects_list_new: true
+  git_push_options: true
 
   vendor_filter: upsun
 
