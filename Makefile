@@ -53,6 +53,7 @@ internal/legacy/archives/php_windows.zip:
 	mkdir -p internal/legacy/archives
 	wget https://windows.php.net/downloads/releases/php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip -O internal/legacy/archives/php_windows.zip
 
+.PHONY: internal/legacy/archives/cacert.pem
 internal/legacy/archives/cacert.pem:
 	mkdir -p internal/legacy/archives
 	wget https://curl.se/ca/cacert.pem -O internal/legacy/archives/cacert.pem
