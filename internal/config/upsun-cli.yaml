@@ -56,9 +56,6 @@ api:
   auth_url: "https://auth.upsun.com"
   oauth2_client_id: "upsun-cli"
 
-  ssh_domain_wildcards: ["*.platform.sh", "*.upsun.com"]
-
-  invitations: true
   organizations: true
   centralized_permissions: true
   user_verification: true
@@ -67,6 +64,9 @@ api:
   git_push_options: true
 
   vendor_filter: upsun
+
+ssh:
+  domain_wildcards: ["*.platform.sh", "*.upsun.com"]
 
 detection:
   git_remote_name: "upsun"
