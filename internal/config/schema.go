@@ -44,8 +44,6 @@ type Config struct {
 		OAuth2RevokeURL    string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_revoke_url"` // e.g. "https://auth.api.platform.sh/oauth2/revoke"
 		OAuth2TokenURL     string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_token_url"`  // e.g. "https://auth.api.platform.sh/oauth2/token"
 		CertifierURL       string `validate:"required_without=AuthURL,omitempty,url" yaml:"certifier_url"`     // e.g. "https://ssh.api.platform.sh"
-
-		SSHDomainWildcards []string `validate:"required" yaml:"ssh_domain_wildcards"` // e.g. ["*.platform.sh"]
 	} `validate:"required,dive"`
 	Detection struct {
 		GitRemoteName string   `validate:"required" yaml:"git_remote_name"` // e.g. "platform"
@@ -59,6 +57,9 @@ type Config struct {
 		ProjectConfigFlavor string `validate:"omitempty" yaml:"project_config_flavor"` // default: "platform"
 		ConsoleURL          string `validate:"omitempty,url" yaml:"console_url"`       // e.g. "https://console.platform.sh"
 		DocsURL             string `validate:"omitempty,url" yaml:"docs_url"`          // e.g. "https://docs.platform.sh"
+	} `validate:"required,dive"`
+	SSH struct {
+		DomainWildcards []string `validate:"required" yaml:"domain_wildcards"` // e.g. ["*.platform.sh"]
 	} `validate:"required,dive"`
 }
 

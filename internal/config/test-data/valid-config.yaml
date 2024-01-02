@@ -22,13 +22,13 @@ api:
   base_url: 'https://api.example.com'
   auth_url: 'https://auth.example.com'
 
-  ssh_domain_wildcards: ['*.example.com']
-
   centralized_permissions: true
-  invitations: true
   metrics: true
   organizations: true
   user_verification: true
+
+ssh:
+  domain_wildcards: ['*.example.com']
 
 detection:
   git_remote_name: 'example'
