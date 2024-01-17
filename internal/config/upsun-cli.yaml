@@ -73,8 +73,6 @@ detection:
   git_domain: "upsun.com"
   site_domains: ["platformsh.site", "tst.site", "upsunapp.com"]
 
-  api_domain_suffix: "upsun.com"
-
 browser_login:
   body: |
     <img
