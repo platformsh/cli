@@ -58,6 +58,7 @@ api:
 
   organizations: true
   centralized_permissions: true
+  teams: true
   user_verification: true
   metrics: true
   sizing: true
