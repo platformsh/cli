@@ -1,0 +1,17 @@
+name: Adds all issues to the project board
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  add-to-project:
+    name: Add issue to project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@RELEASE_VERSION
+        with:
+          project-url: https://github.com/orgs/platformsh/projects/4
+          # Token creation details: https://github.com/actions/add-to-project?tab=readme-ov-file#creating-a-pat-and-adding-it-to-your-repository
+          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
