@@ -62,7 +62,6 @@ api:
   user_verification: true
   metrics: true
   sizing: true
-  git_push_options: true
 
   vendor_filter: upsun
 
