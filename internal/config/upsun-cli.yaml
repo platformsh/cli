@@ -84,3 +84,6 @@ browser_login:
     <h1>{{title}}</h1>
 
     {{content}}
+
+messages:
+  region_discount: Get a <options=bold;fg=green>3% discount</> on resources for regions with a carbon intensity of less than 100 gCO2eq/kWh.
