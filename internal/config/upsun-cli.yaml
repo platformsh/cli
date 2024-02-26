@@ -51,7 +51,7 @@ service:
   runtime_operations_help_url: "https://docs.upsun.com/create-apps/runtime-operations.html"
 
 api:
-  base_url: "https://proxy.upsun.com"
+  base_url: "https://api.upsun.com"
 
   auth_url: "https://auth.upsun.com"
   oauth2_client_id: "upsun-cli"
