@@ -28,10 +28,8 @@ application:
 
 service:
   name: "Upsun"
-  slug: "upsun"
 
   env_prefix: "PLATFORM_"
-  header_prefix: "X-Upsun"
 
   project_config_dir: ".upsun"
   project_config_flavor: "upsun"
@@ -72,6 +70,7 @@ detection:
   git_remote_name: "upsun"
   git_domain: "upsun.com"
   site_domains: ["platformsh.site", "tst.site", "upsunapp.com"]
+  cluster_header: 'X-Platform-Cluster'
 
 browser_login:
   body: |
