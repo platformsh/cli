@@ -165,7 +165,7 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 		envPrefix+"MIGRATE_CHECK=0",
 		envPrefix+"APPLICATION_PROMPT_SELF_INSTALL=0",
 		envPrefix+"WRAPPED=1",
-		envPrefix+"APPLICATION_VERSION="+LegacyCLIVersion,
+		envPrefix+"APPLICATION_VERSION="+c.Version,
 	)
 	if c.Debug {
 		cmd.Env = append(cmd.Env, envPrefix+"CLI_DEBUG=1")
