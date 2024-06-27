@@ -25,9 +25,6 @@ linters-settings:
   revive:
     # minimal confidence for issues, default is 0.8
     min-confidence: 0
-  govet:
-    # report about shadowed variables
-    check-shadowing: true
   lll:
     # max line length, lines longer will be reported. Default is 120.
     # '\t' is counted as 1 character by default, and can be changed with the tab-width option
@@ -117,6 +114,8 @@ linters:
     - nolintlint
     # Finds slice declarations that could potentially be preallocated
     - prealloc
+    # Find code that shadows one of Go's predeclared identifiers.
+    - predeclared
     # checks whether Err of rows is checked successfully
     # rowserrcheck is disabled because of generics. See https://github.com/golangci/golangci-lint/issues/2649.
     # - rowserrcheck
@@ -141,11 +140,6 @@ linters:
     # Whitespace Linter - Forces you to use empty lines!
     # - wsl
 
-run:
-  skip-dirs:
+issues:
+  exclude-dirs:
     - vendor
-
-# golangci.com configuration
-# https://github.com/golangci/golangci/wiki/Configuration
-service:
-  golangci-lint-version: 1.52.x # use the fixed version to not introduce new linters unexpectedly
