@@ -23,7 +23,7 @@ func newVersionCommand(cnf *config.Config) *cobra.Command {
 		Use:                "version",
 		Short:              "Print the version number of the " + cnf.Application.Name,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			fmt.Fprintf(color.Output, "%s %s\n", cnf.Application.Name, color.CyanString(version))
 
 			if viper.GetBool("verbose") {

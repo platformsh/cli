@@ -51,7 +51,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		SilenceUsage:       true,
 		SilenceErrors:      true,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
 			if viper.GetBool("version") {
 				versionCommand.Run(cmd, []string{})
 				os.Exit(0)
@@ -63,7 +63,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 				}()
 			}
 		},
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			c := &legacy.CLIWrapper{
 				Config:         cnf,
 				Version:        version,
@@ -89,7 +89,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 				os.Exit(exitCode)
 			}
 		},
-		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		PersistentPostRun: func(_ *cobra.Command, _ []string) {
 			checkShellConfigLeftovers(cnf)
 			select {
 			case rel := <-updateMessageChan:
@@ -120,7 +120,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 	cmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
 
 	projectInitCmd := commands.NewPlatformifyCmd(assets)
-	projectInitCmd.SetHelpFunc(func(_ *cobra.Command, args []string) {
+	projectInitCmd.SetHelpFunc(func(_ *cobra.Command, _ []string) {
 		internalCmd := innerProjectInitCommand(cnf)
 		fmt.Println(internalCmd.HelpPage(cnf))
 	})
@@ -128,7 +128,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 	validateCmd := commands.NewValidateCommand(assets)
 	validateCmd.Use = "app:config-validate"
 	validateCmd.Aliases = []string{"validate"}
-	validateCmd.SetHelpFunc(func(_ *cobra.Command, args []string) {
+	validateCmd.SetHelpFunc(func(_ *cobra.Command, _ []string) {
 		internalCmd := innerAppConfigValidateCommand(cnf)
 		fmt.Println(internalCmd.HelpPage(cnf))
 	})

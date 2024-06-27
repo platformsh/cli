@@ -29,7 +29,7 @@ type Config struct {
 		UserStateFile   string `validate:"omitempty" yaml:"user_state_file"`   // defaults to "state.json"
 		WritableUserDir string `validate:"omitempty" yaml:"writable_user_dir"` // defaults to UserConfigDir
 		TempSubDir      string `validate:"omitempty" yaml:"tmp_sub_dir"`       // defaults to Slug+"-tmp"
-	} `validate:"required,dive"`
+	} `validate:"required"`
 	Updates struct {
 		Check         bool `validate:"omitempty"`                       // defaults to true
 		CheckInterval int  `validate:"omitempty" yaml:"check_interval"` // seconds, defaults to 3600
@@ -44,11 +44,11 @@ type Config struct {
 		OAuth2RevokeURL    string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_revoke_url"` // e.g. "https://auth.api.platform.sh/oauth2/revoke"
 		OAuth2TokenURL     string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_token_url"`  // e.g. "https://auth.api.platform.sh/oauth2/token"
 		CertifierURL       string `validate:"required_without=AuthURL,omitempty,url" yaml:"certifier_url"`     // e.g. "https://ssh.api.platform.sh"
-	} `validate:"required,dive"`
+	} `validate:"required"`
 	Detection struct {
 		GitRemoteName string   `validate:"required" yaml:"git_remote_name"` // e.g. "platform"
 		SiteDomains   []string `validate:"required" yaml:"site_domains"`    // e.g. ["platformsh.site", "tst.site"]
-	} `validate:"required,dive"`
+	} `validate:"required"`
 	Service struct {
 		Name                string `validate:"required"`                               // e.g. "Platform.sh"
 		EnvPrefix           string `validate:"required" yaml:"env_prefix"`             // e.g. "PLATFORM_"
@@ -56,10 +56,10 @@ type Config struct {
 		ProjectConfigFlavor string `validate:"omitempty" yaml:"project_config_flavor"` // default: "platform"
 		ConsoleURL          string `validate:"omitempty,url" yaml:"console_url"`       // e.g. "https://console.platform.sh"
 		DocsURL             string `validate:"omitempty,url" yaml:"docs_url"`          // e.g. "https://docs.platform.sh"
-	} `validate:"required,dive"`
+	} `validate:"required"`
 	SSH struct {
 		DomainWildcards []string `validate:"required" yaml:"domain_wildcards"` // e.g. ["*.platform.sh"]
-	} `validate:"required,dive"`
+	} `validate:"required"`
 }
 
 // applyDefaults applies defaults to config before parsing.

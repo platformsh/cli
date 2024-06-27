@@ -24,8 +24,8 @@ PHP_BINARY_PATH := internal/legacy/archives/php_$(GOOS)_$(GOARCH)
 VERSION := $(shell git describe --always)
 
 # Tooling versions
-GORELEASER_VERSION=v1.20
-GOLANGCI_LINT_VERSION=v1.52
+GORELEASER_VERSION=v2.0
+GOLANGCI_LINT_VERSION=v1.59
 
 internal/legacy/archives/platform.phar:
 	curl -L https://github.com/platformsh/legacy-cli/releases/download/v$(LEGACY_CLI_VERSION)/platform.phar -o internal/legacy/archives/platform.phar
