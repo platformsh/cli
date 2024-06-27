@@ -211,7 +211,7 @@ brews:
       - platform
 
     goarm: "7"
-    folder: Formula
+    directory: Formula
 
     commit_author:
       name: Antonis Kalipetis
@@ -241,7 +241,7 @@ brews:
       - upsun
 
     goarm: "7"
-    folder: Formula
+    directory: Formula
 
     commit_author:
       name: Antonis Kalipetis
@@ -271,7 +271,7 @@ scoops:
     ids:
       - platform
 
-    folder: Scoops
+    directory: Scoops
     commit_author:
       name: Antonis Kalipetis
       email: antonis.kalipetis@platform.sh
@@ -288,7 +288,7 @@ scoops:
     ids:
       - upsun
 
-    folder: Scoops
+    directory: Scoops
     commit_author:
       name: Antonis Kalipetis
       email: antonis.kalipetis@platform.sh
