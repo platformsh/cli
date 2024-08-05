@@ -9,7 +9,7 @@ brew install bison pkg-config coreutils autoconf
 SSL_DIR_PATH=$(pwd)/"$DIR"/ssl
 mkdir -p "$SSL_DIR_PATH"
 
-curl -fSsl https://www.openssl.org/source/openssl-"$OPENSSL_VERSION".tar.gz | tar  xzf - -C "$DIR"
+curl -LfSsl https://www.openssl.org/source/openssl-"$OPENSSL_VERSION".tar.gz | tar  xzf - -C "$DIR"
 cd "$DIR"/openssl-"$OPENSSL_VERSION"
 
 ./config no-shared --prefix="$SSL_DIR_PATH" --openssldir="$SSL_DIR_PATH"
