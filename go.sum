@@ -96,6 +96,8 @@ github.com/platformsh/platformify v0.2.9 h1:JKakEM6kY3p+IG3/J427Cw8T97pyPnPMomx9
 github.com/platformsh/platformify v0.2.9/go.mod h1:fgmCcfQfHbhe1oXsIdIhpnniyZu8IdIMOlcBAa/ygic=
 github.com/platformsh/platformify v0.2.10 h1:5/b5hXpXWV0rVswstvx1fSmE7c7qaYs3u2pICDCcA3E=
 github.com/platformsh/platformify v0.2.10/go.mod h1:fgmCcfQfHbhe1oXsIdIhpnniyZu8IdIMOlcBAa/ygic=
+github.com/platformsh/platformify v0.2.11 h1:9TRej4tDgQahRfl1tDOGaCry79yXYXbzDR1ZMdOPsU8=
+github.com/platformsh/platformify v0.2.11/go.mod h1:fgmCcfQfHbhe1oXsIdIhpnniyZu8IdIMOlcBAa/ygic=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
