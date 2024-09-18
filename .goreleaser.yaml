@@ -119,8 +119,7 @@ release:
     name: cli
   footer: |
     * * *
-    **Legacy CLI release Notes**: https://github.com/platformsh/legacy-cli/releases/v{{ .Tag }}
-    **Full Legacy CLI changelog**: https://github.com/platformsh/legacy-cli/compare/v{{ .PreviousTag }}...v{{ .Tag }}
+    **Legacy CLI release Notes**: https://github.com/platformsh/legacy-cli/releases/v{{ .Env.LEGACY_CLI_VERSION }}
     * * *
     ## Upgrade
 
