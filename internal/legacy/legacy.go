@@ -69,13 +69,14 @@ func fileChanged(filename string, content []byte) (bool, error) {
 
 // CLIWrapper wraps the legacy CLI
 type CLIWrapper struct {
-	Stdout         io.Writer
-	Stderr         io.Writer
-	Stdin          io.Reader
-	Config         *config.Config
-	Version        string
-	CustomPharPath string
-	Debug          bool
+	Stdout             io.Writer
+	Stderr             io.Writer
+	Stdin              io.Reader
+	Config             *config.Config
+	Version            string
+	CustomPharPath     string
+	Debug              bool
+	DisableInteraction bool
 }
 
 func (c *CLIWrapper) cacheDir() string {
@@ -169,6 +170,9 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 	)
 	if c.Debug {
 		cmd.Env = append(cmd.Env, envPrefix+"CLI_DEBUG=1")
+	}
+	if c.DisableInteraction {
+		cmd.Env = append(cmd.Env, envPrefix+"NO_INTERACTION=1")
 	}
 	cmd.Env = append(cmd.Env, fmt.Sprintf(
 		"%sUSER_AGENT={APP_NAME_DASH}/%s ({UNAME_S}; {UNAME_R}; PHP %s; WRAPPER %s)",

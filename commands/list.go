@@ -24,13 +24,14 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			var b bytes.Buffer
 			c := &legacy.CLIWrapper{
-				Config:         cnf,
-				Version:        version,
-				CustomPharPath: viper.GetString("phar-path"),
-				Debug:          viper.GetBool("debug"),
-				Stdout:         &b,
-				Stderr:         cmd.ErrOrStderr(),
-				Stdin:          cmd.InOrStdin(),
+				Config:             cnf,
+				Version:            version,
+				CustomPharPath:     viper.GetString("phar-path"),
+				Debug:              viper.GetBool("debug"),
+				DisableInteraction: viper.GetBool("no-interaction"),
+				Stdout:             &b,
+				Stderr:             cmd.ErrOrStderr(),
+				Stdin:              cmd.InOrStdin(),
 			}
 			if err := c.Init(); err != nil {
 				debugLog("%s\n", color.RedString(err.Error()))
