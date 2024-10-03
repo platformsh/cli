@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -52,6 +53,10 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		SilenceUsage:       true,
 		SilenceErrors:      true,
 		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
+			if viper.GetBool("quiet") && !viper.GetBool("debug") && !viper.GetBool("verbose") {
+				viper.Set("no-interaction", true)
+				cmd.SetErr(io.Discard)
+			}
 			if viper.GetBool("version") {
 				versionCommand.Run(cmd, []string{})
 				os.Exit(0)
@@ -65,13 +70,14 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		},
 		Run: func(cmd *cobra.Command, _ []string) {
 			c := &legacy.CLIWrapper{
-				Config:         cnf,
-				Version:        version,
-				CustomPharPath: viper.GetString("phar-path"),
-				Debug:          viper.GetBool("debug"),
-				Stdout:         cmd.OutOrStdout(),
-				Stderr:         cmd.ErrOrStderr(),
-				Stdin:          cmd.InOrStdin(),
+				Config:             cnf,
+				Version:            version,
+				CustomPharPath:     viper.GetString("phar-path"),
+				Debug:              viper.GetBool("debug"),
+				DisableInteraction: viper.GetBool("no-interaction"),
+				Stdout:             cmd.OutOrStdout(),
+				Stderr:             cmd.ErrOrStderr(),
+				Stdin:              cmd.InOrStdin(),
 			}
 			if err := c.Init(); err != nil {
 				debugLog("%s\n", color.RedString(err.Error()))
@@ -118,6 +124,10 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 	cmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
 	cmd.PersistentFlags().Bool("no-interaction", false, "Enable non-interactive mode")
 	cmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
+	cmd.PersistentFlags().BoolP("quiet", "q", false,
+		"Suppress any messages and errors (stderr), while continuing to display necessary output (stdout)."+
+			" This implies --no-interaction. Ignored in verbose mode.",
+	)
 
 	projectInitCmd := commands.NewPlatformifyCmd(assets)
 	projectInitCmd.SetHelpFunc(func(_ *cobra.Command, _ []string) {
