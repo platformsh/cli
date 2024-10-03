@@ -19,9 +19,6 @@ var phpCLI []byte
 //go:embed archives/windows_php.ini.tpl
 var phpIniTemplate string
 
-//go:embed archives/cacert.pem
-var caCert []byte
-
 // copyPHP to destination, if it does not exist
 func (c *CLIWrapper) copyPHP() error {
 	dest := path.Join(c.cacheDir(), "php")
@@ -66,8 +63,7 @@ func (c *CLIWrapper) copyPHP() error {
 		return fmt.Errorf("could not open php.ini file for writing: %w", err)
 	}
 	defer w.Close()
-	template.Must(template.New("php.ini").Parse(phpIniTemplate)).Execute(w, map[string]string{"CLIDir": c.cacheDir()})
-	copyFile(path.Join(c.cacheDir(), "php", "extras", "cacert.pem"), caCert)
+	template.Must(template.New("php.ini").Parse(phpIniTemplate)).Execute(w, nil)
 
 	return nil
 }

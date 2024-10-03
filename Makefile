@@ -30,7 +30,7 @@ GOLANGCI_LINT_VERSION=v1.59
 internal/legacy/archives/platform.phar:
 	curl -L https://github.com/platformsh/legacy-cli/releases/download/v$(LEGACY_CLI_VERSION)/platform.phar -o internal/legacy/archives/platform.phar
 
-internal/legacy/archives/php_windows_amd64: internal/legacy/archives/php_windows.zip internal/legacy/archives/cacert.pem
+internal/legacy/archives/php_windows_amd64: internal/legacy/archives/php_windows.zip
 
 internal/legacy/archives/php_darwin_$(GOARCH):
 	bash build-php-brew.sh $(GOOS) $(PHP_VERSION) $(OPENSSL_VERSION)
@@ -52,11 +52,6 @@ internal/legacy/archives/php_linux_$(GOARCH):
 internal/legacy/archives/php_windows.zip:
 	mkdir -p internal/legacy/archives
 	wget https://windows.php.net/downloads/releases/php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip -O internal/legacy/archives/php_windows.zip
-
-.PHONY: internal/legacy/archives/cacert.pem
-internal/legacy/archives/cacert.pem:
-	mkdir -p internal/legacy/archives
-	wget https://curl.se/ca/cacert.pem -O internal/legacy/archives/cacert.pem
 
 php: $(PHP_BINARY_PATH)
 
