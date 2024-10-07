@@ -62,7 +62,7 @@ php: $(PHP_BINARY_PATH)
 
 .PHONY: goreleaser
 goreleaser:
-	go install github.com/goreleaser/goreleaser@$(GORELEASER_VERSION)
+	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser@$(GORELEASER_VERSION)
 
 .PHONY: single
 single: goreleaser internal/legacy/archives/platform.phar php ## Build a single target release for Platform.sh or Upsun
@@ -84,10 +84,17 @@ release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Rel
 .PHONY: test
 test: ## Run unit tests
 	go clean -testcache
-	go test -v -race -mod=readonly -cover ./...
+	go test -v -race -short -cover ./...
+
+platform: internal/legacy/archives/platform.phar php
+	go build ./cmd/platform
+
+.PHONY: integration-test
+integration-test: platform
+	TEST_CLI_PATH="$(PWD)/platform" go test -v ./tests/...
 
 golangci-lint:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
+	command -v golangci-lint >/dev/null || go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
 
 .PHONY: lint
 lint: golangci-lint ## Run linter

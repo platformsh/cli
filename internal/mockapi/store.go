@@ -1,0 +1,52 @@
+package mockapi
+
+import (
+	"sync"
+)
+
+type store struct {
+	sync.RWMutex
+	myUser        *User
+	orgs          map[string]*Org
+	projects      map[string]*Project
+	environments  map[string]*Environment
+	subscriptions map[string]*Subscription
+	userGrants    []*UserGrant
+}
+
+func (s *store) SetEnvironments(envs []*Environment) {
+	s.Lock()
+	defer s.Unlock()
+	s.environments = make(map[string]*Environment, len(envs))
+	for _, e := range envs {
+		s.environments[e.ID] = e
+	}
+}
+
+func (s *store) SetProjects(pros []*Project) {
+	s.Lock()
+	defer s.Unlock()
+	s.projects = make(map[string]*Project, len(pros))
+	for _, p := range pros {
+		s.projects[p.ID] = p
+	}
+}
+
+func (s *store) SetOrgs(orgs []*Org) {
+	s.Lock()
+	defer s.Unlock()
+	s.orgs = make(map[string]*Org, len(orgs))
+	for _, o := range orgs {
+		s.orgs[o.ID] = o
+	}
+}
+
+func (s *store) SetUserGrants(grants []*UserGrant) {
+	s.Lock()
+	defer s.Unlock()
+	s.userGrants = grants
+}
+
+func (s *store) SetMyUser(u *User) {
+	s.myUser = u
+}
