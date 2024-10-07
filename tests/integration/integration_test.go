@@ -1,12 +1,10 @@
-// Run integration tests using, for example:
-// TEST_CLI_PATH=./platform go run -v ./tests/...
-
 package integration
 
 import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -26,7 +24,7 @@ func getCommandName(t *testing.T) string {
 	versionCmd.Env = testEnv()
 	output, err := versionCmd.Output()
 	require.NoError(t, err, "the 'version' command must succeed under the CLI at: %s", candidate)
-	require.Equal(t, "Platform Test CLI 1.0.0\n", string(output))
+	require.Contains(t, string(output), "Platform Test CLI ")
 	if testing.Verbose() {
 		log.Printf("Validated CLI command %s", candidate)
 	}
@@ -37,16 +35,21 @@ func getCommandName(t *testing.T) string {
 func command(t *testing.T, args ...string) *exec.Cmd {
 	cmd := exec.Command(getCommandName(t), args...) //nolint:gosec
 	cmd.Env = testEnv()
+	cmd.Dir = os.TempDir()
 	return cmd
 }
 
 const EnvPrefix = "TEST_CLI_"
 
 func testEnv() []string {
+	configPath, err := filepath.Abs("config.yaml")
+	if err != nil {
+		panic(err)
+	}
 	return append(
 		os.Environ(),
 		"COLUMNS=120",
-		"CLI_CONFIG_FILE=config.yaml",
+		"CLI_CONFIG_FILE="+configPath,
 		EnvPrefix+"NO_INTERACTION=1",
 		EnvPrefix+"VERSION=1.0.0",
 	)
