@@ -1,0 +1,33 @@
+Command: help
+Description: Displays help for a command
+
+Usage:
+ platform help [--format FORMAT] [--raw] [--] [<command_name>]
+
+Arguments:
+  command               The command to execute
+  command_name          The command name [default: "help"]
+
+Options:
+      --format=FORMAT   The output format (txt, json, or md) [default: "txt"]
+      --raw             To output raw command help
+  -h, --help            Display this help message
+  -V, --version         Display this application version
+  -q, --quiet           Only print necessary output; suppress other messages and errors. This implies --no-interaction.
+                        It is ignored in verbose mode.
+  -y, --yes             Answer "yes" to confirmation questions; accept the default value for other questions; disable
+                        interaction
+      --no-interaction  Do not ask any interactive questions; accept default values. Equivalent to using the environment
+                        variable: TEST_CLI_NO_INTERACTION=1
+  -v|vv|vvv, --verbose  Increase the verbosity of messages
+
+Help:
+ The help command displays help for a given command:
+ 
+   platform help list
+ 
+ You can also output the help in other formats by using the --format option:
+ 
+   platform help --format=json list
+ 
+ To display the list of available commands, please use the list command.

@@ -1,0 +1,38 @@
+# Test CLI configuration
+application:
+  name: 'Platform Test CLI'
+  slug: 'platform-test-cli'
+  version: '1.0.0'
+  executable: 'platform'
+  env_prefix: 'TEST_CLI_'
+  user_config_dir: '.platform-test-cli'
+
+service:
+  name: 'Platform.sh'
+  env_prefix: 'PLATFORM_'
+
+  project_config_dir: '.platform'
+  app_config_file: '.platform.app.yaml'
+  project_config_flavor: 'platform'
+
+api:
+  base_url: 'https://api.platform.sh'
+  auth_url: 'https://auth.api.platform.sh'
+  oauth2_client_id: 'platform-cli'
+
+  organizations: true
+  centralized_permissions: true
+  teams: true
+  user_verification: true
+  metrics: true
+
+  vendor_filter: 'platformsh'
+
+ssh:
+  domain_wildcards: ['*.platform.sh']
+
+detection:
+  git_remote_name: 'platform'
+  git_domain: 'platform.sh'
+  site_domains: ['platform.sh', 'platformsh.site', 'tst.site']
+  cluster_header: 'X-Platform-Cluster'

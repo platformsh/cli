@@ -1,0 +1,39 @@
+Command: list
+Description: Lists commands
+
+Usage:
+ platform list [--raw] [--format FORMAT] [--all] [--] [<namespace>]
+
+Arguments:
+  namespace             The namespace name
+
+Options:
+      --raw             To output raw command list
+      --format=FORMAT   The output format (txt, xml, json, or md) [default: "txt"]
+      --all             Show all commands, including hidden ones
+  -h, --help            Display this help message
+  -V, --version         Display this application version
+  -q, --quiet           Only print necessary output; suppress other messages and errors. This implies --no-interaction.
+                        It is ignored in verbose mode.
+  -y, --yes             Answer "yes" to confirmation questions; accept the default value for other questions; disable
+                        interaction
+      --no-interaction  Do not ask any interactive questions; accept default values. Equivalent to using the environment
+                        variable: TEST_CLI_NO_INTERACTION=1
+  -v|vv|vvv, --verbose  Increase the verbosity of messages
+
+Help:
+ The list command lists all commands:
+ 
+   platform list
+ 
+ You can also display the commands for a specific namespace:
+ 
+   platform list project
+ 
+ You can also output the information in other formats by using the --format option:
+ 
+   platform list --format=xml
+ 
+ It's also possible to get raw list of commands (useful for embedding command runner):
+ 
+   platform list --raw

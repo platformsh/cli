@@ -57,6 +57,9 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 				viper.Set("no-interaction", true)
 				cmd.SetErr(io.Discard)
 			}
+			if cnf.Application.Version != "" {
+				version = cnf.Application.Version
+			}
 			if viper.GetBool("version") {
 				versionCommand.Run(cmd, []string{})
 				os.Exit(0)

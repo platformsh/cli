@@ -1,0 +1,192 @@
+Platform Test CLI 1.0.0
+
+Global options:
+  --help           -h Display this help message
+  --verbose        -v|vv|vvv Increase the verbosity of messages
+  --version        -V Display this application version
+  --yes            -y Answer "yes" to confirmation questions; accept the default value for other questions; disable interaction
+  --no-interaction    Do not ask any interactive questions; accept default values. Equivalent to using the environment variable: TEST_CLI_NO_INTERACTION=1
+  --ansi              Force ANSI output
+  --no-ansi           Disable ANSI output
+  --no             -n Answer "no" to confirmation questions; accept the default value for other questions; disable interaction
+  --quiet          -q Do not output any message
+
+Available commands:
+  clear-cache (cc)                                              Clear the CLI cache
+  decode                                                        Decode an encoded string such as PLATFORM_VARIABLES
+  help                                                          Displays help for a command
+  list                                                          Lists commands
+  multi                                                         Execute a command on multiple projects
+  web                                                           Open the project in the Web UI
+activity                                                        
+  activity:cancel                                               Cancel an activity
+  activity:get                                                  View detailed information on a single activity
+  activity:list (activities, act)                               Get a list of activities for an environment or project
+  activity:log                                                  Display the log for an activity
+app                                                             
+  app:config-get                                                View the configuration of an app
+  app:config-validate (validate)                                Validate the config files of a project
+  app:list (apps)                                               List apps in the project
+auth                                                            
+  auth:api-token-login                                          Log in to Platform.sh using an API token
+  auth:browser-login (login)                                    Log in to Platform.sh via a browser
+  auth:info                                                     Display your account information
+  auth:logout (logout)                                          Log out of Platform.sh
+  auth:verify-phone-number                                      Verify your phone number interactively
+backup                                                          
+  backup:create (backup)                                        Make a backup of an environment
+  backup:delete                                                 Delete an environment backup
+  backup:get                                                    View an environment backup
+  backup:list (backups)                                         List available backups of an environment
+  backup:restore                                                Restore an environment backup
+certificate                                                     
+  certificate:add                                               Add an SSL certificate to the project
+  certificate:delete                                            Delete a certificate from the project
+  certificate:get                                               View a certificate
+  certificate:list (certificates, certs)                        List project certificates
+commit                                                          
+  commit:get                                                    Show commit details
+  commit:list (commits)                                         List commits
+db                                                              
+  db:dump                                                       Create a local dump of the remote database
+  db:sql (sql)                                                  Run SQL on the remote database
+domain                                                          
+  domain:add                                                    Add a new domain to the project
+  domain:delete                                                 Delete a domain from the project
+  domain:get                                                    Show detailed information for a domain
+  domain:list (domains)                                         Get a list of all domains
+  domain:update                                                 Update a domain
+environment                                                     
+  environment:activate                                          Activate an environment
+  environment:branch (branch)                                   Branch an environment
+  environment:checkout (checkout)                               Check out an environment
+  environment:delete                                            Delete one or more environments
+  environment:drush (drush)                                     Run a drush command on the remote environment
+  environment:http-access (httpaccess)                          Update HTTP access settings for an environment
+  environment:info                                              Read or set properties for an environment
+  environment:init                                              Initialize an environment from a public Git repository
+  environment:list (environments, env)                          Get a list of environments
+  environment:logs (log)                                        Read an environment's logs
+  environment:merge (merge)                                     Merge an environment
+  environment:pause                                             Pause an environment
+  environment:push (push)                                       Push code to an environment
+  environment:redeploy (redeploy)                               Redeploy an environment
+  environment:relationships (relationships, rel)                Show an environment's relationships
+  environment:resume                                            Resume a paused environment
+  environment:scp (scp)                                         Copy files to and from an environment using scp
+  environment:ssh (ssh)                                         SSH to the current environment
+  environment:synchronize (sync)                                Synchronize an environment's code and/or data from its parent
+  environment:url (url)                                         Get the public URLs of an environment
+  environment:xdebug (xdebug)                                   Open a tunnel to Xdebug on the environment
+integration                                                     
+  integration:activity:get                                      View detailed information on a single integration activity
+  integration:activity:list (integration:activities)            Get a list of activities for an integration
+  integration:activity:log                                      Display the log for an integration activity
+  integration:add                                               Add an integration to the project
+  integration:delete                                            Delete an integration from a project
+  integration:get                                               View details of an integration
+  integration:list (integrations)                               View a list of project integration(s)
+  integration:update                                            Update an integration
+  integration:validate                                          Validate an existing integration
+local                                                           
+  local:build (build)                                           Build the current project locally
+  local:dir (dir)                                               Find the local project root
+  local:drush-aliases (drush-aliases)                           Find the project's Drush aliases
+metrics                                                         
+  metrics:all (metrics, met)                                    Show CPU, disk and memory metrics for an environment
+  metrics:cpu (cpu)                                             Show CPU usage of an environment
+  metrics:disk-usage (disk)                                     Show disk usage of an environment
+  metrics:memory (mem, memory)                                  Show memory usage of an environment
+mount                                                           
+  mount:download                                                Download files from a mount, using rsync
+  mount:list (mounts)                                           Get a list of mounts
+  mount:upload                                                  Upload files to a mount, using rsync
+operation                                                       
+  operation:list (ops)                                          List runtime operations on an environment
+  operation:run                                                 Run an operation on the environment
+organization                                                    
+  organization:billing:address                                  View or change an organization's billing address
+  organization:billing:profile                                  View or change an organization's billing profile
+  organization:create                                           Create a new organization
+  organization:delete                                           Delete an organization
+  organization:info                                             View or change organization details
+  organization:list (orgs, organizations)                       List organizations
+  organization:subscription:list (org:subs)                     List subscriptions within an organization
+  organization:user:add                                         Invite a user to an organization
+  organization:user:delete                                      Remove a user from an organization
+  organization:user:get                                         View an organization user
+  organization:user:list (org:users)                            List organization users
+  organization:user:projects (oups)                             List the projects a user can access
+  organization:user:update                                      Update an organization user
+project                                                         
+  project:clear-build-cache                                     Clear a project's build cache
+  project:create (create)                                       Create a new project
+  project:delete                                                Delete a project
+  project:get (get)                                             Clone a project locally
+  project:info                                                  Read or set properties for a project
+  project:init (ify)                                            Initialize a project
+  project:list (projects, pro)                                  Get a list of all active projects
+  project:set-remote (set-remote)                               Set the remote project for the current Git repository
+repo                                                            
+  repo:cat                                                      Read a file in the project repository
+  repo:ls                                                       List files in the project repository
+  repo:read (read)                                              Read a directory or file in the project repository
+resources                                                       
+  resources:build:get (build-resources:get, build-resources)    View the build resources of a project
+route                                                           
+  route:get                                                     View detailed information about a route
+  route:list (routes)                                           List all routes for an environment
+self                                                            
+  self:install                                                  Install or update CLI configuration files
+  self:update (update, up)                                      Update the CLI to the latest version
+service                                                         
+  service:list (services)                                       List services in the project
+  service:mongo:dump (mongodump)                                Create a binary archive dump of data from MongoDB
+  service:mongo:export (mongoexport)                            Export data from MongoDB
+  service:mongo:restore (mongorestore)                          Restore a binary archive dump of data into MongoDB
+  service:mongo:shell (mongo)                                   Use the MongoDB shell
+  service:redis-cli (redis)                                     Access the Redis CLI
+source-operation                                                
+  source-operation:list (source-ops)                            List source operations on an environment
+  source-operation:run                                          Run a source operation
+ssh-cert                                                        
+  ssh-cert:load                                                 Generate an SSH certificate
+ssh-key                                                         
+  ssh-key:add                                                   Add a new SSH key
+  ssh-key:delete                                                Delete an SSH key
+  ssh-key:list (ssh-keys)                                       Get a list of SSH keys in your account
+subscription                                                    
+  subscription:info                                             Read or modify subscription properties
+team                                                            
+  team:create                                                   Create a new team
+  team:delete                                                   Delete a team
+  team:get                                                      View a team
+  team:list (teams)                                             List teams
+  team:project:add                                              Add project(s) to a team
+  team:project:delete                                           Remove a project from a team
+  team:project:list (team:projects, team:pro)                   List projects in a team
+  team:update                                                   Update a team
+  team:user:add                                                 Add a user to a team
+  team:user:delete                                              Remove a user from a team
+  team:user:list (team:users)                                   List users in a team
+tunnel                                                          
+  tunnel:close                                                  Close SSH tunnels
+  tunnel:info                                                   View relationship info for SSH tunnels
+  tunnel:list (tunnels)                                         List SSH tunnels
+  tunnel:open                                                   Open SSH tunnels to an app's relationships
+  tunnel:single                                                 Open a single SSH tunnel to an app relationship
+user                                                            
+  user:add                                                      Add a user to the project
+  user:delete                                                   Delete a user from the project
+  user:get                                                      View a user's role(s)
+  user:list (users)                                             List project users
+  user:update                                                   Update user role(s) on a project
+variable                                                        
+  variable:create                                               Create a variable
+  variable:delete                                               Delete a variable
+  variable:get (vget)                                           View a variable
+  variable:list (variables, var)                                List variables
+  variable:update                                               Update a variable
+worker                                                          
+  worker:list (workers)                                         Get a list of all deployed workers
+

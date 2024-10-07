@@ -29,6 +29,7 @@ type Config struct {
 		UserStateFile   string `validate:"omitempty" yaml:"user_state_file"`   // defaults to "state.json"
 		WritableUserDir string `validate:"omitempty" yaml:"writable_user_dir"` // defaults to UserConfigDir
 		TempSubDir      string `validate:"omitempty" yaml:"tmp_sub_dir"`       // defaults to Slug+"-tmp"
+		Version         string `validate:"omitempty"`                          // defaults to version variable set by GoReleaser
 	} `validate:"required"`
 	Updates struct {
 		Check         bool `validate:"omitempty"`                       // defaults to true

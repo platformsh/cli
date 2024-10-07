@@ -1,0 +1,42 @@
+Command: project:create
+Aliases: create
+Description: Create a new project
+
+Usage:
+ platform create [-o|--org ORG] [--title TITLE] [--region REGION] [--plan PLAN] [--environments ENVIRONMENTS] [--storage STORAGE] [--default-branch DEFAULT-BRANCH] [--set-remote] [--no-set-remote]
+
+Options:
+  -o, --org=ORG                        The organization name (or ID)
+      --title=TITLE                    The initial project title [default: "Untitled Project"]
+      --region=REGION                  The region where the project will be hosted.
+      --plan=PLAN                      The subscription plan
+      --environments=ENVIRONMENTS      The number of environments [default: 3]
+      --storage=STORAGE                The amount of storage per environment, in GiB [default: 5]
+      --default-branch=DEFAULT-BRANCH  The default Git branch name for the project (the production environment)
+                                       [default: "main"]
+      --set-remote                     Set the new project as the remote for this repository. This is the default if no
+                                       remote project is already set.
+      --no-set-remote                  Do not set the new project as the remote for this repository
+  -h, --help                           Display this help message
+  -V, --version                        Display this application version
+  -q, --quiet                          Only print necessary output; suppress other messages and errors. This implies
+                                       --no-interaction. It is ignored in verbose mode.
+  -y, --yes                            Answer "yes" to confirmation questions; accept the default value for other
+                                       questions; disable interaction
+      --no-interaction                 Do not ask any interactive questions; accept default values. Equivalent to using
+                                       the environment variable: TEST_CLI_NO_INTERACTION=1
+  -v|vv|vvv, --verbose                 Increase the verbosity of messages
+
+Help:
+ Use this command to create a new project.
+ 
+ An interactive form will be presented with the available options. If the
+ command is run non-interactively (with --yes), the form will not be displayed,
+ and the --region option will be required.
+ 
+ A project subscription will be requested, and then checked periodically (every
+ 3 seconds) until the project has been activated, or until the process times
+ out (15 minutes by default).
+ 
+ If known, the project ID will be output to STDOUT. All other output will be sent
+ to STDERR.
