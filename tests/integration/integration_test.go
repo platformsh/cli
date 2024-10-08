@@ -20,10 +20,10 @@ func getCommandName(t *testing.T) string {
 	if candidate == "" {
 		t.Skip("enable by setting TEST_CLI_PATH (or use `make integration-test`)")
 	}
-	versionCmd := exec.Command(candidate, "version")
+	versionCmd := exec.Command(candidate, "--version")
 	versionCmd.Env = testEnv()
 	output, err := versionCmd.Output()
-	require.NoError(t, err, "the 'version' command must succeed under the CLI at: %s", candidate)
+	require.NoError(t, err, "running '--version' must succeed under the CLI at: %s", candidate)
 	require.Contains(t, string(output), "Platform Test CLI ")
 	if testing.Verbose() {
 		log.Printf("Validated CLI command %s", candidate)

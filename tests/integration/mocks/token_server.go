@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"testing"
 
+	"golang.org/x/exp/slices"
+
 	"net/http"
 	"net/http/httptest"
 )
 
-var APITokens = map[string]string{
-	"api-token-1": "access-token1",
-}
+var ValidAPITokens = []string{"api-token-1"}
+var accessTokens = []string{"access-token-1"}
 
 // APITokenServer creates a new mock OAuth 2.0 API token server.
 // The caller must call Close() on the server when finished.
@@ -31,13 +32,13 @@ func APITokenServer(t *testing.T) *httptest.Server {
 				return
 			}
 			apiToken := req.Form.Get("api_token")
-			if accessToken, ok := APITokens[apiToken]; ok {
+			if slices.Contains(ValidAPITokens, apiToken) {
 				w.WriteHeader(http.StatusOK)
 				_ = json.NewEncoder(w).Encode(struct {
 					AccessToken string `json:"access_token"`
 					ExpiresIn   int    `json:"expires_in"`
 					Type        string `json:"token_type"`
-				}{AccessToken: accessToken, ExpiresIn: 60, Type: "bearer"})
+				}{AccessToken: accessTokens[0], ExpiresIn: 60, Type: "bearer"})
 				return
 			}
 			w.WriteHeader(http.StatusBadRequest)
