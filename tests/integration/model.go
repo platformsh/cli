@@ -61,5 +61,6 @@ type org struct {
 	ID    string   `json:"id"`
 	Name  string   `json:"name"`
 	Label string   `json:"label"`
+	Owner string   `json:"owner_id"`
 	Links halLinks `json:"_links"`
 }
