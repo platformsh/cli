@@ -59,3 +59,17 @@ jobs:
 
       - name: Run tests
         run: make test
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, phar
+        env:
+          fail-fast: true
+
+      - name: Run legacy CLI integration tests
+        run: |
+          make internal/legacy/archives/platform.phar
+          chmod +x internal/legacy/archives/platform.phar
+          TEST_CLI_PATH=$PWD/internal/legacy/archives/platform.phar go test -v ./tests/integration/...
