@@ -10,8 +10,8 @@ import (
 )
 
 func (h *Handler) handleProjectRefs(w http.ResponseWriter, req *http.Request) {
-	h.store.mux.RLock()
-	defer h.store.mux.RUnlock()
+	h.store.RLock()
+	defer h.store.RUnlock()
 	require.NoError(h.t, req.ParseForm())
 	ids := strings.Split(req.Form.Get("in"), ",")
 	refs := make(map[string]*ProjectRef, len(ids))
@@ -26,8 +26,8 @@ func (h *Handler) handleProjectRefs(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handleGetProject(w http.ResponseWriter, req *http.Request) {
-	h.store.mux.RLock()
-	defer h.store.mux.RUnlock()
+	h.store.RLock()
+	defer h.store.RUnlock()
 	projectID := chi.URLParam(req, "id")
 	if p, ok := h.store.projects[projectID]; ok {
 		_ = json.NewEncoder(w).Encode(p)
@@ -37,8 +37,8 @@ func (h *Handler) handleGetProject(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handleListEnvironments(w http.ResponseWriter, req *http.Request) {
-	h.store.mux.RLock()
-	defer h.store.mux.RUnlock()
+	h.store.RLock()
+	defer h.store.RUnlock()
 	projectID := chi.URLParam(req, "id")
 	var envs []*Environment
 	for _, e := range h.store.environments {
@@ -50,8 +50,8 @@ func (h *Handler) handleListEnvironments(w http.ResponseWriter, req *http.Reques
 }
 
 func (h *Handler) handleGetCurrentDeployment(w http.ResponseWriter, req *http.Request) {
-	h.store.mux.RLock()
-	defer h.store.mux.RUnlock()
+	h.store.RLock()
+	defer h.store.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	environmentID := chi.URLParam(req, "environment_id")
 	var d *Deployment

@@ -26,8 +26,8 @@ func (h *Handler) handleOrgRefs(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handleListOrgs(w http.ResponseWriter, _ *http.Request) {
-	h.store.mux.RLock()
-	defer h.store.mux.RUnlock()
+	h.store.RLock()
+	defer h.store.RUnlock()
 	var (
 		orgs     = make([]*Org, 0, len(h.store.orgs))
 		ownerIDs = make(uniqueMap)
@@ -47,8 +47,8 @@ func (h *Handler) handleListOrgs(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (h *Handler) handleGetOrg(w http.ResponseWriter, req *http.Request) {
-	h.store.mux.RLock()
-	defer h.store.mux.RUnlock()
+	h.store.RLock()
+	defer h.store.RUnlock()
 	var org *Org
 
 	// TODO why doesn't Chi decode this?

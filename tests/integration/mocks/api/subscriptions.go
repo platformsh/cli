@@ -30,8 +30,8 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 		EventualProjectID: projectID,
 	}
 
-	h.store.mux.Lock()
-	defer h.store.mux.Unlock()
+	h.store.Lock()
+	defer h.store.Unlock()
 
 	if h.store.subscriptions == nil {
 		h.store.subscriptions = make(map[string]*Subscription)
@@ -50,8 +50,8 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 }
 
 func (h *Handler) handleGetSubscription(w http.ResponseWriter, req *http.Request) {
-	h.store.mux.Lock()
-	defer h.store.mux.Unlock()
+	h.store.Lock()
+	defer h.store.Unlock()
 	id := chi.URLParam(req, "id")
 	sub := h.store.subscriptions[id]
 	if sub == nil {

@@ -24,8 +24,8 @@ func (h *Handler) handleUserRefs(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handleUserExtendedAccess(w http.ResponseWriter, req *http.Request) {
-	h.store.mux.RLock()
-	defer h.store.mux.RUnlock()
+	h.store.RLock()
+	defer h.store.RUnlock()
 	userID := chi.URLParam(req, "id")
 	require.NoError(h.t, req.ParseForm())
 	require.Equal(h.t, "project", req.Form.Get("filter[resource_type]"))

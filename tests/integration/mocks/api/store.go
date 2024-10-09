@@ -5,7 +5,7 @@ import (
 )
 
 type store struct {
-	mux           sync.RWMutex
+	sync.RWMutex
 	myUser        *User
 	orgs          map[string]*Org
 	projects      map[string]*Project
@@ -15,8 +15,8 @@ type store struct {
 }
 
 func (s *store) SetEnvironments(envs []*Environment) {
-	s.mux.Lock()
-	defer s.mux.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	s.environments = make(map[string]*Environment, len(envs))
 	for _, e := range envs {
 		s.environments[e.ID] = e
@@ -24,8 +24,8 @@ func (s *store) SetEnvironments(envs []*Environment) {
 }
 
 func (s *store) SetProjects(pros []*Project) {
-	s.mux.Lock()
-	defer s.mux.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	s.projects = make(map[string]*Project, len(pros))
 	for _, p := range pros {
 		s.projects[p.ID] = p
@@ -33,8 +33,8 @@ func (s *store) SetProjects(pros []*Project) {
 }
 
 func (s *store) SetOrgs(orgs []*Org) {
-	s.mux.Lock()
-	defer s.mux.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	s.orgs = make(map[string]*Org, len(orgs))
 	for _, o := range orgs {
 		s.orgs[o.ID] = o
@@ -42,8 +42,8 @@ func (s *store) SetOrgs(orgs []*Org) {
 }
 
 func (s *store) SetUserGrants(grants []*UserGrant) {
-	s.mux.Lock()
-	defer s.mux.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	s.userGrants = grants
 }
 
