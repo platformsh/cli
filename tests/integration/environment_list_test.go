@@ -15,7 +15,7 @@ import (
 )
 
 func TestEnvironmentList(t *testing.T) {
-	authServer := mocks.APITokenServer(t)
+	authServer := mocks.NewAuthServer(t)
 	defer authServer.Close()
 
 	apiHandler := api.NewHandler(t)
@@ -36,13 +36,7 @@ func TestEnvironmentList(t *testing.T) {
 	})
 
 	run := func(args ...string) string {
-		cmd := command(t, args...)
-		cmd.Env = append(
-			cmd.Env,
-			EnvPrefix+"API_BASE_URL="+apiServer.URL,
-			EnvPrefix+"API_AUTH_URL="+authServer.URL,
-			EnvPrefix+"TOKEN="+mocks.ValidAPITokens[0],
-		)
+		cmd := authenticatedCommand(t, apiServer.URL, authServer.URL, args...)
 		if testing.Verbose() {
 			cmd.Stderr = os.Stderr
 		}

@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http/httptest"
 	"os"
-	"os/exec"
 	"strings"
 	"testing"
 
@@ -17,7 +16,7 @@ import (
 )
 
 func TestAppList(t *testing.T) {
-	authServer := mocks.APITokenServer(t)
+	authServer := mocks.NewAuthServer(t)
 	defer authServer.Close()
 
 	apiHandler := api.NewHandler(t)
@@ -57,22 +56,8 @@ func TestAppList(t *testing.T) {
 
 	apiHandler.SetEnvironments(envs)
 
-	authenticatedCommand := func(args ...string) *exec.Cmd {
-		cmd := command(t, args...)
-		cmd.Env = append(
-			cmd.Env,
-			EnvPrefix+"API_BASE_URL="+apiServer.URL,
-			EnvPrefix+"API_AUTH_URL="+authServer.URL,
-			EnvPrefix+"TOKEN="+mocks.ValidAPITokens[0],
-		)
-		if testing.Verbose() {
-			cmd.Stderr = os.Stderr
-		}
-		return cmd
-	}
-
 	run := func(args ...string) string {
-		b, err := authenticatedCommand(args...).Output()
+		b, err := authenticatedCommand(t, apiServer.URL, authServer.URL, args...).Output()
 		require.NoError(t, err)
 		return string(b)
 	}
@@ -90,7 +75,8 @@ app	golang:1.23
 +--------------+-------------+-------------------+
 `, "\n"), run("workers", "-v", "-p", mockProjectID, "-e", "."))
 
-	servicesCmd := authenticatedCommand("services", "-p", mockProjectID, "-e", "main")
+	servicesCmd := authenticatedCommand(t, apiServer.URL, authServer.URL,
+		"services", "-p", mockProjectID, "-e", "main")
 	stdErrBuf := bytes.Buffer{}
 	servicesCmd.Stderr = &stdErrBuf
 	if testing.Verbose() {

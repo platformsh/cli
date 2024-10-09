@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/platformsh/cli/tests/integration/mocks"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,6 +42,17 @@ func command(t *testing.T, args ...string) *exec.Cmd {
 	cmd := exec.Command(getCommandName(t), args...) //nolint:gosec
 	cmd.Env = testEnv()
 	cmd.Dir = os.TempDir()
+	return cmd
+}
+
+func authenticatedCommand(t *testing.T, apiURL, authURL string, args ...string) *exec.Cmd {
+	cmd := command(t, args...)
+	cmd.Env = append(
+		cmd.Env,
+		EnvPrefix+"API_BASE_URL="+apiURL,
+		EnvPrefix+"API_AUTH_URL="+authURL,
+		EnvPrefix+"TOKEN="+mocks.ValidAPITokens[0],
+	)
 	return cmd
 }
 

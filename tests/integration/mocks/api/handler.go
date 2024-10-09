@@ -3,10 +3,12 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/stretchr/testify/require"
 )
 
 type Handler struct {
@@ -24,6 +26,15 @@ func NewHandler(t *testing.T) *Handler {
 	if testing.Verbose() {
 		h.Mux.Use(middleware.DefaultLogger)
 	}
+
+	h.Mux.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			authHeader := req.Header.Get("Authorization")
+			require.NotEmpty(t, authHeader)
+			require.True(t, strings.HasPrefix(authHeader, "Bearer "))
+			next.ServeHTTP(w, req)
+		})
+	})
 
 	h.Mux.Get("/users/me", h.handleUsersMe)
 	h.Mux.Get("/users/{id}/extended-access", h.handleUserExtendedAccess)

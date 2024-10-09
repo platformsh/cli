@@ -16,7 +16,7 @@ import (
 )
 
 func TestProjectCreate(t *testing.T) {
-	authServer := mocks.APITokenServer(t)
+	authServer := mocks.NewAuthServer(t)
 	defer authServer.Close()
 
 	apiHandler := api.NewHandler(t)
@@ -33,13 +33,8 @@ func TestProjectCreate(t *testing.T) {
 	title := "Test Project Title"
 	region := "test-region"
 
-	cmd := command(t, "project:create", "-v", "--region", region, "--title", title, "--org", "cli-tests")
-	cmd.Env = append(
-		cmd.Env,
-		EnvPrefix+"API_BASE_URL="+apiServer.URL,
-		EnvPrefix+"API_AUTH_URL="+authServer.URL,
-		EnvPrefix+"TOKEN="+mocks.ValidAPITokens[0],
-	)
+	cmd := authenticatedCommand(t, apiServer.URL, authServer.URL,
+		"project:create", "-v", "--region", region, "--title", title, "--org", "cli-tests")
 
 	var stdErrBuf bytes.Buffer
 	var stdOutBuf bytes.Buffer
