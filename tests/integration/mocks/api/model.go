@@ -40,15 +40,16 @@ type ProjectRepository struct {
 }
 
 type Project struct {
-	ID           string            `json:"id"`
-	Title        string            `json:"title"`
-	Region       string            `json:"region"`
-	Organization string            `json:"organization"`
-	Vendor       string            `json:"vendor"`
-	Repository   ProjectRepository `json:"repository"`
-	Links        HalLinks          `json:"_links"`
-	CreatedAt    time.Time         `json:"created_at"`
-	UpdatedAt    time.Time         `json:"updated_at"`
+	ID            string            `json:"id"`
+	Title         string            `json:"title"`
+	Region        string            `json:"region"`
+	Organization  string            `json:"organization"`
+	Vendor        string            `json:"vendor"`
+	Repository    ProjectRepository `json:"repository"`
+	DefaultBranch string            `json:"default_branch"`
+	Links         HalLinks          `json:"_links"`
+	CreatedAt     time.Time         `json:"created_at"`
+	UpdatedAt     time.Time         `json:"updated_at"`
 
 	SubscriptionID string `json:"-"`
 }
@@ -79,6 +80,42 @@ type Environment struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	Links       HalLinks  `json:"_links"`
+
+	currentDeployment *Deployment
+}
+
+func (e *Environment) SetCurrentDeployment(d *Deployment) {
+	e.currentDeployment = d
+}
+
+type App struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
+	Size string `json:"size"`
+	Disk string `json:"disk"`
+}
+
+type Commands struct {
+	Start string `json:"start"`
+}
+
+type WorkerInfo struct {
+	Commands Commands `json:"commands"`
+}
+
+type Worker struct {
+	App
+	Worker WorkerInfo `json:"worker"`
+}
+
+type Deployment struct {
+	WebApps  map[string]App    `json:"webapps"`
+	Services map[string]App    `json:"services"`
+	Workers  map[string]Worker `json:"workers"`
+
+	Routes map[string]any `json:"routes"`
+
+	Links HalLinks `json:"_links"`
 }
 
 type Org struct {

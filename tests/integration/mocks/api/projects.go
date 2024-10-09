@@ -49,6 +49,24 @@ func (h *Handler) handleListEnvironments(w http.ResponseWriter, req *http.Reques
 	_ = json.NewEncoder(w).Encode(envs)
 }
 
+func (h *Handler) handleGetCurrentDeployment(w http.ResponseWriter, req *http.Request) {
+	h.store.mux.RLock()
+	defer h.store.mux.RUnlock()
+	projectID := chi.URLParam(req, "project_id")
+	environmentID := chi.URLParam(req, "environment_id")
+	var d *Deployment
+	for _, e := range h.store.environments {
+		if e.Project == projectID && e.ID == environmentID {
+			d = e.currentDeployment
+		}
+	}
+	if d == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(d)
+}
+
 func (h *Handler) handleListRegions(w http.ResponseWriter, _ *http.Request) {
 	type region struct {
 		ID             string `json:"id"`

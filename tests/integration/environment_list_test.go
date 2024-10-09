@@ -22,10 +22,6 @@ func TestEnvironmentList(t *testing.T) {
 	apiServer := httptest.NewServer(apiHandler)
 	defer apiServer.Close()
 
-	// The legacy CLI identifier expects project IDs to be alphanumeric.
-	// See: https://github.com/platformsh/legacy-cli/blob/main/src/Service/Identifier.php#L75
-	mockProjectID := "abcdefg123456"
-
 	apiHandler.SetProjects([]*api.Project{
 		{
 			ID:    mockProjectID,

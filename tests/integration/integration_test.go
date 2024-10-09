@@ -12,6 +12,10 @@ import (
 
 var _validatedCommand string
 
+// The legacy CLI identifier expects project IDs to be alphanumeric.
+// See: https://github.com/platformsh/legacy-cli/blob/main/src/Service/Identifier.php#L75
+const mockProjectID = "abcdefg123456"
+
 func getCommandName(t *testing.T) string {
 	if _validatedCommand != "" {
 		return _validatedCommand

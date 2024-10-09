@@ -52,6 +52,7 @@ func NewHandler(t *testing.T) *Handler {
 
 	h.Mux.Get("/projects/{id}", h.handleGetProject)
 	h.Mux.Get("/projects/{id}/environments", h.handleListEnvironments)
+	h.Mux.Get("/projects/{project_id}/environments/{environment_id}/deployments/current", h.handleGetCurrentDeployment)
 	h.Mux.Get("/ref/projects", h.handleProjectRefs)
 
 	h.Mux.Get("/regions", h.handleListRegions)
