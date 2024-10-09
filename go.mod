@@ -6,6 +6,7 @@ toolchain go1.22.4
 
 require (
 	github.com/fatih/color v1.17.0
+	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/gofrs/flock v0.8.1
 	github.com/mattn/go-isatty v0.0.20

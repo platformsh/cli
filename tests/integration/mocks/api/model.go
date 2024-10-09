@@ -1,59 +1,60 @@
-package integration
+package api
+
+// TODO unify these models with the 'api' package, and/or use OpenAPI or similar to generate them
 
 import (
 	"strings"
 	"time"
 )
 
-type halLink struct {
+type HALLink struct {
 	HREF string `json:"href"`
 }
 
-type halLinks map[string]halLink
+type HalLinks map[string]HALLink
 
-// makeHALLinks helps make a list of HAL links out of arguments in the format name=path.
-func makeHALLinks(nameAndPath ...string) halLinks {
-	links := make(halLinks, len(nameAndPath))
+// MakeHALLinks helps make a list of HAL links out of arguments in the format name=path.
+func MakeHALLinks(nameAndPath ...string) HalLinks {
+	links := make(HalLinks, len(nameAndPath))
 	for _, p := range nameAndPath {
 		parts := strings.SplitN(p, "=", 2)
-		links[parts[0]] = halLink{parts[1]}
+		links[parts[0]] = HALLink{parts[1]}
 	}
 	return links
 }
 
-// TODO unify these models with the 'api' package, and/or use OpenAPI or similar to generate them
-type subscription struct {
+type Subscription struct {
 	ID            string   `json:"id"`
-	Links         halLinks `json:"_links"`
+	Links         HalLinks `json:"_links"`
 	ProjectID     string   `json:"project_id"`
 	ProjectRegion string   `json:"project_region"`
 	ProjectTitle  string   `json:"project_title"`
 	Status        string   `json:"status"`
 	ProjectUI     string   `json:"project_ui"`
 
-	eventualProjectID string
+	EventualProjectID string `json:"-"`
 }
 
-type projectRepository struct {
+type ProjectRepository struct {
 	URL string `json:"url"`
 }
 
-type project struct {
+type Project struct {
 	ID           string            `json:"id"`
 	Title        string            `json:"title"`
 	Region       string            `json:"region"`
 	Organization string            `json:"organization"`
 	Vendor       string            `json:"vendor"`
-	Repository   projectRepository `json:"repository"`
-	Links        halLinks          `json:"_links"`
+	Repository   ProjectRepository `json:"repository"`
+	Links        HalLinks          `json:"_links"`
 	CreatedAt    time.Time         `json:"created_at"`
 	UpdatedAt    time.Time         `json:"updated_at"`
 
 	SubscriptionID string `json:"-"`
 }
 
-func (p *project) asRef() *projectRef {
-	return &projectRef{
+func (p *Project) AsRef() *ProjectRef {
+	return &ProjectRef{
 		ID:             p.ID,
 		Region:         p.Region,
 		Title:          p.Title,
@@ -66,7 +67,7 @@ func (p *project) asRef() *projectRef {
 	}
 }
 
-type environment struct {
+type Environment struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	MachineName string    `json:"machine_name"`
@@ -74,21 +75,22 @@ type environment struct {
 	Type        string    `json:"type"`
 	Status      string    `json:"status"`
 	Parent      any       `json:"parent"`
+	Project     string    `json:"project"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
-	Links       halLinks  `json:"_links"`
+	Links       HalLinks  `json:"_links"`
 }
 
-type org struct {
+type Org struct {
 	ID    string   `json:"id"`
 	Name  string   `json:"name"`
 	Label string   `json:"label"`
 	Owner string   `json:"owner_id"`
-	Links halLinks `json:"_links"`
+	Links HalLinks `json:"_links"`
 }
 
-func (o *org) asRef() *orgRef {
-	return &orgRef{
+func (o *Org) AsRef() *OrgRef {
+	return &OrgRef{
 		ID:    o.ID,
 		Name:  o.Name,
 		Label: o.Label,
@@ -96,14 +98,14 @@ func (o *org) asRef() *orgRef {
 	}
 }
 
-type orgRef struct {
+type OrgRef struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Label string `json:"label"`
 	Owner string `json:"owner_id"`
 }
 
-type userGrant struct {
+type UserGrant struct {
 	ResourceID     string    `json:"resource_id"`
 	ResourceType   string    `json:"resource_type"`
 	OrganizationID string    `json:"organization_id"`
@@ -113,7 +115,13 @@ type userGrant struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
-type projectRef struct {
+type UserRef struct {
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
+}
+
+type ProjectRef struct {
 	ID             string    `json:"id"`
 	Region         string    `json:"region"`
 	Title          string    `json:"title"`

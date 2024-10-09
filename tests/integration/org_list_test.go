@@ -1,13 +1,9 @@
 package integration
 
 import (
-	"encoding/json"
-	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"path"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -15,13 +11,32 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/platformsh/cli/tests/integration/mocks"
+	"github.com/platformsh/cli/tests/integration/mocks/api"
 )
 
 func TestOrgList(t *testing.T) {
 	authServer := mocks.APITokenServer(t)
 	defer authServer.Close()
 
-	apiServer := orgListServer(t)
+	makeOrg := func(id, name, label, owner string) *api.Org {
+		return &api.Org{
+			ID:    id,
+			Name:  name,
+			Label: label,
+			Owner: owner,
+			Links: api.MakeHALLinks("self=/organizations/" + url.PathEscape(id)),
+		}
+	}
+
+	apiHandler := api.NewHandler(t)
+	apiHandler.MyUserID = "user-id-1"
+	apiHandler.SetOrgs([]*api.Org{
+		makeOrg("org-id-1", "acme", "ACME Inc.", apiHandler.MyUserID),
+		makeOrg("org-id-2", "four-seasons", "Four Seasons Total Landscaping", apiHandler.MyUserID),
+		makeOrg("org-id-3", "duff", "Duff Beer", "user-id-2"),
+	})
+
+	apiServer := httptest.NewServer(apiHandler)
 	defer apiServer.Close()
 
 	run := func(args ...string) string {
@@ -63,55 +78,4 @@ org-id-1,acme
 org-id-2,four-seasons
 org-id-3,duff
 `, "\n"), run("orgs", "--format", "csv", "--columns", "id,name", "--no-header"))
-}
-
-func orgListServer(t *testing.T) *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if testing.Verbose() {
-			t.Log(req)
-		}
-		switch {
-		case req.Method == http.MethodGet && req.URL.Path == "/organizations",
-			req.Method == http.MethodGet && regexp.MustCompile(`^/users/[a-z0-9-]+/organizations$`).MatchString(req.URL.Path):
-			makeOrg := func(id, name, label, owner string) org {
-				return org{
-					ID:    id,
-					Name:  name,
-					Label: label,
-					Owner: owner,
-					Links: makeHALLinks("self=/organizations/" + url.PathEscape(id)),
-				}
-			}
-			ownerIDs := []string{"user-id-1", "user-id-2"}
-			_ = json.NewEncoder(w).Encode(struct {
-				Items []org    `json:"items"`
-				Links halLinks `json:"_links"`
-			}{Items: []org{
-				makeOrg("org-id-1", "acme", "ACME Inc.", ownerIDs[0]),
-				makeOrg("org-id-2", "four-seasons", "Four Seasons Total Landscaping", ownerIDs[0]),
-				makeOrg("org-id-3", "duff", "Duff Beer", ownerIDs[1]),
-			}, Links: makeHALLinks("ref:users:0=/ref/users?in=" + strings.Join(ownerIDs, ","))})
-			return
-		// TODO generalize users server
-		case req.Method == http.MethodGet && req.URL.Path == "/users/me":
-			_ = json.NewEncoder(w).Encode(map[string]string{"id": "user-id"})
-		case req.Method == http.MethodGet && regexp.MustCompile(`^/users/[a-z0-9-]+$`).MatchString(req.URL.Path):
-			_ = json.NewEncoder(w).Encode(map[string]string{"id": path.Base(req.URL.Path)})
-		case req.Method == http.MethodGet && req.URL.Path == "/ref/users":
-			require.NoError(t, req.ParseForm())
-			ids := strings.Split(req.Form.Get("in"), ",")
-			type userRef struct {
-				ID       string `json:"id"`
-				Email    string `json:"email"`
-				Username string `json:"username"`
-			}
-			userRefs := make(map[string]userRef, len(ids))
-			for _, id := range ids {
-				userRefs[id] = userRef{ID: id, Email: id + "@example.com", Username: id}
-			}
-			_ = json.NewEncoder(w).Encode(userRefs)
-		default:
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}))
 }
