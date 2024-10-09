@@ -19,7 +19,7 @@ func TestProjectList(t *testing.T) {
 
 	myUserID := "my-user-id"
 	otherUserID := "other-user-id"
-	vendor := "platformsh"
+	vendor := "test-vendor"
 
 	apiHandler := api.NewHandler(t)
 	apiHandler.SetMyUser(&api.User{ID: myUserID})

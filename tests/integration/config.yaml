@@ -3,22 +3,19 @@ application:
   name: 'Platform Test CLI'
   slug: 'platform-test-cli'
   version: '1.0.0'
-  executable: 'platform'
+  executable: 'platform-test'
   env_prefix: 'TEST_CLI_'
   user_config_dir: '.platform-test-cli'
 
 service:
-  name: 'Platform.sh'
+  name: 'Platform.sh Testing'
   env_prefix: 'PLATFORM_'
-
   project_config_dir: '.platform'
-  app_config_file: '.platform.app.yaml'
-  project_config_flavor: 'platform'
 
 api:
-  base_url: 'https://api.platform.sh'
-  auth_url: 'https://auth.api.platform.sh'
-  oauth2_client_id: 'platform-cli'
+  # Placeholder URLs which can be replaced during tests.
+  base_url: 'http://127.0.0.1'
+  auth_url: 'http://127.0.0.1'
 
   organizations: true
   centralized_permissions: true
@@ -26,13 +23,13 @@ api:
   user_verification: true
   metrics: true
 
-  vendor_filter: 'platformsh'
+  vendor_filter: 'test-vendor'
 
 ssh:
-  domain_wildcards: ['*.platform.sh']
+  domain_wildcards: ['*.cli-tests.example.com']
 
 detection:
-  git_remote_name: 'platform'
-  git_domain: 'platform.sh'
-  site_domains: ['platform.sh', 'platformsh.site', 'tst.site']
+  git_remote_name: 'platform-test'
+  git_domain: 'git.cli-tests.example.com'
+  site_domains: ['cli-tests.example.com']
   cluster_header: 'X-Platform-Cluster'
