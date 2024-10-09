@@ -132,3 +132,30 @@ type ProjectRef struct {
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
+
+type User struct {
+	ID string `json:"id"`
+
+	Deactivated bool `json:"deactivated"`
+
+	Namespace string `json:"namespace"`
+
+	Username      string `json:"username"`
+	FirstName     string `json:"first_name"`
+	LastName      string `json:"last_name"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	Picture       string `json:"picture"`
+	Country       string `json:"country"`
+
+	PhoneNumberVerified bool `json:"phone_number_verified"`
+
+	MFAEnabled bool `json:"mfa_enabled"`
+	SSOEnabled bool `json:"sso_enabled"`
+
+	ConsentMethod string    `json:"consent_method"`
+	ConsentedAt   time.Time `json:"consented_at"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}

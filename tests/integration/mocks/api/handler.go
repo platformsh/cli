@@ -14,8 +14,6 @@ type Handler struct {
 
 	t *testing.T
 
-	MyUserID string
-
 	store
 }
 

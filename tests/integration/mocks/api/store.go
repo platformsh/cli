@@ -6,6 +6,7 @@ import (
 
 type store struct {
 	mux           sync.RWMutex
+	myUser        *User
 	orgs          map[string]*Org
 	projects      map[string]*Project
 	environments  map[string]*Environment
@@ -44,4 +45,8 @@ func (s *store) SetUserGrants(grants []*UserGrant) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	s.userGrants = grants
+}
+
+func (s *store) SetMyUser(u *User) {
+	s.myUser = u
 }

@@ -10,7 +10,7 @@ import (
 )
 
 func (h *Handler) handleUsersMe(w http.ResponseWriter, _ *http.Request) {
-	_ = json.NewEncoder(w).Encode(map[string]string{"id": h.MyUserID})
+	_ = json.NewEncoder(w).Encode(h.store.myUser)
 }
 
 func (h *Handler) handleUserRefs(w http.ResponseWriter, req *http.Request) {

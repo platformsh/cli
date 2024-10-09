@@ -28,11 +28,13 @@ func TestOrgList(t *testing.T) {
 		}
 	}
 
+	myUserID := "user-id-1"
+
 	apiHandler := api.NewHandler(t)
-	apiHandler.MyUserID = "user-id-1"
+	apiHandler.SetMyUser(&api.User{ID: myUserID})
 	apiHandler.SetOrgs([]*api.Org{
-		makeOrg("org-id-1", "acme", "ACME Inc.", apiHandler.MyUserID),
-		makeOrg("org-id-2", "four-seasons", "Four Seasons Total Landscaping", apiHandler.MyUserID),
+		makeOrg("org-id-1", "acme", "ACME Inc.", myUserID),
+		makeOrg("org-id-2", "four-seasons", "Four Seasons Total Landscaping", myUserID),
 		makeOrg("org-id-3", "duff", "Duff Beer", "user-id-2"),
 	})
 

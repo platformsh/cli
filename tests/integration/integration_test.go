@@ -52,5 +52,6 @@ func testEnv() []string {
 		"CLI_CONFIG_FILE="+configPath,
 		EnvPrefix+"NO_INTERACTION=1",
 		EnvPrefix+"VERSION=1.0.0",
+		EnvPrefix+"HOME="+os.TempDir(),
 	)
 }

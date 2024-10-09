@@ -22,7 +22,7 @@ func TestProjectList(t *testing.T) {
 	vendor := "platformsh"
 
 	apiHandler := api.NewHandler(t)
-	apiHandler.MyUserID = myUserID
+	apiHandler.SetMyUser(&api.User{ID: myUserID})
 	apiServer := httptest.NewServer(apiHandler)
 	defer apiServer.Close()
 

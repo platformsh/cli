@@ -20,7 +20,6 @@ func TestProjectCreate(t *testing.T) {
 	defer authServer.Close()
 
 	apiHandler := api.NewHandler(t)
-	apiHandler.MyUserID = "my-user-id"
 	apiHandler.SetOrgs([]*api.Org{{
 		ID:    "cli-test-id",
 		Name:  "cli-tests",
