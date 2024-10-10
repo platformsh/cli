@@ -5,7 +5,6 @@
 package tests
 
 import (
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -28,16 +27,26 @@ func getCommandName(t *testing.T) string {
 	}
 	candidate := os.Getenv("TEST_CLI_PATH")
 	if candidate == "" {
-		t.Skip("enable by setting TEST_CLI_PATH (or use `make integration-test`)")
+		candidate = "platform"
+	}
+	if !filepath.IsAbs(candidate) {
+		c, err := filepath.Abs("../" + candidate)
+		require.NoError(t, err)
+		candidate = c
+	}
+	_, err := os.Stat(candidate)
+	switch {
+	case os.IsNotExist(err) && os.Getenv("TEST_CLI_PATH") == "":
+		t.Skipf("skipping integration tests: CLI not found at path: %s", candidate)
+	case err != nil:
+		require.NoError(t, err)
 	}
 	versionCmd := exec.Command(candidate, "--version")
 	versionCmd.Env = testEnv()
 	output, err := versionCmd.Output()
 	require.NoError(t, err, "running '--version' must succeed under the CLI at: %s", candidate)
 	require.Contains(t, string(output), "Platform Test CLI ")
-	if testing.Verbose() {
-		log.Printf("Validated CLI command %s", candidate)
-	}
+	t.Logf("Validated CLI command %s", candidate)
 	_validatedCommand = candidate
 	return _validatedCommand
 }
