@@ -1,4 +1,4 @@
-package integration
+package tests
 
 import (
 	"net/http/httptest"
@@ -7,12 +7,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/platformsh/cli/tests/integration/mocks"
-	"github.com/platformsh/cli/tests/integration/mocks/api"
+	"github.com/platformsh/cli/internal/mock"
+	"github.com/platformsh/cli/internal/mock/api"
 )
 
 func TestSSHCerts(t *testing.T) {
-	authServer := mocks.NewAuthServer(t)
+	authServer := mock.NewAuthServer(t)
 	defer authServer.Close()
 
 	myUserID := "my-user-id"

@@ -1,4 +1,5 @@
-package mocks
+// Package mock provides API mocks for testing CLI functionality.
+package mock
 
 import (
 	"crypto/ed25519"

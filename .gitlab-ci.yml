@@ -134,7 +134,7 @@ integration-test-linux:
   dependencies:
     - build
   script: |
-    TEST_CLI_PATH=$PWD/dist/platform_linux_amd64_v1/platform go test -failfast -mod=readonly -v ./tests/integration/...
+    TEST_CLI_PATH=$PWD/dist/platform_linux_amd64_v1/platform go test -failfast -mod=readonly -v ./tests/...
 
 release:
   stage: release

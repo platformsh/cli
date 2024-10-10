@@ -1,4 +1,8 @@
-package integration
+// Package tests contains integration tests, which run the CLI as a shell command and verify its output.
+//
+// A TEST_CLI_PATH environment variable can be provided to override the path to a
+// CLI executable. It defaults to `platform` in the repository root.
+package tests
 
 import (
 	"log"
@@ -7,9 +11,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/platformsh/cli/tests/integration/mocks"
-
 	"github.com/stretchr/testify/require"
+
+	"github.com/platformsh/cli/internal/mock"
 )
 
 var _validatedCommand string
@@ -51,7 +55,7 @@ func authenticatedCommand(t *testing.T, apiURL, authURL string, args ...string) 
 		cmd.Env,
 		EnvPrefix+"API_BASE_URL="+apiURL,
 		EnvPrefix+"API_AUTH_URL="+authURL,
-		EnvPrefix+"TOKEN="+mocks.ValidAPITokens[0],
+		EnvPrefix+"TOKEN="+mock.ValidAPITokens[0],
 	)
 	return cmd
 }
