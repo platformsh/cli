@@ -98,5 +98,6 @@ func testEnv() []string {
 		EnvPrefix+"NO_INTERACTION=1",
 		EnvPrefix+"VERSION=1.0.0",
 		EnvPrefix+"HOME="+os.TempDir(),
+		"TZ=UTC",
 	)
 }

@@ -63,6 +63,7 @@ func NewHandler(t *testing.T) *Handler {
 	})
 
 	h.Mux.Get("/projects/{id}", h.handleGetProject)
+	h.Mux.Patch("/projects/{id}", h.handlePatchProject)
 	h.Mux.Get("/projects/{id}/environments", h.handleListEnvironments)
 	h.Mux.Get("/projects/{project_id}/environments/{environment_id}/deployments/current", h.handleGetCurrentDeployment)
 	h.Mux.Get("/projects/{project_id}/user-access", h.handleProjectUserAccess)

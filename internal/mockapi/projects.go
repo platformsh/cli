@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
@@ -34,6 +35,26 @@ func (h *Handler) handleGetProject(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNotFound)
+}
+
+func (h *Handler) handlePatchProject(w http.ResponseWriter, req *http.Request) {
+	h.store.Lock()
+	defer h.store.Unlock()
+	projectID := chi.URLParam(req, "id")
+	p, ok := h.store.projects[projectID]
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	patched := *p
+	err := json.NewDecoder(req.Body).Decode(&patched)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	patched.UpdatedAt = time.Now()
+	h.store.projects[projectID] = &patched
+	_ = json.NewEncoder(w).Encode(&patched)
 }
 
 func (h *Handler) handleListEnvironments(w http.ResponseWriter, req *http.Request) {
