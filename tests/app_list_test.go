@@ -1,10 +1,7 @@
 package tests
 
 import (
-	"bytes"
-	"io"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
@@ -23,14 +20,16 @@ func TestAppList(t *testing.T) {
 	apiServer := httptest.NewServer(apiHandler)
 	defer apiServer.Close()
 
+	projectID := "nu8ohgeizah1a"
+
 	apiHandler.SetProjects([]*mockapi.Project{{
-		ID: mockProjectID,
-		Links: mockapi.MakeHALLinks("self=/projects/"+mockProjectID,
-			"environments=/projects/"+mockProjectID+"/environments"),
+		ID: projectID,
+		Links: mockapi.MakeHALLinks("self=/projects/"+projectID,
+			"environments=/projects/"+projectID+"/environments"),
 		DefaultBranch: "main",
 	}})
 
-	main := makeEnv(mockProjectID, "main", "production", "active", nil)
+	main := makeEnv(projectID, "main", "production", "active", nil)
 	main.SetCurrentDeployment(&mockapi.Deployment{
 		WebApps: map[string]mockapi.App{
 			"app": {Name: "app", Type: "golang:1.23", Size: "AUTO"},
@@ -43,14 +42,14 @@ func TestAppList(t *testing.T) {
 				Worker: mockapi.WorkerInfo{Commands: mockapi.Commands{Start: "sleep 60"}},
 			},
 		},
-		Links: mockapi.MakeHALLinks("self=/projects/" + mockProjectID + "/environments/main/deployment/current"),
+		Links: mockapi.MakeHALLinks("self=/projects/" + projectID + "/environments/main/deployment/current"),
 	})
 
 	envs := []*mockapi.Environment{
 		main,
-		makeEnv(mockProjectID, "staging", "staging", "active", "main"),
-		makeEnv(mockProjectID, "dev", "development", "active", "staging"),
-		makeEnv(mockProjectID, "fix", "development", "inactive", "dev"),
+		makeEnv(projectID, "staging", "staging", "active", "main"),
+		makeEnv(projectID, "dev", "development", "active", "staging"),
+		makeEnv(projectID, "fix", "development", "inactive", "dev"),
 	}
 
 	apiHandler.SetEnvironments(envs)
@@ -60,7 +59,7 @@ func TestAppList(t *testing.T) {
 	assert.Equal(t, strings.TrimLeft(`
 Name	Type
 app	golang:1.23
-`, "\n"), run("apps", "-p", mockProjectID, "-e", ".", "--refresh", "--format", "tsv"))
+`, "\n"), run("apps", "-p", projectID, "-e", ".", "--refresh", "--format", "tsv"))
 
 	assert.Equal(t, strings.TrimLeft(`
 +--------------+-------------+-------------------+
@@ -68,15 +67,10 @@ app	golang:1.23
 +--------------+-------------+-------------------+
 | app--worker1 | golang:1.23 | start: 'sleep 60' |
 +--------------+-------------+-------------------+
-`, "\n"), run("workers", "-v", "-p", mockProjectID, "-e", "."))
+`, "\n"), run("workers", "-v", "-p", projectID, "-e", "."))
 
-	servicesCmd := authenticatedCommand(t, apiServer.URL, authServer.URL,
-		"services", "-p", mockProjectID, "-e", "main")
-	stdErrBuf := bytes.Buffer{}
-	servicesCmd.Stderr = &stdErrBuf
-	if testing.Verbose() {
-		servicesCmd.Stderr = io.MultiWriter(&stdErrBuf, os.Stderr)
-	}
-	require.NoError(t, servicesCmd.Run())
-	assert.Contains(t, stdErrBuf.String(), "No services found")
+	runCombinedOutput := runnerCombinedOutput(t, apiServer.URL, authServer.URL)
+	co, err := runCombinedOutput("services", "-p", projectID, "-e", "main")
+	require.NoError(t, err)
+	assert.Contains(t, co, "No services found")
 }

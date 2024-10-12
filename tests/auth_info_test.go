@@ -46,7 +46,7 @@ func TestAuthInfo(t *testing.T) {
 | email                 | my-user@example.com |
 | phone_number_verified | true                |
 +-----------------------+---------------------+
-`, "\n"), run("auth:info", "-v"))
+`, "\n"), run("auth:info", "-v", "--refresh"))
 
 	assert.Equal(t, "my-user-id\n", run("auth:info", "-P", "id"))
 }

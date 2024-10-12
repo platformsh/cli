@@ -1,13 +1,16 @@
 package mockapi
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"path"
 	"slices"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/oklog/ulid/v2"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,7 +41,7 @@ func (h *Handler) handleListOrgs(w http.ResponseWriter, _ *http.Request) {
 		orgs = append(orgs, o)
 		ownerIDs[o.Owner] = struct{}{}
 	}
-	slices.SortFunc(orgs, func(a, b *Org) int { return strings.Compare(a.ID, b.ID) })
+	slices.SortFunc(orgs, func(a, b *Org) int { return strings.Compare(a.Name, b.Name) })
 	_ = json.NewEncoder(w).Encode(struct {
 		Items []*Org   `json:"items"`
 		Links HalLinks `json:"_links"`
@@ -53,7 +56,6 @@ func (h *Handler) handleGetOrg(w http.ResponseWriter, req *http.Request) {
 	defer h.store.RUnlock()
 	var org *Org
 
-	// TODO why doesn't Chi decode this?
 	orgID := chi.URLParam(req, "id")
 	if strings.HasPrefix(orgID, "name%3D") {
 		name := strings.TrimPrefix(orgID, "name%3D")
@@ -73,4 +75,46 @@ func (h *Handler) handleGetOrg(w http.ResponseWriter, req *http.Request) {
 	}
 
 	_ = json.NewEncoder(w).Encode(org)
+}
+
+func (h *Handler) handleCreateOrg(w http.ResponseWriter, req *http.Request) {
+	h.store.Lock()
+	defer h.store.Unlock()
+	var org Org
+	err := json.NewDecoder(req.Body).Decode(&org)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	for _, o := range h.store.orgs {
+		if o.Name == org.Name {
+			w.WriteHeader(http.StatusConflict)
+			return
+		}
+	}
+	org.ID = ulid.MustNew(ulid.Now(), rand.Reader).String()
+	org.Owner = h.store.myUser.ID
+	org.Capabilities = []string{}
+	org.Links = MakeHALLinks("self=/organizations/" + url.PathEscape(org.ID))
+	h.store.orgs[org.ID] = &org
+	_ = json.NewEncoder(w).Encode(&org)
+}
+
+func (h *Handler) handlePatchOrg(w http.ResponseWriter, req *http.Request) {
+	h.store.Lock()
+	defer h.store.Unlock()
+	projectID := chi.URLParam(req, "id")
+	p, ok := h.store.orgs[projectID]
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	patched := *p
+	err := json.NewDecoder(req.Body).Decode(&patched)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	h.store.orgs[projectID] = &patched
+	_ = json.NewEncoder(w).Encode(&patched)
 }

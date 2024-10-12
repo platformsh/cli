@@ -10,6 +10,7 @@ require (
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/gofrs/flock v0.8.1
 	github.com/mattn/go-isatty v0.0.20
+	github.com/oklog/ulid/v2 v2.1.0
 	github.com/platformsh/platformify v0.2.11
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
