@@ -117,11 +117,12 @@ type Deployment struct {
 }
 
 type Org struct {
-	ID    string   `json:"id"`
-	Name  string   `json:"name"`
-	Label string   `json:"label"`
-	Owner string   `json:"owner_id"`
-	Links HalLinks `json:"_links"`
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	Label        string   `json:"label"`
+	Owner        string   `json:"owner_id"`
+	Capabilities []string `json:"capabilities"`
+	Links        HalLinks `json:"_links"`
 }
 
 func (o *Org) AsRef() *OrgRef {
@@ -140,6 +141,15 @@ type OrgRef struct {
 	Owner string `json:"owner_id"`
 }
 
+type ProjectUserGrant struct {
+	ProjectID      string    `json:"project_id"`
+	OrganizationID string    `json:"organization_id"`
+	UserID         string    `json:"user_id"`
+	Permissions    []string  `json:"permissions"`
+	GrantedAt      time.Time `json:"granted_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
 type UserGrant struct {
 	ResourceID     string    `json:"resource_id"`
 	ResourceType   string    `json:"resource_type"`
@@ -151,9 +161,11 @@ type UserGrant struct {
 }
 
 type UserRef struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Username  string `json:"username"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 type ProjectRef struct {

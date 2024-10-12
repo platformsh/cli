@@ -18,7 +18,7 @@ func (h *Handler) handleUserRefs(w http.ResponseWriter, req *http.Request) {
 	ids := strings.Split(req.Form.Get("in"), ",")
 	userRefs := make(map[string]UserRef, len(ids))
 	for _, id := range ids {
-		userRefs[id] = UserRef{ID: id, Email: id + "@example.com", Username: id}
+		userRefs[id] = UserRef{ID: id, Email: id + "@example.com", Username: id, FirstName: "User", LastName: id}
 	}
 	_ = json.NewEncoder(w).Encode(userRefs)
 }
