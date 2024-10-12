@@ -35,31 +35,32 @@ func TestOrgList(t *testing.T) {
 | Name         | Label                          | Owner email           |
 +--------------+--------------------------------+-----------------------+
 | acme         | ACME Inc.                      | user-id-1@example.com |
-| four-seasons | Four Seasons Total Landscaping | user-id-1@example.com |
 | duff         | Duff Beer                      | user-id-2@example.com |
+| four-seasons | Four Seasons Total Landscaping | user-id-1@example.com |
 +--------------+--------------------------------+-----------------------+
 `, "\n"), run("orgs"))
 
 	assert.Equal(t, strings.TrimLeft(`
 Name	Label	Owner email
 acme	ACME Inc.	user-id-1@example.com
-four-seasons	Four Seasons Total Landscaping	user-id-1@example.com
 duff	Duff Beer	user-id-2@example.com
+four-seasons	Four Seasons Total Landscaping	user-id-1@example.com
 `, "\n"), run("orgs", "--format", "plain"))
 
 	assert.Equal(t, strings.TrimLeft(`
 org-id-1,acme
-org-id-2,four-seasons
 org-id-3,duff
+org-id-2,four-seasons
 `, "\n"), run("orgs", "--format", "csv", "--columns", "id,name", "--no-header"))
 }
 
 func makeOrg(id, name, label, owner string) *mockapi.Org {
 	return &mockapi.Org{
-		ID:    id,
-		Name:  name,
-		Label: label,
-		Owner: owner,
-		Links: mockapi.MakeHALLinks("self=/organizations/" + url.PathEscape(id)),
+		ID:           id,
+		Name:         name,
+		Label:        label,
+		Owner:        owner,
+		Capabilities: []string{},
+		Links:        mockapi.MakeHALLinks("self=/organizations/" + url.PathEscape(id)),
 	}
 }

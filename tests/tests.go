@@ -5,6 +5,7 @@
 package tests
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -75,12 +76,25 @@ func authenticatedCommand(t *testing.T, apiURL, authURL string, args ...string) 
 }
 
 // runnerWithAuth returns a function to authenticate and run a CLI command, returning stdout output.
+// This asserts that the command has not failed.
 func runnerWithAuth(t *testing.T, apiURL, authURL string) func(args ...string) string {
 	return func(args ...string) string {
 		cmd := authenticatedCommand(t, apiURL, authURL, args...)
 		b, err := cmd.Output()
 		require.NoError(t, err)
 		return string(b)
+	}
+}
+
+// runnerCombinedOutput returns a function to authenticate and run a CLI command, returning combined output.
+func runnerCombinedOutput(t *testing.T, apiURL, authURL string) func(args ...string) (string, error) {
+	return func(args ...string) (string, error) {
+		cmd := authenticatedCommand(t, apiURL, authURL, args...)
+		var b bytes.Buffer
+		cmd.Stdout = &b
+		cmd.Stderr = &b
+		err := cmd.Run()
+		return b.String(), err
 	}
 }
 

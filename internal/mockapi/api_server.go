@@ -45,7 +45,9 @@ func NewHandler(t *testing.T) *Handler {
 	})
 
 	h.Mux.Get("/organizations", h.handleListOrgs)
+	h.Mux.Post("/organizations", h.handleCreateOrg)
 	h.Mux.Get("/organizations/{id}", h.handleGetOrg)
+	h.Mux.Patch("/organizations/{id}", h.handlePatchOrg)
 	h.Mux.Get("/users/{id}/organizations", h.handleListOrgs)
 	h.Mux.Get("/ref/organizations", h.handleOrgRefs)
 
