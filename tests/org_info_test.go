@@ -26,10 +26,7 @@ func TestOrgInfo(t *testing.T) {
 
 	run := runnerWithAuth(t, apiServer.URL, authServer.URL)
 
-	// TODO disable the cache?
-	run("cc")
-
-	assert.Contains(t, run("org:info", "-o", "org-1", "--format", "csv"), `Property,Value
+	assert.Contains(t, run("org:info", "-o", "org-1", "--format", "csv", "--refresh"), `Property,Value
 id,org-id-1
 name,org-1
 label,Org 1
@@ -42,9 +39,6 @@ capabilities,`)
 	co, err := runCombinedOutput("org:info", "-o", "org-1", "label", "New Label")
 	assert.NoError(t, err)
 	assert.Contains(t, co, "Property label set to: New Label\n")
-
-	// TODO fix the legacy CLI to invalidate the cache when the org is updated: this cache clear step should not be needed
-	run("cc")
 
 	assert.Equal(t, "New Label\n", run("org:info", "-o", "org-1", "label"))
 }
