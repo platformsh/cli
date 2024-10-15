@@ -86,11 +86,18 @@ func (e *Environment) SetCurrentDeployment(d *Deployment) {
 	e.currentDeployment = d
 }
 
+type Mount struct {
+	Source     string `json:"source"`
+	SourcePath string `json:"source_path"`
+}
+
 type App struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
 	Size string `json:"size"`
-	Disk string `json:"disk"`
+	Disk int    `json:"disk"`
+
+	Mounts map[string]Mount `json:"mounts"`
 }
 
 type Commands struct {
