@@ -2,7 +2,7 @@ stages:
   - check
   - php
   - build
-  - behave-test
+  - integration-test
   - release
 
 .go-cache:
@@ -127,18 +127,14 @@ build:
       - dist/
     expire_in: 1 day
 
-behave-test-linux:
-  stage: behave-test
+integration-test-linux:
+  stage: integration-test
+  image: cimg/go:1.22
+  extends: .go-cache
   dependencies:
     - build
-  variables:
-    PATH_CLI: platform_linux_amd64_v1/platform
-  before_script:
-    - apt-get install -y python3 python3-pip
-    - pip3 install --no-cache-dir behave sh selenium requests
-  script:
-    - bash tests/test-behave.sh
-  image: pjcdawkins/platformsh-cli
+  script: |
+    TEST_CLI_PATH=$PWD/dist/platform_linux_amd64_v1/platform go test -v ./tests/...
 
 release:
   stage: release
@@ -152,7 +148,7 @@ release:
     - make release
   dependencies:
     - unit-test-lint
-    - behave-test-linux
+    - integration-test-linux
     - build-php-linux-arm
     - build-php-linux-x86
     - build-php-macos-arm
