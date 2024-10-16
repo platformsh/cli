@@ -12,6 +12,8 @@ type store struct {
 	environments  map[string]*Environment
 	subscriptions map[string]*Subscription
 	userGrants    []*UserGrant
+
+	projectBackups map[string]map[string]*Backup
 }
 
 func (s *store) SetEnvironments(envs []*Environment) {
@@ -49,4 +51,30 @@ func (s *store) SetUserGrants(grants []*UserGrant) {
 
 func (s *store) SetMyUser(u *User) {
 	s.myUser = u
+}
+
+func (s *store) SetProjectBackups(projectID string, backups []*Backup) {
+	s.Lock()
+	defer s.Unlock()
+	if s.projectBackups == nil {
+		s.projectBackups = make(map[string]map[string]*Backup)
+	}
+	if s.projectBackups[projectID] == nil {
+		s.projectBackups[projectID] = make(map[string]*Backup)
+	}
+	for _, b := range backups {
+		s.projectBackups[projectID][b.ID] = b
+	}
+}
+
+func (s *store) addProjectBackup(projectID string, backup *Backup) {
+	s.Lock()
+	defer s.Unlock()
+	if s.projectBackups == nil {
+		s.projectBackups = make(map[string]map[string]*Backup)
+	}
+	if s.projectBackups[projectID] == nil {
+		s.projectBackups[projectID] = make(map[string]*Backup)
+	}
+	s.projectBackups[projectID][backup.ID] = backup
 }

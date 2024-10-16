@@ -213,3 +213,19 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type Backup struct {
+	ID            string    `json:"id"`
+	EnvironmentID string    `json:"environment"`
+	Status        string    `json:"status"`
+	Safe          bool      `json:"safe"`
+	Restorable    bool      `json:"restorable"`
+	Automated     bool      `json:"automated"`
+	CommitID      string    `json:"commit_id"`
+	ExpiresAt     time.Time `json:"expires_at"`
+
+	Links HalLinks `json:"_links"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}

@@ -39,6 +39,7 @@ func TestProjectCreate(t *testing.T) {
 		cmd.Stderr = io.MultiWriter(&stdErrBuf, os.Stderr)
 	}
 	cmd.Stdout = &stdOutBuf
+	t.Log("Running:", cmd)
 	require.NoError(t, cmd.Run())
 
 	// stdout should contain the project ID.

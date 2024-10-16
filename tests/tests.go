@@ -80,6 +80,7 @@ func authenticatedCommand(t *testing.T, apiURL, authURL string, args ...string) 
 func runnerWithAuth(t *testing.T, apiURL, authURL string) func(args ...string) string {
 	return func(args ...string) string {
 		cmd := authenticatedCommand(t, apiURL, authURL, args...)
+		t.Log("Running:", cmd)
 		b, err := cmd.Output()
 		require.NoError(t, err)
 		return string(b)
@@ -93,6 +94,7 @@ func runnerCombinedOutput(t *testing.T, apiURL, authURL string) func(args ...str
 		var b bytes.Buffer
 		cmd.Stdout = &b
 		cmd.Stderr = &b
+		t.Log("Running:", cmd)
 		err := cmd.Run()
 		return b.String(), err
 	}
