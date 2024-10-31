@@ -1,0 +1,80 @@
+import React, { useState } from 'react';
+import { Wallet, TrendingUp, PiggyBank, DollarSign, AlertTriangle, Brain, Building, LineChart } from 'lucide-react';
+import InvestmentCard from './components/InvestmentCard';
+import SavingsTracker from './components/SavingsTracker';
+import FinancialTips from './components/FinancialTips';
+import AIAnalysis from './components/AIAnalysis';
+import StockMarketLive from './components/StockMarketLive';
+import RealEstateOpportunities from './components/RealEstateOpportunities';
+import MarketTrends from './components/MarketTrends';
+
+function App() {
+  const [currentBalance, setCurrentBalance] = useState<number>(0);
+  const [savingsGoal, setSavingsGoal] = useState<number>(0);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-indigo-900 text-white">
+      <header className="bg-black/20 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Wallet className="h-8 w-8 text-blue-400" />
+              <h1 className="text-2xl font-bold">SmartWealth AI Advisor</h1>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-purple-400" />
+                <span className="text-sm text-purple-300">AI Active</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-green-400" />
+                <span className="font-semibold">{currentBalance.toLocaleString('fr-FR')} €</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="mb-8 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-yellow-500" />
+          <p className="text-yellow-200 text-sm">
+            Attention: Les investissements comportent des risques. Consultez un conseiller financier professionnel avant toute décision d'investissement.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <StockMarketLive />
+          <AIAnalysis />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <MarketTrends />
+          <SavingsTracker 
+            currentBalance={currentBalance}
+            savingsGoal={savingsGoal}
+            onUpdateBalance={setCurrentBalance}
+            onUpdateGoal={setSavingsGoal}
+          />
+          <InvestmentCard 
+            title="Investissements Recommandés"
+            icon={<TrendingUp className="h-6 w-6 text-green-400" />}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <RealEstateOpportunities />
+          <FinancialTips />
+        </div>
+      </main>
+
+      <footer className="bg-black/20 mt-12 py-6">
+        <div className="container mx-auto px-4 text-center text-sm text-gray-400">
+          <p>© 2024 SmartWealth AI Advisor. Tous droits réservés.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export default App;
