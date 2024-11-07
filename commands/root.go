@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/fatih/color"
@@ -17,7 +18,6 @@ import (
 	"github.com/platformsh/platformify/vendorization"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/exp/slices"
 
 	"github.com/platformsh/cli/internal"
 	"github.com/platformsh/cli/internal/config"
