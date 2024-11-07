@@ -23,26 +23,25 @@ var _validatedCommand string
 const mockProjectID = "abcdefg123456"
 
 func getCommandName(t *testing.T) string {
+	if testing.Short() {
+		t.Skip("skipping integration test due to -short flag")
+	}
 	if _validatedCommand != "" {
 		return _validatedCommand
 	}
 	candidate := os.Getenv("TEST_CLI_PATH")
-	if candidate == "" {
-		candidate = "platform"
-	}
-	if !filepath.IsAbs(candidate) {
-		c, err := filepath.Abs("../" + candidate)
+	if candidate != "" {
+		_, err := os.Stat(candidate)
+		require.NoError(t, err)
+	} else {
+		matches, _ := filepath.Glob("../dist/platform_*/platform")
+		if len(matches) == 0 {
+			t.Skipf("skipping integration tests: CLI not found matching path: %s", "../dist/platform_*/platform")
+			return ""
+		}
+		c, err := filepath.Abs(matches[0])
 		require.NoError(t, err)
 		candidate = c
-	}
-	_, err := os.Stat(candidate)
-	switch {
-	case os.IsNotExist(err) && os.Getenv("TEST_CLI_PATH") == "":
-		t.Skipf("skipping integration tests: CLI not found at path: %s", candidate)
-	case err != nil:
-		require.NoError(t, err)
-	case testing.Short():
-		t.Skip("skipping integration test due to -short flag")
 	}
 	versionCmd := exec.Command(candidate, "--version")
 	versionCmd.Env = testEnv()

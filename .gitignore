@@ -4,9 +4,6 @@ php-*
 !internal/legacy/archives/windows_php.ini.tpl
 completion
 
-# Executable built with `go build ./cmd/platform` (or `make platform`)
-/platform
-
 # Binaries for programs and plugins
 *.exe
 *.exe~
