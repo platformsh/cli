@@ -11,6 +11,7 @@ service:
   name: 'Platform.sh Testing'
   env_prefix: 'PLATFORM_'
   project_config_dir: '.platform'
+  console_url: 'https://console.cli-tests.example.com'
 
 api:
   # Placeholder URLs which can be replaced during tests.

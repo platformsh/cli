@@ -33,6 +33,18 @@ type Subscription struct {
 	ProjectUI     string   `json:"project_ui"`
 }
 
+type CanCreateRequiredAction struct {
+	Action string `json:"action"`
+	Type   string `json:"type"`
+}
+
+type CanCreateResponse struct {
+	CanCreate bool   `json:"can_create"`
+	Message   string `json:"message"`
+
+	RequiredAction *CanCreateRequiredAction `json:"required_action"`
+}
+
 type ProjectRepository struct {
 	URL string `json:"url"`
 }
