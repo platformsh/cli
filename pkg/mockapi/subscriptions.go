@@ -70,3 +70,14 @@ func (h *Handler) handleGetSubscription(w http.ResponseWriter, req *http.Request
 	}
 	_ = json.NewEncoder(w).Encode(sub)
 }
+
+func (h *Handler) handleCanCreateSubscriptions(w http.ResponseWriter, req *http.Request) {
+	h.store.RLock()
+	defer h.store.RUnlock()
+	id := chi.URLParam(req, "id")
+	cc := h.store.canCreate[id]
+	if cc == nil {
+		cc = &CanCreateResponse{CanCreate: true}
+	}
+	_ = json.NewEncoder(w).Encode(cc)
+}
