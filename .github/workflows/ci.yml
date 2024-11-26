@@ -9,9 +9,6 @@ on:
 permissions:
   contents: read
 
-env:
-  GOPRIVATE: github.com/platformsh
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -37,20 +34,6 @@ jobs:
           touch internal/legacy/archives/php_darwin_amd64
           touch internal/legacy/archives/php_darwin_arm64
           touch internal/config/embedded-config.yaml
-
-      - name: Add SSH Go Module Private Key
-        env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.GO_MODULE_PRIVATE_KEY }}"
-          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
-
-      - name: Setup access for private go modules
-        run: |
-          git config --global url."ssh://git@github.com/".insteadOf https://github.com/
 
       - name: Run linter
         uses: golangci/golangci-lint-action@v3
