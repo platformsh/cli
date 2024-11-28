@@ -127,15 +127,6 @@ build:
       - dist/
     expire_in: 1 day
 
-integration-test-linux:
-  stage: integration-test
-  image: cimg/go:1.22
-  extends: .go-cache
-  dependencies:
-    - build
-  script: |
-    TEST_CLI_PATH=$PWD/dist/platform_linux_amd64_v1/platform go test -v ./tests/...
-
 release:
   stage: release
   rules:

@@ -84,11 +84,7 @@ release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Rel
 .PHONY: test
 test: ## Run unit tests
 	go clean -testcache
-	go test -v -race -short -cover ./...
-
-.PHONY: integration-test
-integration-test: single
-	go test -v ./tests/...
+	go test -v -race -mod=readonly -cover ./...
 
 golangci-lint:
 	command -v golangci-lint >/dev/null || go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)

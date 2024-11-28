@@ -13,6 +13,8 @@ type store struct {
 	subscriptions map[string]*Subscription
 	userGrants    []*UserGrant
 
+	canCreate map[string]*CanCreateResponse
+
 	projectBackups map[string]map[string]*Backup
 }
 
@@ -41,6 +43,15 @@ func (s *store) SetOrgs(orgs []*Org) {
 	for _, o := range orgs {
 		s.orgs[o.ID] = o
 	}
+}
+
+func (s *store) SetCanCreate(orgID string, r *CanCreateResponse) {
+	s.Lock()
+	defer s.Unlock()
+	if s.canCreate == nil {
+		s.canCreate = make(map[string]*CanCreateResponse)
+	}
+	s.canCreate[orgID] = r
 }
 
 func (s *store) SetUserGrants(grants []*UserGrant) {
