@@ -182,6 +182,9 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 		c.Version,
 	))
 	if err := cmd.Run(); err != nil {
+		// Cleanup cache directory
+		c.debugLog("removing cache directory: %s", c.cacheDir())
+		os.RemoveAll(c.cacheDir())
 		return fmt.Errorf("could not run legacy CLI command: %w", err)
 	}
 
