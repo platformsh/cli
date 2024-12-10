@@ -80,7 +80,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 				Stdin:              cmd.InOrStdin(),
 			}
 			if err := c.Init(); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
+				log.Println(color.RedString(err.Error()))
 				os.Exit(1)
 				return
 			}
