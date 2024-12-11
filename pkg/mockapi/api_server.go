@@ -46,22 +46,22 @@ func NewHandler(t *testing.T) *Handler {
 
 	h.Mux.Get("/organizations", h.handleListOrgs)
 	h.Mux.Post("/organizations", h.handleCreateOrg)
-	h.Mux.Get("/organizations/{id}", h.handleGetOrg)
-	h.Mux.Patch("/organizations/{id}", h.handlePatchOrg)
+	h.Mux.Get("/organizations/{organization_id}", h.handleGetOrg)
+	h.Mux.Patch("/organizations/{organization_id}", h.handlePatchOrg)
 	h.Mux.Get("/users/{id}/organizations", h.handleListOrgs)
 	h.Mux.Get("/ref/organizations", h.handleOrgRefs)
 
-	h.Mux.Post("/organizations/{id}/subscriptions", h.handleCreateSubscription)
+	h.Mux.Post("/organizations/{organization_id}/subscriptions", h.handleCreateSubscription)
 	h.Mux.Get("/subscriptions/{id}", h.handleGetSubscription)
-	h.Mux.Get("/organizations/{id}/subscriptions/can-create", h.handleCanCreateSubscriptions)
-	h.Mux.Get("/organizations/{id}/setup/options", func(w http.ResponseWriter, _ *http.Request) {
+	h.Mux.Get("/organizations/{organization_id}/subscriptions/can-create", h.handleCanCreateSubscriptions)
+	h.Mux.Get("/organizations/{organization_id}/setup/options", func(w http.ResponseWriter, _ *http.Request) {
 		type options struct {
 			Plans   []string `json:"plans"`
 			Regions []string `json:"regions"`
 		}
 		_ = json.NewEncoder(w).Encode(options{[]string{"development"}, []string{"test-region"}})
 	})
-	h.Mux.Get("/organizations/{id}/subscriptions/estimate", func(w http.ResponseWriter, _ *http.Request) {
+	h.Mux.Get("/organizations/{organization_id}/subscriptions/estimate", func(w http.ResponseWriter, _ *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]any{"total": "$1,000 USD"})
 	})
 
