@@ -42,6 +42,7 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 		Links:          MakeHALLinks("self=/projects/" + projectID),
 		Repository:     ProjectRepository{URL: projectID + "@git.example.com:" + projectID + ".git"},
 		SubscriptionID: sub.ID,
+		Organization:   chi.URLParam(req, "id"),
 	}
 	h.store.Unlock()
 
