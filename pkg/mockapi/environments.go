@@ -15,7 +15,7 @@ import (
 func (h *Handler) handleListEnvironments(w http.ResponseWriter, req *http.Request) {
 	h.store.RLock()
 	defer h.store.RUnlock()
-	projectID := chi.URLParam(req, "id")
+	projectID := chi.URLParam(req, "project_id")
 	var envs []*Environment
 	for _, e := range h.store.environments {
 		if e.Project == projectID {
