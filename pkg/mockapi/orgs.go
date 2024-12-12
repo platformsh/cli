@@ -56,7 +56,7 @@ func (h *Handler) handleGetOrg(w http.ResponseWriter, req *http.Request) {
 	defer h.store.RUnlock()
 	var org *Org
 
-	orgID := chi.URLParam(req, "id")
+	orgID := chi.URLParam(req, "organization_id")
 	if strings.HasPrefix(orgID, "name%3D") {
 		name := strings.TrimPrefix(orgID, "name%3D")
 		for _, o := range h.store.orgs {
@@ -103,8 +103,8 @@ func (h *Handler) handleCreateOrg(w http.ResponseWriter, req *http.Request) {
 func (h *Handler) handlePatchOrg(w http.ResponseWriter, req *http.Request) {
 	h.store.Lock()
 	defer h.store.Unlock()
-	projectID := chi.URLParam(req, "id")
-	p, ok := h.store.orgs[projectID]
+	orgID := chi.URLParam(req, "organization_id")
+	p, ok := h.store.orgs[orgID]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -115,6 +115,6 @@ func (h *Handler) handlePatchOrg(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	h.store.orgs[projectID] = &patched
+	h.store.orgs[orgID] = &patched
 	_ = json.NewEncoder(w).Encode(&patched)
 }

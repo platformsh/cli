@@ -42,7 +42,7 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 		Links:          MakeHALLinks("self=/projects/" + projectID),
 		Repository:     ProjectRepository{URL: projectID + "@git.example.com:" + projectID + ".git"},
 		SubscriptionID: sub.ID,
-		Organization:   chi.URLParam(req, "id"),
+		Organization:   chi.URLParam(req, "organization_id"),
 	}
 	h.store.Unlock()
 
@@ -63,7 +63,7 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 func (h *Handler) handleGetSubscription(w http.ResponseWriter, req *http.Request) {
 	h.store.RLock()
 	defer h.store.RUnlock()
-	id := chi.URLParam(req, "id")
+	id := chi.URLParam(req, "subscription_id")
 	sub := h.store.subscriptions[id]
 	if sub == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -75,7 +75,7 @@ func (h *Handler) handleGetSubscription(w http.ResponseWriter, req *http.Request
 func (h *Handler) handleCanCreateSubscriptions(w http.ResponseWriter, req *http.Request) {
 	h.store.RLock()
 	defer h.store.RUnlock()
-	id := chi.URLParam(req, "id")
+	id := chi.URLParam(req, "organization_id")
 	cc := h.store.canCreate[id]
 	if cc == nil {
 		cc = &CanCreateResponse{CanCreate: true}
