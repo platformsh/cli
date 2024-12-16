@@ -69,6 +69,7 @@ func NewHandler(t *testing.T) *Handler {
 	h.Mux.Patch("/projects/{project_id}", h.handlePatchProject)
 	h.Mux.Get("/projects/{project_id}/environments", h.handleListEnvironments)
 	h.Mux.Get("/projects/{project_id}/environments/{environment_id}", h.handleGetEnvironment)
+	h.Mux.Patch("/projects/{project_id}/environments/{environment_id}", h.handlePatchEnvironment)
 	h.Mux.Get("/projects/{project_id}/environments/{environment_id}/backups", h.handleListBackups)
 	h.Mux.Post("/projects/{project_id}/environments/{environment_id}/backups", h.handleCreateBackup)
 	h.Mux.Get("/projects/{project_id}/environments/{environment_id}/deployments/current", h.handleGetCurrentDeployment)

@@ -27,6 +27,17 @@ func (s *store) SetEnvironments(envs []*Environment) {
 	}
 }
 
+func (s *store) findEnvironment(projectID, envID string) *Environment {
+	s.RLock()
+	defer s.RUnlock()
+	for id, e := range s.environments {
+		if e.Project == projectID && id == envID {
+			return e
+		}
+	}
+	return nil
+}
+
 func (s *store) SetProjects(pros []*Project) {
 	s.Lock()
 	defer s.Unlock()
