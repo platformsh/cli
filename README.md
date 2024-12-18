@@ -40,6 +40,17 @@ The installer is configurable using the following environment variables:
 * `INSTALL_DIR` - the installation directory for the `raw` installation method, for example you can use `INSTALL_DIR=$HOME/.local/bin` for a single user installation
 * `VERSION` - the version of the CLI to install, if you need a version other than the latest one
 
+
+### Nix profile
+
+Refer to the [Nix
+documentation if you are not on NixOS](https://nix.dev/manual/nix/2.24/installation/installing-binary.html).
+
+```console
+nix profile install nixpkgs#platformsh
+nix profile install nixpkgs#upsun
+```
+
 #### Installation configuration examples
 
 <details>
