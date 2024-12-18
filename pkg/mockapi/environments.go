@@ -15,7 +15,7 @@ import (
 func (h *Handler) handleListEnvironments(w http.ResponseWriter, req *http.Request) {
 	h.store.RLock()
 	defer h.store.RUnlock()
-	projectID := chi.URLParam(req, "id")
+	projectID := chi.URLParam(req, "project_id")
 	var envs []*Environment
 	for _, e := range h.store.environments {
 		if e.Project == projectID {
@@ -37,6 +37,27 @@ func (h *Handler) handleGetEnvironment(w http.ResponseWriter, req *http.Request)
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
+}
+
+func (h *Handler) handlePatchEnvironment(w http.ResponseWriter, req *http.Request) {
+	env := h.findEnvironment(chi.URLParam(req, "project_id"), chi.URLParam(req, "environment_id"))
+	if env == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	h.store.RLock()
+	defer h.store.RUnlock()
+
+	patched := *env
+	err := json.NewDecoder(req.Body).Decode(&patched)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	patched.UpdatedAt = time.Now()
+	h.store.environments[patched.ID] = &patched
+	_ = json.NewEncoder(w).Encode(&patched)
 }
 
 func (h *Handler) handleGetCurrentDeployment(w http.ResponseWriter, req *http.Request) {

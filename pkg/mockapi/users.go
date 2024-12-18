@@ -26,7 +26,7 @@ func (h *Handler) handleUserRefs(w http.ResponseWriter, req *http.Request) {
 func (h *Handler) handleUserExtendedAccess(w http.ResponseWriter, req *http.Request) {
 	h.store.RLock()
 	defer h.store.RUnlock()
-	userID := chi.URLParam(req, "id")
+	userID := chi.URLParam(req, "user_id")
 	require.NoError(h.t, req.ParseForm())
 	require.Equal(h.t, "project", req.Form.Get("filter[resource_type]"))
 	var (

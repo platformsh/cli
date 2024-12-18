@@ -29,7 +29,7 @@ func (h *Handler) handleProjectRefs(w http.ResponseWriter, req *http.Request) {
 func (h *Handler) handleGetProject(w http.ResponseWriter, req *http.Request) {
 	h.store.RLock()
 	defer h.store.RUnlock()
-	projectID := chi.URLParam(req, "id")
+	projectID := chi.URLParam(req, "project_id")
 	if p, ok := h.store.projects[projectID]; ok {
 		_ = json.NewEncoder(w).Encode(p)
 		return
@@ -40,7 +40,7 @@ func (h *Handler) handleGetProject(w http.ResponseWriter, req *http.Request) {
 func (h *Handler) handlePatchProject(w http.ResponseWriter, req *http.Request) {
 	h.store.Lock()
 	defer h.store.Unlock()
-	projectID := chi.URLParam(req, "id")
+	projectID := chi.URLParam(req, "project_id")
 	p, ok := h.store.projects[projectID]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
