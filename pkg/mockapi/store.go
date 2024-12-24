@@ -15,8 +15,10 @@ type store struct {
 
 	canCreate map[string]*CanCreateResponse
 
-	activities     map[string]map[string]*Activity
-	projectBackups map[string]map[string]*Backup
+	activities        map[string]map[string]*Activity
+	projectBackups    map[string]map[string]*Backup
+	projectVariables  map[string][]*Variable
+	envLevelVariables map[string]map[string][]*EnvLevelVariable
 }
 
 func (s *store) SetEnvironments(envs []*Environment) {
@@ -114,4 +116,25 @@ func (s *store) addProjectBackup(projectID string, backup *Backup) {
 		s.projectBackups[projectID] = make(map[string]*Backup)
 	}
 	s.projectBackups[projectID][backup.ID] = backup
+}
+
+func (s *store) SetProjectVariables(projectID string, vars []*Variable) {
+	s.Lock()
+	defer s.Unlock()
+	if s.projectVariables == nil {
+		s.projectVariables = make(map[string][]*Variable)
+	}
+	s.projectVariables[projectID] = vars
+}
+
+func (s *store) SetEnvLevelVariables(projectID, environmentID string, vars []*EnvLevelVariable) {
+	s.Lock()
+	defer s.Unlock()
+	if s.envLevelVariables == nil {
+		s.envLevelVariables = make(map[string]map[string][]*EnvLevelVariable)
+	}
+	if s.envLevelVariables[projectID] == nil {
+		s.envLevelVariables[projectID] = make(map[string][]*EnvLevelVariable)
+	}
+	s.envLevelVariables[projectID][environmentID] = vars
 }

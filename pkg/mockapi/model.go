@@ -263,3 +263,22 @@ type Activity struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type Variable struct {
+	Name           string `json:"name"`
+	Value          string `json:"value,omitempty"`
+	IsSensitive    bool   `json:"is_sensitive"`
+	VisibleBuild   bool   `json:"visible_build"`
+	VisibleRuntime bool   `json:"visible_runtime"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type EnvLevelVariable struct {
+	Variable
+
+	IsEnabled     bool `json:"is_enabled"`
+	Inherited     bool `json:"inherited"`
+	IsInheritable bool `json:"is_inheritable"`
+}
