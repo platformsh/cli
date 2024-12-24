@@ -241,3 +241,25 @@ type Backup struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type Activity struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+
+	State             string    `json:"state"`
+	Result            string    `json:"result"`
+	CompletionPercent int       `json:"completion_percent"`
+	CompletedAt       time.Time `json:"completed_at"`
+	StartedAt         time.Time `json:"started_at"`
+
+	Project      string   `json:"project"`
+	Environments []string `json:"environments"`
+
+	Description string `json:"description"`
+	Text        string `json:"text"`
+
+	Payload any `json:"payload"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}

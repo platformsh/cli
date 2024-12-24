@@ -15,6 +15,7 @@ type store struct {
 
 	canCreate map[string]*CanCreateResponse
 
+	activities     map[string]map[string]*Activity
 	projectBackups map[string]map[string]*Backup
 }
 
@@ -73,6 +74,20 @@ func (s *store) SetUserGrants(grants []*UserGrant) {
 
 func (s *store) SetMyUser(u *User) {
 	s.myUser = u
+}
+
+func (s *store) SetProjectActivities(projectID string, activities []*Activity) {
+	s.Lock()
+	defer s.Unlock()
+	if s.activities == nil {
+		s.activities = make(map[string]map[string]*Activity)
+	}
+	if s.activities[projectID] == nil {
+		s.activities[projectID] = make(map[string]*Activity)
+	}
+	for _, a := range activities {
+		s.activities[projectID][a.ID] = a
+	}
 }
 
 func (s *store) SetProjectBackups(projectID string, backups []*Backup) {
