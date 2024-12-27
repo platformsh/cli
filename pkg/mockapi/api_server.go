@@ -84,9 +84,13 @@ func NewHandler(t *testing.T) *Handler {
 	h.Mux.Get("/projects/{project_id}/environments/{environment_id}/activities/{id}", h.handleGetEnvironmentActivity)
 
 	h.Mux.Get("/projects/{project_id}/variables", h.handleListProjectVariables)
+	h.Mux.Post("/projects/{project_id}/variables", h.handleCreateProjectVariable)
 	h.Mux.Get("/projects/{project_id}/variables/{name}", h.handleGetProjectVariable)
+	h.Mux.Patch("/projects/{project_id}/variables/{name}", h.handlePatchProjectVariable)
 	h.Mux.Get("/projects/{project_id}/environments/{environment_id}/variables", h.handleListEnvLevelVariables)
+	h.Mux.Post("/projects/{project_id}/environments/{environment_id}/variables", h.handleCreateEnvLevelVariable)
 	h.Mux.Get("/projects/{project_id}/environments/{environment_id}/variables/{name}", h.handleGetEnvLevelVariable)
+	h.Mux.Patch("/projects/{project_id}/environments/{environment_id}/variables/{name}", h.handlePatchEnvLevelVariable)
 
 	return h
 }

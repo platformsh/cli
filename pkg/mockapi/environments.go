@@ -45,8 +45,8 @@ func (h *Handler) handlePatchEnvironment(w http.ResponseWriter, req *http.Reques
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.store.Lock()
+	defer h.store.Unlock()
 
 	patched := *env
 	err := json.NewDecoder(req.Body).Decode(&patched)
