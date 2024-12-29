@@ -2,8 +2,6 @@ package mockapi
 
 import (
 	"encoding/json"
-	"fmt"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"time"
@@ -19,11 +17,11 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 	}{}
 	err := json.NewDecoder(req.Body).Decode(&createOptions)
 	require.NoError(h.t, err)
-	id := fmt.Sprint(rand.Int()) //nolint:gosec
-	projectID := "p" + id
+	id := NumericID()
+	projectID := ProjectID()
 	sub := Subscription{
-		ID:            "s" + id,
-		Links:         MakeHALLinks("self=" + "/subscriptions/" + url.PathEscape("s"+id)),
+		ID:            id,
+		Links:         MakeHALLinks("self=" + "/subscriptions/" + url.PathEscape(id)),
 		ProjectRegion: createOptions.Region,
 		ProjectTitle:  createOptions.Title,
 		Status:        "provisioning",
