@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/mattn/go-isatty"
+	"github.com/symfony-cli/terminal"
 
 	"github.com/platformsh/cli/internal/config"
 	"github.com/platformsh/cli/internal/state"
@@ -59,21 +59,17 @@ func CheckForUpdate(cnf *config.Config, currentVersion string) (*ReleaseInfo, er
 
 // shouldCheckForUpdate checks updates are not disabled and the environment is a terminal
 func shouldCheckForUpdate(cnf *config.Config) bool {
-	if cnf.Wrapper.GitHubRepo == "" || !cnf.Updates.Check || os.Getenv(cnf.Application.EnvPrefix+"UPDATES_CHECK") == "0" {
-		return false
-	}
-
-	return !isCI() && isTerminal(os.Stdout) && isTerminal(os.Stderr)
+	return config.Version != "0.0.0" &&
+		cnf.Wrapper.GitHubRepo != "" &&
+		cnf.Updates.Check &&
+		os.Getenv(cnf.Application.EnvPrefix+"UPDATES_CHECK") != "0" &&
+		!isCI() && terminal.IsTerminal(os.Stdout) && terminal.IsTerminal(os.Stderr)
 }
 
 func isCI() bool {
 	return os.Getenv("CI") != "" || // GitHub Actions, Travis CI, CircleCI, Cirrus CI, GitLab CI, AppVeyor, CodeShip, dsari
 		os.Getenv("BUILD_NUMBER") != "" || // Jenkins, TeamCity
 		os.Getenv("RUN_ID") != "" // TaskCluster, dsari
-}
-
-func isTerminal(f *os.File) bool {
-	return isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd())
 }
 
 // getLatestReleaseInfo from GitHub
