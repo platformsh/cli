@@ -21,6 +21,7 @@ import (
 
 	"github.com/platformsh/cli/internal"
 	"github.com/platformsh/cli/internal/config"
+	"github.com/platformsh/cli/internal/config/alt"
 	"github.com/platformsh/cli/internal/legacy"
 )
 
@@ -63,15 +64,22 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 			}
 			if cnf.Wrapper.GitHubRepo != "" {
 				go func() {
-					rel, _ := internal.CheckForUpdate(cnf, version)
+					rel, _ := internal.CheckForUpdate(cnf, config.Version)
 					updateMessageChan <- rel
+				}()
+			}
+			if alt.ShouldUpdate(cnf) {
+				go func() {
+					if err := alt.Update(cmd.Context(), cnf, debugLog); err != nil {
+						cmd.PrintErrln("Error updating config:", color.RedString(err.Error()))
+					}
 				}()
 			}
 		},
 		Run: func(cmd *cobra.Command, _ []string) {
 			c := &legacy.CLIWrapper{
 				Config:             cnf,
-				Version:            version,
+				Version:            config.Version,
 				CustomPharPath:     viper.GetString("phar-path"),
 				Debug:              viper.GetBool("debug"),
 				DisableInteraction: viper.GetBool("no-interaction"),
@@ -145,6 +153,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 
 	// Add subcommands.
 	cmd.AddCommand(
+		configInstallCommand,
 		newCompletionCommand(cnf),
 		newHelpCommand(cnf),
 		newListCommand(cnf),
@@ -204,7 +213,7 @@ func printUpdateMessage(newRelease *internal.ReleaseInfo, cnf *config.Config) {
 
 	fmt.Fprintf(color.Error, "\n\n%s %s → %s\n",
 		color.YellowString(fmt.Sprintf("A new release of the %s is available:", cnf.Application.Name)),
-		color.CyanString(version),
+		color.CyanString(config.Version),
 		color.CyanString(newRelease.Version),
 	)
 
