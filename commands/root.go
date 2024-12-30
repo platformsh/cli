@@ -20,6 +20,7 @@ import (
 
 	"github.com/platformsh/cli/internal"
 	"github.com/platformsh/cli/internal/config"
+	"github.com/platformsh/cli/internal/config/alt"
 	"github.com/platformsh/cli/internal/legacy"
 )
 
@@ -70,8 +71,15 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 			}
 			if cnf.Wrapper.GitHubRepo != "" {
 				go func() {
-					rel, _ := internal.CheckForUpdate(cnf, version)
+					rel, _ := internal.CheckForUpdate(cnf, config.Version)
 					updateMessageChan <- rel
+				}()
+			}
+			if alt.ShouldUpdate(cnf) {
+				go func() {
+					if err := alt.Update(cmd.Context(), cnf, debugLog); err != nil {
+						cmd.PrintErrln("Error updating config:", color.RedString(err.Error()))
+					}
 				}()
 			}
 		},
@@ -137,6 +145,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 
 	// Add subcommands.
 	cmd.AddCommand(
+		newConfigInstallCommand(),
 		newCompletionCommand(cnf),
 		newHelpCommand(cnf),
 		newListCommand(cnf),
@@ -196,7 +205,7 @@ func printUpdateMessage(w io.Writer, newRelease *internal.ReleaseInfo, cnf *conf
 
 	fmt.Fprintf(w, "\n\n%s %s → %s\n",
 		color.YellowString(fmt.Sprintf("A new release of the %s is available:", cnf.Application.Name)),
-		color.CyanString(version),
+		color.CyanString(config.Version),
 		color.CyanString(newRelease.Version),
 	)
 
@@ -258,7 +267,7 @@ func exitWithError(err error) {
 func makeLegacyCLIWrapper(cnf *config.Config, stdout, stderr io.Writer, stdin io.Reader) *legacy.CLIWrapper {
 	return &legacy.CLIWrapper{
 		Config:             cnf,
-		Version:            version,
+		Version:            config.Version,
 		DebugLogFunc:       debugLog,
 		DisableInteraction: viper.GetBool("no-interaction"),
 		Stdout:             stdout,
