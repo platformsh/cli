@@ -6,104 +6,20 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"regexp"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/mattn/go-isatty"
 
 	"github.com/platformsh/cli/internal/config"
 	"github.com/platformsh/cli/internal/state"
+	"github.com/platformsh/cli/internal/version"
 )
-
-var versionRegex = regexp.MustCompile(`^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(-(?P<preRelease>.+))?$`)
 
 // ReleaseInfo stores information about a release
 type ReleaseInfo struct {
 	Version     string    `json:"tag_name"`
 	URL         string    `json:"html_url"`
 	PublishedAt time.Time `json:"published_at"`
-}
-
-// Version contains parsed information about a SemVer version
-type Version struct {
-	VersionParts    [3]int
-	PreReleaseParts []string
-}
-
-// CompareVersions and see which version is greater
-func CompareVersions(a, b *Version) int {
-	// Compare Major, Minor and Patch versions
-	for i := 0; i < 3; i++ {
-		if a.VersionParts[i] > b.VersionParts[i] {
-			return 1
-		}
-		if a.VersionParts[i] < b.VersionParts[i] {
-			return -1
-		}
-	}
-
-	// Start comparing identifiers
-	for i := 0; ; i++ {
-		// Check that there are identifiers left
-		if len(a.PreReleaseParts) <= i && len(b.PreReleaseParts) <= i {
-			return 0
-		}
-
-		// Shorter takes precedence
-		if len(b.PreReleaseParts) <= i {
-			return 1
-		}
-		if len(a.PreReleaseParts) <= i {
-			return -1
-		}
-
-		aPart := a.PreReleaseParts[i]
-		bPart := b.PreReleaseParts[i]
-		aInt, aErr := strconv.Atoi(aPart)
-		bInt, bErr := strconv.Atoi(bPart)
-
-		// Try comparing integers first
-		if aErr == nil && bErr == nil {
-			if aInt > bInt {
-				return 1
-			}
-			if aInt < bInt {
-				return -1
-			}
-			// Integer wins string
-		} else if aErr == nil {
-			return 1
-		} else if bErr == nil {
-			return -1
-			// Compare strings
-		} else if cmp := strings.Compare(aPart, bPart); cmp != 0 {
-			return cmp
-		}
-	}
-}
-
-// ParseVersion from a string, returning a Version or error if it's not SemVer
-func ParseVersion(version string) (*Version, error) {
-	if !versionRegex.MatchString(version) {
-		return nil, fmt.Errorf("version does not match SemVer: %s", version)
-	}
-
-	result := versionRegex.FindStringSubmatch(version)
-	major, _ := strconv.Atoi(result[versionRegex.SubexpIndex("major")])
-	minor, _ := strconv.Atoi(result[versionRegex.SubexpIndex("minor")])
-	patch, _ := strconv.Atoi(result[versionRegex.SubexpIndex("patch")])
-	preRelease := result[versionRegex.SubexpIndex("preRelease")]
-	var preReleaseParts []string
-	if preRelease != "" {
-		preReleaseParts = strings.Split(preRelease, ".")
-	}
-
-	return &Version{
-		VersionParts:    [3]int{major, minor, patch},
-		PreReleaseParts: preReleaseParts,
-	}, nil
 }
 
 // CheckForUpdate checks whether this software has had a newer release on GitHub
@@ -130,16 +46,11 @@ func CheckForUpdate(cnf *config.Config, currentVersion string) (*ReleaseInfo, er
 		return nil, fmt.Errorf("could not determine latest release: %w", err)
 	}
 
-	currentVersionParsed, err := ParseVersion(currentVersion)
+	cmp, err := version.Compare(releaseInfo.Version, currentVersion)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not compare versions: %w", err)
 	}
-
-	latestVersionParsed, err := ParseVersion(releaseInfo.Version)
-	if err != nil {
-		return nil, err
-	}
-	if CompareVersions(latestVersionParsed, currentVersionParsed) == 1 {
+	if cmp > 0 {
 		return releaseInfo, nil
 	}
 
