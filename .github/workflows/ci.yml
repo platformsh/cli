@@ -15,14 +15,12 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          # do not enable cache here, because golangci-linter
-          # has its own internal cache with better performance
-          go-version: 1.22.x
+          go-version: 1.22
 
       - name: Create fake PHP and .phar files
         run: |
@@ -36,9 +34,9 @@ jobs:
           touch internal/config/embedded-config.yaml
 
       - name: Run linter
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.59
+          version: v1.63
 
       - name: Run tests
         run: make test
