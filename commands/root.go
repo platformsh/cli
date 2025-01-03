@@ -69,31 +69,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 			}
 		},
 		Run: func(cmd *cobra.Command, _ []string) {
-			c := &legacy.CLIWrapper{
-				Config:             cnf,
-				Version:            version,
-				CustomPharPath:     viper.GetString("phar-path"),
-				Debug:              viper.GetBool("debug"),
-				DisableInteraction: viper.GetBool("no-interaction"),
-				Stdout:             cmd.OutOrStdout(),
-				Stderr:             cmd.ErrOrStderr(),
-				Stdin:              cmd.InOrStdin(),
-			}
-			if err := c.Init(); err != nil {
-				log.Println(color.RedString(err.Error()))
-				os.Exit(1)
-				return
-			}
-
-			if err := c.Exec(cmd.Context(), os.Args[1:]...); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				exitCode := 1
-				var execErr *exec.ExitError
-				if errors.As(err, &execErr) {
-					exitCode = execErr.ExitCode()
-				}
-				os.Exit(exitCode)
-			}
+			runLegacyCLI(cmd.Context(), cnf, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin(), os.Args[1:])
 		},
 		PersistentPostRun: func(_ *cobra.Command, _ []string) {
 			checkShellConfigLeftovers(cnf)
@@ -105,16 +81,22 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		},
 	}
 
-	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
-		if cmd.Context() == nil {
-			cmd.SetContext(context.Background())
+	cmd.SetHelpFunc(func(innerCmd *cobra.Command, args []string) {
+		if innerCmd.Use != cmd.Use {
+			// For real (Cobra) commands, print the usage string.
+			innerCmd.Print(innerCmd.UsageString())
+			return
 		}
 
+		// Others will be passed to the legacy CLI's help command.
 		if !slices.Contains(args, "--help") && !slices.Contains(args, "-h") {
 			args = append([]string{"help"}, args...)
 		}
+		if len(args) == 1 && (args[0] == "-h" || args[0] == "--help") {
+			args = []string{"help"}
+		}
 
-		cmd.Run(cmd, args)
+		runLegacyCLI(cmd.Context(), cnf, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin(), args)
 	})
 
 	cmd.PersistentFlags().BoolP("version", "V", false, fmt.Sprintf("Displays the %s version", cnf.Application.Name))
@@ -247,4 +229,31 @@ func debugLog(format string, v ...any) {
 	}
 
 	log.Printf(format, v...)
+}
+
+func runLegacyCLI(ctx context.Context, cnf *config.Config, stdout, stderr io.Writer, stdin io.Reader, args []string) {
+	c := &legacy.CLIWrapper{
+		Config:             cnf,
+		Version:            version,
+		CustomPharPath:     viper.GetString("phar-path"),
+		Debug:              viper.GetBool("debug"),
+		DisableInteraction: viper.GetBool("no-interaction"),
+		Stdout:             stdout,
+		Stderr:             stderr,
+		Stdin:              stdin,
+	}
+	if err := c.Init(); err != nil {
+		fmt.Fprintln(stderr, color.RedString(err.Error()))
+		os.Exit(1)
+	}
+
+	if err := c.Exec(ctx, args...); err != nil {
+		debugLog("%s\n", color.RedString(err.Error()))
+		exitCode := 1
+		var execErr *exec.ExitError
+		if errors.As(err, &execErr) {
+			exitCode = execErr.ExitCode()
+		}
+		os.Exit(exitCode)
+	}
 }
