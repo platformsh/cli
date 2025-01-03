@@ -1,11 +1,10 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -14,16 +13,16 @@ import (
 )
 
 func main() {
-	log.SetOutput(color.Error)
-
 	// Load configuration.
 	cnfYAML, err := config.LoadYAML()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 	cnf, err := config.FromYAML(cnfYAML)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	// When Cobra starts, load Viper config from the environment.
