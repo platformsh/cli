@@ -10,6 +10,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/symfony-cli/terminal"
 	"gopkg.in/yaml.v3"
 
 	"github.com/platformsh/cli/internal/config"
@@ -25,6 +26,7 @@ var configInstallCommand = &cobra.Command{
 
 func runConfigInstall(cmd *cobra.Command, args []string) error {
 	cmd.PrintErrln("Downloading and validating new CLI configuration...")
+	cmd.PrintErrln()
 
 	urlStr := args[0]
 	if !strings.Contains(urlStr, "://") {
@@ -59,6 +61,27 @@ func runConfigInstall(cmd *cobra.Command, args []string) error {
 		)
 	}
 
+	// Make a formatter to replace the home directory with ~ in filenames.
+	replaceHomeDir := func() func(string) string {
+		hd, err := os.UserHomeDir()
+		return func(p string) string {
+			if err == nil && strings.HasPrefix(p, hd) {
+				return "~" + strings.TrimPrefix(p, hd)
+			}
+			return p
+		}
+	}()
+
+	cmd.PrintErrln("The following files will be created or overwritten:")
+	cmd.PrintErrf("  Config file: %s\n", color.CyanString(replaceHomeDir(configFilePath)))
+	cmd.PrintErrf("  Executable: %s\n", color.CyanString(replaceHomeDir(executableFilePath)))
+	if terminal.Stdin.IsInteractive() {
+		if !terminal.AskConfirmation("Are you sure you want to continue?", true) {
+			os.Exit(1)
+		}
+	}
+	cmd.PrintErrln()
+
 	// Generate the file content.
 	executableContent := fmt.Sprintf(
 		"#!/bin/sh\n"+
@@ -89,30 +112,8 @@ func runConfigInstall(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Make a formatter to replace the home directory with ~ in filenames.
-	replaceHomeDir := func() func(string) string {
-		hd, err := os.UserHomeDir()
-		return func(p string) string {
-			if err == nil && strings.HasPrefix(p, hd) {
-				return "~" + strings.TrimPrefix(p, hd)
-			}
-			return p
-		}
-	}()
-
-	cmd.PrintErrf(
-		"\nThe following files have been created:\n"+
-			"  - Configuration: %s\n"+
-			"  - Executable: %s\n",
-		color.CyanString(replaceHomeDir(configFilePath)),
-		color.CyanString(replaceHomeDir(executableFilePath)),
-	)
-
-	if newCnfStruct.Updates.Check {
-		cmd.PrintErrln("\nThe configuration file will be auto-updated periodically in the background.")
-	} else {
-		cmd.PrintErrln("\nEnable automatic updates to keep the configuration file up to date.")
-	}
+	cmd.PrintErrln("The files have been saved successfully.")
+	cmd.PrintErrln()
 
 	isInPath, err := alt.InPath(executableDir)
 	if err != nil {
@@ -123,8 +124,6 @@ func runConfigInstall(cmd *cobra.Command, args []string) error {
 	if runtime.GOOS == "windows" {
 		envVarName = "Path"
 	}
-
-	cmd.PrintErrln()
 
 	if isInPath {
 		cmd.PrintErrln("Run the new CLI with:", color.GreenString(filepath.Base(executableFilePath)))
