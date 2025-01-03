@@ -79,20 +79,9 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 				Stderr:             cmd.ErrOrStderr(),
 				Stdin:              cmd.InOrStdin(),
 			}
-			if err := c.Init(); err != nil {
-				log.Println(color.RedString(err.Error()))
-				os.Exit(1)
-				return
-			}
 
 			if err := c.Exec(cmd.Context(), os.Args[1:]...); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				exitCode := 1
-				var execErr *exec.ExitError
-				if errors.As(err, &execErr) {
-					exitCode = execErr.ExitCode()
-				}
-				os.Exit(exitCode)
+				handleLegacyError(err)
 			}
 		},
 		PersistentPostRun: func(_ *cobra.Command, _ []string) {
@@ -247,4 +236,15 @@ func debugLog(format string, v ...any) {
 	}
 
 	log.Printf(format, v...)
+}
+
+func handleLegacyError(err error) {
+	var execErr *exec.ExitError
+	if errors.As(err, &execErr) {
+		exitCode := execErr.ExitCode()
+		debugLog("%s\n", err)
+		os.Exit(exitCode)
+	}
+	log.Println(color.RedString(err.Error()))
+	os.Exit(1)
 }
