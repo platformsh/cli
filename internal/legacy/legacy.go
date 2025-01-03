@@ -6,7 +6,6 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -77,6 +76,13 @@ type CLIWrapper struct {
 	CustomPharPath     string
 	Debug              bool
 	DisableInteraction bool
+	DebugLogFunc       func(string, ...any)
+}
+
+func (c *CLIWrapper) debug(msg string, args ...any) {
+	if c.DebugLogFunc != nil {
+		c.DebugLogFunc(msg, args...)
+	}
 }
 
 func (c *CLIWrapper) cacheDir() string {
@@ -86,7 +92,7 @@ func (c *CLIWrapper) cacheDir() string {
 // Init the CLI wrapper, creating a temporary directory and copying over files
 func (c *CLIWrapper) Init() error {
 	if _, err := os.Stat(c.cacheDir()); os.IsNotExist(err) {
-		c.debugLog("cache directory does not exist, creating: %s", c.cacheDir())
+		c.debug("Cache directory does not exist, creating: %s", c.cacheDir())
 		if err := os.Mkdir(c.cacheDir(), 0o700); err != nil {
 			return fmt.Errorf("could not create temporary directory: %w", err)
 		}
@@ -95,7 +101,7 @@ func (c *CLIWrapper) Init() error {
 	if err := fileLock.Lock(); err != nil {
 		return fmt.Errorf("could not acquire lock: %w", err)
 	}
-	c.debugLog("lock acquired: %s", fileLock.Path())
+	c.debug("Lock acquired: %s", fileLock.Path())
 	//nolint:errcheck
 	defer fileLock.Unlock()
 
@@ -104,7 +110,7 @@ func (c *CLIWrapper) Init() error {
 			return fmt.Errorf("legacy CLI phar file not found: %w", err)
 		}
 
-		c.debugLog("phar file does not exist, copying: %s", c.PharPath())
+		c.debug("Phar file does not exist, copying: %s", c.PharPath())
 		if err := copyFile(c.PharPath(), phar); err != nil {
 			return fmt.Errorf("could not copy phar file: %w", err)
 		}
@@ -126,7 +132,7 @@ func (c *CLIWrapper) Init() error {
 	}
 
 	if _, err := os.Stat(c.PHPPath()); os.IsNotExist(err) {
-		c.debugLog("PHP binary does not exist, copying: %s", c.PHPPath())
+		c.debug("PHP binary does not exist, copying: %s", c.PHPPath())
 		if err := c.copyPHP(); err != nil {
 			return fmt.Errorf("could not copy files: %w", err)
 		}
@@ -182,7 +188,7 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 	))
 	if err := cmd.Run(); err != nil {
 		// Cleanup cache directory
-		c.debugLog("removing cache directory: %s", c.cacheDir())
+		c.debug("Removing cache directory: %s", c.cacheDir())
 		os.RemoveAll(c.cacheDir())
 		return fmt.Errorf("could not run legacy CLI command: %w", err)
 	}
@@ -214,11 +220,4 @@ func (c *CLIWrapper) PharPath() string {
 // ConfigPath returns the path to the YAML config file that will be provided to the legacy CLI.
 func (c *CLIWrapper) ConfigPath() string {
 	return path.Join(c.cacheDir(), "config.yaml")
-}
-
-// debugLog logs a debugging message, if debug is enabled
-func (c *CLIWrapper) debugLog(msg string, v ...any) {
-	if c.Debug {
-		log.Printf(msg, v...)
-	}
 }

@@ -9,7 +9,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -19,9 +18,10 @@ import (
 
 func newCompletionCommand(cnf *config.Config) *cobra.Command {
 	return &cobra.Command{
-		Use:   "completion",
-		Short: "Print the completion script for your shell",
-		Args:  cobra.MaximumNArgs(1),
+		Use:           "completion",
+		Short:         "Print the completion script for your shell",
+		Args:          cobra.MaximumNArgs(1),
+		SilenceErrors: true,
 		Run: func(cmd *cobra.Command, args []string) {
 			completionArgs := []string{"_completion", "-g", "--program", cnf.Application.Executable}
 			if len(args) > 0 {
@@ -33,6 +33,7 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 				Version:            version,
 				CustomPharPath:     viper.GetString("phar-path"),
 				Debug:              viper.GetBool("debug"),
+				DebugLogFunc:       debugLog,
 				DisableInteraction: viper.GetBool("no-interaction"),
 				Stdout:             &b,
 				Stderr:             cmd.ErrOrStderr(),
@@ -40,13 +41,13 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 			}
 
 			if err := c.Init(); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
+				debugLog(err.Error())
 				os.Exit(1)
 				return
 			}
 
 			if err := c.Exec(cmd.Context(), completionArgs...); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
+				debugLog(err.Error())
 				exitCode := 1
 				var execErr *exec.ExitError
 				if errors.As(err, &execErr) {

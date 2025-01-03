@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -51,11 +50,19 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		DisableFlagParsing: false,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		SilenceUsage:       true,
-		SilenceErrors:      true,
+		SilenceErrors:      false,
 		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
 			if viper.GetBool("quiet") && !viper.GetBool("debug") && !viper.GetBool("verbose") {
 				viper.Set("no-interaction", true)
 				cmd.SetErr(io.Discard)
+			} else {
+				// Ensure the command's output writers can handle colors.
+				if cmd.OutOrStdout() == os.Stdout {
+					cmd.SetOut(color.Output)
+				}
+				if cmd.ErrOrStderr() == os.Stderr {
+					cmd.SetErr(color.Error)
+				}
 			}
 			if viper.GetBool("version") {
 				versionCommand.Run(cmd, []string{})
@@ -71,11 +78,11 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		Run: func(cmd *cobra.Command, _ []string) {
 			runLegacyCLI(cmd.Context(), cnf, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin(), os.Args[1:])
 		},
-		PersistentPostRun: func(_ *cobra.Command, _ []string) {
-			checkShellConfigLeftovers(cnf)
+		PersistentPostRun: func(cmd *cobra.Command, _ []string) {
+			checkShellConfigLeftovers(cmd.ErrOrStderr(), cnf)
 			select {
 			case rel := <-updateMessageChan:
-				printUpdateMessage(rel, cnf)
+				printUpdateMessage(cmd.ErrOrStderr(), rel, cnf)
 			default:
 			}
 		},
@@ -142,7 +149,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 }
 
 // checkShellConfigLeftovers checks .zshrc and .bashrc for any leftovers from the legacy CLI
-func checkShellConfigLeftovers(cnf *config.Config) {
+func checkShellConfigLeftovers(w io.Writer, cnf *config.Config) {
 	start := fmt.Sprintf("# BEGIN SNIPPET: %s configuration", cnf.Application.Name)
 	end := "# END SNIPPET"
 	shellConfigSnippet := regexp.MustCompile(regexp.QuoteMeta(start) + "(?s).+?" + regexp.QuoteMeta(end))
@@ -168,23 +175,23 @@ func checkShellConfigLeftovers(cnf *config.Config) {
 		}
 
 		if shellConfigSnippet.Match(shellConfig) {
-			fmt.Fprintf(color.Error, "%s Your %s file contains code that is no longer needed for the New %s\n",
-				color.YellowString("Warning:"),
+			fmt.Fprintf(w, "%s Your %s file contains code that is no longer needed for the New %s\n",
+				color.YellowString("Notice:"),
 				shellConfigFile,
 				cnf.Application.Name,
 			)
-			fmt.Fprintf(color.Error, "%s %s\n", color.YellowString("Please remove the following lines from:"), shellConfigFile)
-			fmt.Fprintf(color.Error, "\t%s\n", strings.ReplaceAll(string(shellConfigSnippet.Find(shellConfig)), "\n", "\n\t"))
+			fmt.Fprintf(w, "%s %s\n", color.YellowString("Please remove the following lines from:"), shellConfigFile)
+			fmt.Fprintf(w, "\t%s\n", strings.ReplaceAll(string(shellConfigSnippet.Find(shellConfig)), "\n", "\n\t"))
 		}
 	}
 }
 
-func printUpdateMessage(newRelease *internal.ReleaseInfo, cnf *config.Config) {
+func printUpdateMessage(w io.Writer, newRelease *internal.ReleaseInfo, cnf *config.Config) {
 	if newRelease == nil {
 		return
 	}
 
-	fmt.Fprintf(color.Error, "\n\n%s %s → %s\n",
+	fmt.Fprintf(w, "\n\n%s %s → %s\n",
 		color.YellowString(fmt.Sprintf("A new release of the %s is available:", cnf.Application.Name)),
 		color.CyanString(version),
 		color.CyanString(newRelease.Version),
@@ -193,19 +200,19 @@ func printUpdateMessage(newRelease *internal.ReleaseInfo, cnf *config.Config) {
 	executable, err := os.Executable()
 	if err == nil && cnf.Wrapper.HomebrewTap != "" && isUnderHomebrew(executable) {
 		fmt.Fprintf(
-			color.Error,
+			w,
 			"To upgrade, run: brew update && brew upgrade %s\n",
 			color.YellowString(cnf.Wrapper.HomebrewTap),
 		)
 	} else if cnf.Wrapper.GitHubRepo != "" {
 		fmt.Fprintf(
-			color.Error,
+			w,
 			"To upgrade, follow the instructions at: https://github.com/%s#upgrade\n",
 			cnf.Wrapper.GitHubRepo,
 		)
 	}
 
-	fmt.Fprintf(color.Error, "%s\n\n", color.YellowString(newRelease.URL))
+	fmt.Fprintf(w, "%s\n\n", color.YellowString(newRelease.URL))
 }
 
 func isUnderHomebrew(binary string) bool {
@@ -228,7 +235,18 @@ func debugLog(format string, v ...any) {
 		return
 	}
 
-	log.Printf(format, v...)
+	prefix := color.New(color.ReverseVideo).Sprintf("DEBUG")
+	fmt.Fprintf(color.Error, prefix+" "+strings.TrimSpace(format)+"\n", v...)
+}
+
+func exitWithError(cmd *cobra.Command, err error) {
+	cmd.PrintErrln(color.RedString(err.Error()))
+	exitCode := 1
+	var execErr *exec.ExitError
+	if errors.As(err, &execErr) {
+		exitCode = execErr.ExitCode()
+	}
+	os.Exit(exitCode)
 }
 
 func runLegacyCLI(ctx context.Context, cnf *config.Config, stdout, stderr io.Writer, stdin io.Reader, args []string) {
@@ -237,6 +255,7 @@ func runLegacyCLI(ctx context.Context, cnf *config.Config, stdout, stderr io.Wri
 		Version:            version,
 		CustomPharPath:     viper.GetString("phar-path"),
 		Debug:              viper.GetBool("debug"),
+		DebugLogFunc:       debugLog,
 		DisableInteraction: viper.GetBool("no-interaction"),
 		Stdout:             stdout,
 		Stderr:             stderr,
