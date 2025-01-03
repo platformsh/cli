@@ -52,7 +52,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		DisableFlagParsing: false,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		SilenceUsage:       true,
-		SilenceErrors:      true,
+		SilenceErrors:      false,
 		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
 			if viper.GetBool("quiet") && !viper.GetBool("debug") && !viper.GetBool("verbose") {
 				viper.Set("no-interaction", true)
@@ -153,7 +153,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 
 	// Add subcommands.
 	cmd.AddCommand(
-		configInstallCommand,
+		newConfigInstallCommand(),
 		newCompletionCommand(cnf),
 		newHelpCommand(cnf),
 		newListCommand(cnf),

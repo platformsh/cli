@@ -15,25 +15,20 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/config/alt"
 )
 
 func TestConfigInstallCmd(t *testing.T) {
 	tempDir := t.TempDir()
+	tempBinDir := filepath.Join(tempDir, "bin")
+	require.NoError(t, os.Mkdir(tempBinDir, 0o755))
+	_ = os.Setenv("HOME", tempDir)
+	_ = os.Setenv("XDG_CONFIG_HOME", "")
 
-	// Ensure filesystem functions looking for UserHomeDir or UserConfigDir return the test directory.
-	homeEnv := os.Getenv("HOME")
-	require.NoError(t, os.Setenv("HOME", tempDir))
-	require.NoError(t, os.Unsetenv("XDG_CONFIG_HOME"))
-	require.NoError(t, os.Unsetenv("TEST_HOME"))
-	t.Cleanup(func() {
-		_ = os.Setenv("HOME", homeEnv)
-	})
+	remoteConfig := testConfig()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if req.URL.Path == "/test-config.yaml" {
-			cnf := testConfig()
-			_ = yaml.NewEncoder(w).Encode(cnf)
+			_ = yaml.NewEncoder(w).Encode(remoteConfig)
 		}
 	}))
 	defer server.Close()
@@ -44,9 +39,11 @@ func TestConfigInstallCmd(t *testing.T) {
 	defer cancel()
 	ctx = config.ToContext(ctx, cnf)
 
-	cmd := configInstallCommand
+	cmd := newConfigInstallCommand()
 	cmd.SetContext(ctx)
 	cmd.SetOut(io.Discard)
+	_ = cmd.Flags().Set("config-dir", tempDir)
+	_ = cmd.Flags().Set("bin-dir", tempBinDir)
 
 	args := []string{testConfigURL}
 
@@ -58,15 +55,26 @@ func TestConfigInstallCmd(t *testing.T) {
 	cnf.Application.Executable = "test-cli-executable-host"
 	err = cmd.RunE(cmd, args)
 	assert.NoError(t, err)
-	assert.FileExists(t, filepath.Join(tempDir, alt.HomeSubDir, "test-cli-executable.yaml"))
-	assert.FileExists(t, filepath.Join(tempDir, alt.HomeSubDir, "bin", "test-cli-executable"))
-	assert.Contains(t, stdErrBuf.String(), filepath.Join("~", alt.HomeSubDir, "test-cli-executable.yaml"))
-	assert.Contains(t, stdErrBuf.String(), filepath.Join("~", alt.HomeSubDir, "bin", "test-cli-executable"))
+	assert.FileExists(t, filepath.Join(tempDir, "test-cli-executable.yaml"))
+	assert.FileExists(t, filepath.Join(tempBinDir, "test-cli-executable"))
+	assert.Contains(t, stdErrBuf.String(), "~/test-cli-executable.yaml")
+	assert.Contains(t, stdErrBuf.String(), "~/bin/test-cli-executable")
+	assert.Contains(t, stdErrBuf.String(), "Add the following directory to your PATH")
 
-	b, err := os.ReadFile(filepath.Join(tempDir, alt.HomeSubDir, "bin", "test-cli-executable"))
+	b, err := os.ReadFile(filepath.Join(tempBinDir, "test-cli-executable"))
 	require.NoError(t, err)
-	assert.Contains(t, string(b), filepath.Join(tempDir, alt.HomeSubDir, "test-cli-executable.yaml"))
+	assert.Contains(t, string(b), filepath.Join(tempDir, "test-cli-executable.yaml"))
 	assert.Contains(t, string(b), `test-cli-executable-host "$@"`)
+
+	_ = os.Setenv("PATH", tempBinDir+":"+os.Getenv("PATH"))
+	remoteConfig.Application.Executable = "test-cli-executable2"
+	err = cmd.RunE(cmd, args)
+	assert.NoError(t, err)
+	assert.FileExists(t, filepath.Join(tempDir, "test-cli-executable2.yaml"))
+	assert.FileExists(t, filepath.Join(tempBinDir, "test-cli-executable2"))
+	assert.Contains(t, stdErrBuf.String(), "~/test-cli-executable2.yaml")
+	assert.Contains(t, stdErrBuf.String(), "~/bin/test-cli-executable2")
+	assert.Contains(t, stdErrBuf.String(), "Run the new CLI with: test-cli-executable2")
 }
 
 func testConfig() *config.Config {
