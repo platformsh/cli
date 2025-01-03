@@ -85,8 +85,8 @@ func NewAuthServer(t *testing.T) *httptest.Server {
 			Serial:      0,
 			CertType:    ssh.UserCert,
 			KeyId:       "test-key-id",
-			ValidAfter:  uint64(time.Now().Add(-1 * time.Second).Unix()),
-			ValidBefore: uint64(time.Now().Add(time.Minute).Unix()),
+			ValidAfter:  uint64(time.Now().Add(-1 * time.Second).Unix()), //nolint:gosec // G115
+			ValidBefore: uint64(time.Now().Add(time.Minute).Unix()),      //nolint:gosec // G115
 			Permissions: ssh.Permissions{
 				Extensions: extensions,
 			},

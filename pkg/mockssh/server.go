@@ -47,7 +47,7 @@ type CommandIO struct {
 	StdErr io.Writer
 }
 
-type CommandHandler func(conn ssh.ConnMetadata, command string, io CommandIO) uint32
+type CommandHandler func(conn ssh.ConnMetadata, command string, io CommandIO) int
 
 // NewServer creates and starts a local SSH server for a test.
 // It must be stopped with the Server.Stop method.
@@ -148,7 +148,7 @@ func (s *Server) Stop() error {
 	return nil
 }
 
-func (s *Server) defaultCommandHandler(_ ssh.ConnMetadata, command string, commandIO CommandIO) uint32 {
+func (s *Server) defaultCommandHandler(_ ssh.ConnMetadata, command string, commandIO CommandIO) int {
 	c := exec.Command("bash", "-c", command)
 	c.Stdout = commandIO.StdOut
 	c.Stderr = commandIO.StdErr
@@ -158,7 +158,7 @@ func (s *Server) defaultCommandHandler(_ ssh.ConnMetadata, command string, comma
 	if err := c.Run(); err != nil {
 		exitErr := &exec.ExitError{}
 		if errors.As(err, &exitErr) {
-			return uint32(exitErr.ExitCode())
+			return exitErr.ExitCode()
 		}
 		_, _ = fmt.Fprintf(commandIO.StdErr, "Failed to execute command: %v", err)
 		return 1
@@ -222,7 +222,7 @@ func (s *Server) handleChannels(conn ssh.ConnMetadata, chans <-chan ssh.NewChann
 
 		timer := time.NewTimer(time.Second * 10)
 
-		var exitWithStatus = make(chan uint32, 1)
+		var exitWithStatus = make(chan int, 1)
 		go func(in <-chan *ssh.Request) {
 			for req := range in {
 				if !req.WantReply {
@@ -253,7 +253,7 @@ func (s *Server) handleChannels(conn ssh.ConnMetadata, chans <-chan ssh.NewChann
 		for {
 			select {
 			case s := <-exitWithStatus:
-				_, err = channel.SendRequest("exit-status", false, ssh.Marshal(struct{ Status uint32 }{s}))
+				_, err = channel.SendRequest("exit-status", false, ssh.Marshal(struct{ Status int }{s}))
 				if err != nil {
 					t.Errorf("Failed to send exit status: %v", err)
 				}
