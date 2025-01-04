@@ -21,6 +21,7 @@ import (
 
 	"github.com/platformsh/cli/internal"
 	"github.com/platformsh/cli/internal/config"
+	"github.com/platformsh/cli/internal/config/alt"
 	"github.com/platformsh/cli/internal/legacy"
 )
 
@@ -51,7 +52,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		DisableFlagParsing: false,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		SilenceUsage:       true,
-		SilenceErrors:      true,
+		SilenceErrors:      false,
 		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
 			if viper.GetBool("quiet") && !viper.GetBool("debug") && !viper.GetBool("verbose") {
 				viper.Set("no-interaction", true)
@@ -63,37 +64,20 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 			}
 			if cnf.Wrapper.GitHubRepo != "" {
 				go func() {
-					rel, _ := internal.CheckForUpdate(cnf, version)
+					rel, _ := internal.CheckForUpdate(cnf, config.Version)
 					updateMessageChan <- rel
+				}()
+			}
+			if alt.ShouldUpdate(cnf) {
+				go func() {
+					if err := alt.Update(cmd.Context(), cnf, debugLog); err != nil {
+						cmd.PrintErrln("Error updating config:", color.RedString(err.Error()))
+					}
 				}()
 			}
 		},
 		Run: func(cmd *cobra.Command, _ []string) {
-			c := &legacy.CLIWrapper{
-				Config:             cnf,
-				Version:            version,
-				CustomPharPath:     viper.GetString("phar-path"),
-				Debug:              viper.GetBool("debug"),
-				DisableInteraction: viper.GetBool("no-interaction"),
-				Stdout:             cmd.OutOrStdout(),
-				Stderr:             cmd.ErrOrStderr(),
-				Stdin:              cmd.InOrStdin(),
-			}
-			if err := c.Init(); err != nil {
-				log.Println(color.RedString(err.Error()))
-				os.Exit(1)
-				return
-			}
-
-			if err := c.Exec(cmd.Context(), os.Args[1:]...); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				exitCode := 1
-				var execErr *exec.ExitError
-				if errors.As(err, &execErr) {
-					exitCode = execErr.ExitCode()
-				}
-				os.Exit(exitCode)
-			}
+			runLegacyCLI(cmd.Context(), cnf, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin(), os.Args[1:])
 		},
 		PersistentPostRun: func(_ *cobra.Command, _ []string) {
 			checkShellConfigLeftovers(cnf)
@@ -105,16 +89,22 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		},
 	}
 
-	cmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
-		if cmd.Context() == nil {
-			cmd.SetContext(context.Background())
+	cmd.SetHelpFunc(func(innerCmd *cobra.Command, args []string) {
+		if innerCmd.Use != cmd.Use {
+			// For real (Cobra) commands, print the usage string.
+			innerCmd.Print(innerCmd.UsageString())
+			return
 		}
 
+		// Others will be passed to the legacy CLI's help command.
 		if !slices.Contains(args, "--help") && !slices.Contains(args, "-h") {
 			args = append([]string{"help"}, args...)
 		}
+		if len(args) == 1 && (args[0] == "-h" || args[0] == "--help") {
+			args = []string{"help"}
+		}
 
-		cmd.Run(cmd, args)
+		runLegacyCLI(cmd.Context(), cnf, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin(), args)
 	})
 
 	cmd.PersistentFlags().BoolP("version", "V", false, fmt.Sprintf("Displays the %s version", cnf.Application.Name))
@@ -145,6 +135,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 
 	// Add subcommands.
 	cmd.AddCommand(
+		newConfigInstallCommand(),
 		newCompletionCommand(cnf),
 		newHelpCommand(cnf),
 		newListCommand(cnf),
@@ -204,7 +195,7 @@ func printUpdateMessage(newRelease *internal.ReleaseInfo, cnf *config.Config) {
 
 	fmt.Fprintf(color.Error, "\n\n%s %s → %s\n",
 		color.YellowString(fmt.Sprintf("A new release of the %s is available:", cnf.Application.Name)),
-		color.CyanString(version),
+		color.CyanString(config.Version),
 		color.CyanString(newRelease.Version),
 	)
 
@@ -247,4 +238,31 @@ func debugLog(format string, v ...any) {
 	}
 
 	log.Printf(format, v...)
+}
+
+func runLegacyCLI(ctx context.Context, cnf *config.Config, stdout, stderr io.Writer, stdin io.Reader, args []string) {
+	c := &legacy.CLIWrapper{
+		Config:             cnf,
+		Version:            config.Version,
+		CustomPharPath:     viper.GetString("phar-path"),
+		Debug:              viper.GetBool("debug"),
+		DisableInteraction: viper.GetBool("no-interaction"),
+		Stdout:             stdout,
+		Stderr:             stderr,
+		Stdin:              stdin,
+	}
+	if err := c.Init(); err != nil {
+		fmt.Fprintln(stderr, color.RedString(err.Error()))
+		os.Exit(1)
+	}
+
+	if err := c.Exec(ctx, args...); err != nil {
+		debugLog("%s\n", color.RedString(err.Error()))
+		exitCode := 1
+		var execErr *exec.ExitError
+		if errors.As(err, &execErr) {
+			exitCode = execErr.ExitCode()
+		}
+		os.Exit(exitCode)
+	}
 }

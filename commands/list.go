@@ -25,7 +25,7 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 			var b bytes.Buffer
 			c := &legacy.CLIWrapper{
 				Config:             cnf,
-				Version:            version,
+				Version:            config.Version,
 				CustomPharPath:     viper.GetString("phar-path"),
 				Debug:              viper.GetBool("debug"),
 				DisableInteraction: viper.GetBool("no-interaction"),
