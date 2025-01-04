@@ -1,4 +1,3 @@
-// Package alt manages instances of alternative CLI configurations.
 package alt
 
 import (
