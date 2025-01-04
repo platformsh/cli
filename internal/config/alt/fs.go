@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	SubDir     = "platform-alt"
-	HomeSubDir = ".platform-alt"
+	subDir     = "platform-alt"
+	homeSubDir = ".platform-alt"
 )
 
 // FindConfigDir finds an appropriate destination directory for an "alt" CLI configuration YAML file.
@@ -27,14 +27,14 @@ func FindConfigDir() (string, error) {
 		return "", err
 	}
 	if isDir {
-		return filepath.Join(userConfigDir, SubDir), nil
+		return filepath.Join(userConfigDir, subDir), nil
 	}
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(homeDir, HomeSubDir), nil
+	return filepath.Join(homeDir, homeSubDir), nil
 }
 
 // FindBinDir finds an appropriate destination directory for an "alt" CLI executable.
@@ -59,7 +59,7 @@ func FindBinDir() (string, error) {
 		return binDir, nil
 	}
 
-	return filepath.Join(homeDir, HomeSubDir, "bin"), nil
+	return filepath.Join(homeDir, homeSubDir, "bin"), nil
 }
 
 // InPath tests if a directory is in the PATH.
