@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
+	"io/fs"
 	"os"
 )
 
@@ -15,7 +16,17 @@ func CopyIfChanged(destFilename string, source []byte, perm os.FileMode) error {
 	if (err != nil && !os.IsNotExist(err)) || matches {
 		return err
 	}
-	return os.WriteFile(destFilename, source, perm)
+	return writeFile(destFilename, source, perm)
+}
+
+// writeFile creates or overwrites a file, somewhat atomically, using a temporary file next to it.
+func writeFile(path string, content []byte, fileMode fs.FileMode) error {
+	tmpFile := path + ".tmp"
+	if err := os.WriteFile(tmpFile, content, fileMode); err != nil {
+		return err
+	}
+
+	return os.Rename(tmpFile, path)
 }
 
 // compare checks if a file matches the given source.
