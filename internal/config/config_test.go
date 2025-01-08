@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/platformsh/cli/internal/config"
 )
@@ -33,13 +34,14 @@ func TestFromYAML(t *testing.T) {
 		assert.Equal(t, "example-cli-tmp", cnf.Application.TempSubDir)
 		assert.Equal(t, "platform", cnf.Service.ProjectConfigFlavor)
 
+		homeDir, err := os.UserHomeDir()
+		require.NoError(t, err, "the test requires a home directory")
+
 		writableDir, err := cnf.WritableUserDir()
 		assert.NoError(t, err)
+		assert.Equal(t, filepath.Join(homeDir, cnf.Application.WritableUserDir), writableDir)
 
-		if homeDir, err := os.UserHomeDir(); err == nil {
-			assert.Equal(t, filepath.Join(homeDir, cnf.Application.WritableUserDir), writableDir)
-		} else {
-			assert.Equal(t, filepath.Join(os.TempDir(), cnf.Application.TempSubDir), writableDir)
-		}
+		_, err = cnf.CacheDir()
+		assert.NoError(t, err)
 	})
 }

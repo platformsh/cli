@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -60,6 +62,9 @@ type Config struct {
 	SSH struct {
 		DomainWildcards []string `validate:"required" yaml:"domain_wildcards"` // e.g. ["*.platform.sh"]
 	} `validate:"required"`
+
+	cacheDir        string `yaml:"-"`
+	writableUserDir string `yaml:"-"`
 }
 
 // applyDefaults applies defaults to config before parsing.
@@ -82,20 +87,44 @@ func (c *Config) applyDynamicDefaults() {
 
 // WritableUserDir returns the path to a writable user-level directory.
 func (c *Config) WritableUserDir() (string, error) {
-	// Attempt to create the directory under $HOME first.
-	if homeDir, err := os.UserHomeDir(); err == nil {
-		path := filepath.Join(homeDir, c.Application.WritableUserDir)
-		if err := os.Mkdir(path, 0o700); err != nil && !os.IsExist(err) {
-			return "", err
-		}
-		return path, nil
+	if c.writableUserDir != "" {
+		return c.writableUserDir, nil
 	}
-
-	// Otherwise,attempt to create it in the temporary directory.
-	path := filepath.Join(os.TempDir(), c.Application.TempSubDir)
-	if err := os.Mkdir(path, 0o700); err != nil && !os.IsExist(err) {
+	hd, err := os.UserHomeDir()
+	if err != nil {
 		return "", err
 	}
+	path := filepath.Join(hd, c.Application.WritableUserDir)
+	if err := mkDirIfNotExists(path); err != nil {
+		return "", err
+	}
+	c.writableUserDir = path
 
 	return path, nil
+}
+
+// CacheDir returns the path to a cache directory.
+func (c *Config) CacheDir() (string, error) {
+	if c.cacheDir != "" {
+		return c.cacheDir, nil
+	}
+	ucd, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+	path := filepath.Join(ucd, c.Application.TempSubDir)
+	if err := mkDirIfNotExists(path); err != nil {
+		return "", err
+	}
+	c.cacheDir = path
+
+	return path, nil
+}
+
+func mkDirIfNotExists(path string) error {
+	err := os.Mkdir(path, 0o700)
+	if errors.Is(err, fs.ErrExist) {
+		return nil
+	}
+	return err
 }

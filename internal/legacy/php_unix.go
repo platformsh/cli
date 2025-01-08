@@ -10,15 +10,15 @@ import (
 )
 
 // copyPHP to destination, if it does not exist
-func (c *CLIWrapper) copyPHP() error {
-	return file.CopyIfChanged(c.PHPPath(), phpCLI, 0o755)
+func (c *CLIWrapper) copyPHP(cacheDir string) error {
+	return file.CopyIfChanged(c.phpPath(cacheDir), phpCLI, 0o755)
 }
 
-// PHPPath returns the path that the PHP CLI will reside
-func (c *CLIWrapper) PHPPath() string {
-	return filepath.Join(c.cacheDir(), phpPath)
+// phpPath returns the path to the temporary PHP-CLI binary
+func (c *CLIWrapper) phpPath(cacheDir string) string {
+	return filepath.Join(cacheDir, "php")
 }
 
-func (c *CLIWrapper) phpSettings() []string {
+func (c *CLIWrapper) phpSettings(_ string) []string {
 	return nil
 }

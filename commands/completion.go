@@ -39,13 +39,18 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 				handleLegacyError(err)
 			}
 
+			pharPath, err := c.PharPath()
+			if err != nil {
+				handleLegacyError(err)
+			}
+
 			completions := strings.ReplaceAll(
 				strings.ReplaceAll(
 					b.String(),
-					c.PharPath(),
+					pharPath,
 					cnf.Application.Executable,
 				),
-				path.Base(c.PharPath()),
+				path.Base(pharPath),
 				cnf.Application.Executable,
 			)
 			fmt.Fprintln(cmd.OutOrStdout(), "#compdef "+cnf.Application.Executable)

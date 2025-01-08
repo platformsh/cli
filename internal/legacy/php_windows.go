@@ -23,8 +23,8 @@ var phpCLIHash string
 var caCert []byte
 
 // copyPHP to destination, if it does not exist
-func (c *CLIWrapper) copyPHP() error {
-	destDir := filepath.Join(c.cacheDir(), "php")
+func (c *CLIWrapper) copyPHP(cacheDir string) error {
+	destDir := filepath.Join(cacheDir, "php")
 	hashPath := filepath.Join(destDir, "hash")
 	hashOK, err := file.CheckHash(hashPath, phpCLIHash)
 	if err != nil && !os.IsNotExist(err) {
@@ -52,9 +52,9 @@ func (c *CLIWrapper) copyPHP() error {
 	return file.CopyIfChanged(hashPath, []byte(phpCLIHash), 0o644)
 }
 
-// PHPPath returns the path that the PHP CLI will reside
-func (c *CLIWrapper) PHPPath() string {
-	return filepath.Join(c.cacheDir(), "php", "php.exe")
+// phpPath returns the path to the temporary PHP-CLI binary
+func (c *CLIWrapper) phpPath(cacheDir string) string {
+	return filepath.Join(cacheDir, "php", "php.exe")
 }
 
 func copyZipFile(f *zip.File, destDir string) error {
@@ -93,9 +93,7 @@ func copyZipFile(f *zip.File, destDir string) error {
 	return nil
 }
 
-func (c *CLIWrapper) phpSettings() []string {
-	cacheDir := c.cacheDir()
-
+func (c *CLIWrapper) phpSettings(cacheDir string) []string {
 	return []string{
 		"extension=" + filepath.Join(cacheDir, "php", "ext", "php_curl.dll"),
 		"extension=" + filepath.Join(cacheDir, "php", "ext", "php_openssl.dll"),
