@@ -25,6 +25,7 @@ jobs:
       - name: Create fake PHP and .phar files
         run: |
           # These are needed so that the linter does not complain
+          mkdir -p internal/legacy/archives
           touch internal/legacy/archives/platform.phar
           touch internal/legacy/archives/php_windows_amd64
           touch internal/legacy/archives/php_linux_amd64

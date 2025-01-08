@@ -21,3 +21,7 @@ func (c *CLIWrapper) copyPHP() error {
 func (c *CLIWrapper) PHPPath() string {
 	return path.Join(c.cacheDir(), phpPath)
 }
+
+func (c *CLIWrapper) phpSettings() []string {
+	return nil
+}
