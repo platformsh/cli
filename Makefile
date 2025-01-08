@@ -1,4 +1,4 @@
-PHP_VERSION = 8.2.26
+PHP_VERSION = 8.2.27
 LEGACY_CLI_VERSION = 4.22.0
 
 GORELEASER_ID ?= platform
@@ -52,11 +52,11 @@ internal/legacy/archives/php_linux_$(GOARCH):
 PHP_WINDOWS_REMOTE_FILENAME := "php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip"
 internal/legacy/archives/php_windows.zip:
 	( \
+	  set -e ;\
 	  mkdir -p internal/legacy/archives ;\
 	  cd internal/legacy/archives ;\
-	  # Using curl (instead of wget) because it's built in to things like Git Bash.
-	  curl "https://windows.php.net/downloads/releases/$(PHP_WINDOWS_REMOTE_FILENAME)" > php_windows.zip ;\
-	  curl https://windows.php.net/downloads/releases/sha256sum.txt | grep "$(PHP_WINDOWS_REMOTE_FILENAME)" | sed s/"$(PHP_WINDOWS_REMOTE_FILENAME)"/"php_windows.zip"/g > php_windows.zip.sha256 ;\
+	  curl -f "https://windows.php.net/downloads/releases/$(PHP_WINDOWS_REMOTE_FILENAME)" > php_windows.zip ;\
+	  curl -f https://windows.php.net/downloads/releases/sha256sum.txt | grep "$(PHP_WINDOWS_REMOTE_FILENAME)" | sed s/"$(PHP_WINDOWS_REMOTE_FILENAME)"/"php_windows.zip"/g > php_windows.zip.sha256 ;\
 	  sha256sum -c php_windows.zip.sha256 ;\
 	)
 
