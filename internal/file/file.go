@@ -2,8 +2,6 @@ package file
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"io"
 	"io/fs"
@@ -58,27 +56,4 @@ func probablyMatches(filename string, data []byte) (bool, error) {
 	}
 
 	return bytes.Equal(data[offset:], buf[:n]), nil
-}
-
-// CheckHash checks if a file has the given SHA256 hash.
-func CheckHash(filename, hash string) (bool, error) {
-	fh, err := sha256File(filename)
-	if err != nil {
-		return false, err
-	}
-	return fh == hash, nil
-}
-
-// sha256File calculates the SHA256 hash of a file.
-func sha256File(filename string) (string, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(h.Sum(nil)), nil
 }
