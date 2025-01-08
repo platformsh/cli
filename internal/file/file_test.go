@@ -1,6 +1,7 @@
 package file
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -11,6 +12,19 @@ import (
 )
 
 func TestCopyIfChanged(t *testing.T) {
+	largeContentLength := 128 * 1024
+	largeContent := make([]byte, largeContentLength)
+	largeContent[0] = 'f'
+	largeContent[largeContentLength-2] = 'o'
+	largeContent[largeContentLength-1] = 'o'
+
+	largeContent2 := make([]byte, largeContentLength)
+	largeContent2[0] = 'b'
+	largeContent2[largeContentLength-2] = 'a'
+	largeContent2[largeContentLength-1] = 'r'
+
+	assert.Equal(t, len(largeContent), len(largeContent2))
+
 	cases := []struct {
 		name        string
 		initialData []byte
@@ -20,6 +34,8 @@ func TestCopyIfChanged(t *testing.T) {
 		{"File does not exist", nil, []byte("new data"), true},
 		{"File matches source", []byte("same data"), []byte("same data"), false},
 		{"File content differs", []byte("old data"), []byte("new data"), true},
+		{"Larger file content differs", largeContent, largeContent2, true},
+		{"Larger file content matches", largeContent, largeContent, false},
 		{"File size differs", []byte("short"), []byte("much longer data"), true},
 		{"Empty source", []byte("existing data"), []byte{}, true},
 	}
@@ -57,7 +73,7 @@ func TestCopyIfChanged(t *testing.T) {
 			data, err := os.ReadFile(destFile)
 			require.NoError(t, err)
 
-			assert.Equal(t, data, c.sourceData)
+			assert.True(t, bytes.Equal(data, c.sourceData))
 		})
 	}
 }

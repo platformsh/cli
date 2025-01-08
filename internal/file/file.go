@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"io"
 	"io/fs"
 	"os"
 )
 
 // CopyIfChanged copies source data to a destination filename if it has changed.
-// It is considered changed if its length or contents are different.
 func CopyIfChanged(destFilename string, source []byte, perm os.FileMode) error {
-	matches, err := compare(destFilename, source)
-	if (err != nil && !os.IsNotExist(err)) || matches {
+	matches, err := probablyMatches(destFilename, source)
+	if err != nil || matches {
 		return err
 	}
 	return writeFile(destFilename, source, perm)
@@ -29,10 +29,14 @@ func writeFile(path string, content []byte, fileMode fs.FileMode) error {
 	return os.Rename(tmpFile, path)
 }
 
-// compare checks if a file matches the given source.
-func compare(filename string, data []byte) (bool, error) {
+// probablyMatches checks, heuristically, if a file matches source data.
+// To save time, it only compares the file size and the end of its contents (up to 32KB).
+func probablyMatches(filename string, data []byte) (bool, error) {
 	f, err := os.Open(filename)
 	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return false, nil
+		}
 		return false, err
 	}
 	defer f.Close()
@@ -45,25 +49,15 @@ func compare(filename string, data []byte) (bool, error) {
 		return false, nil
 	}
 
-	var (
-		buf    = make([]byte, 32*1024)
-		offset = 0
-	)
-	for {
-		n, err := f.Read(buf)
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return false, err
-		}
-		if offset+n > len(data) || !bytes.Equal(data[offset:offset+n], buf[:n]) {
-			return false, nil
-		}
-		offset += n
+	// Read the end of the file (up to 32 KB).
+	buf := make([]byte, min(32*1024, len(data)))
+	offset := max(0, len(data)-32*1024)
+	n, err := f.ReadAt(buf, int64(offset))
+	if err != nil && err != io.EOF {
+		return false, err
 	}
 
-	return offset == len(data), nil
+	return bytes.Equal(data[offset:], buf[:n]), nil
 }
 
 // CheckHash checks if a file has the given SHA256 hash.
