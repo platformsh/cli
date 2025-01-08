@@ -4,7 +4,7 @@
 package legacy
 
 import (
-	"path"
+	"path/filepath"
 
 	"github.com/platformsh/cli/internal/file"
 )
@@ -16,7 +16,7 @@ func (c *CLIWrapper) copyPHP() error {
 
 // PHPPath returns the path that the PHP CLI will reside
 func (c *CLIWrapper) PHPPath() string {
-	return path.Join(c.cacheDir(), phpPath)
+	return filepath.Join(c.cacheDir(), phpPath)
 }
 
 func (c *CLIWrapper) phpSettings() []string {

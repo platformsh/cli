@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 
 	"github.com/gofrs/flock"
 
@@ -40,7 +40,7 @@ type CLIWrapper struct {
 }
 
 func (c *CLIWrapper) cacheDir() string {
-	return path.Join(os.TempDir(), c.Config.Application.Slug)
+	return filepath.Join(os.TempDir(), fmt.Sprintf("%s-%s-%s", c.Config.Application.Slug, PHPVersion, LegacyCLIVersion))
 }
 
 // Initialize the CLI wrapper, creating a temporary directory and copying over files.
@@ -51,7 +51,7 @@ func (c *CLIWrapper) init() error {
 			return fmt.Errorf("could not create temporary directory: %w", err)
 		}
 	}
-	fileLock := flock.New(path.Join(c.cacheDir(), ".lock"))
+	fileLock := flock.New(filepath.Join(c.cacheDir(), ".lock"))
 	if err := fileLock.Lock(); err != nil {
 		return fmt.Errorf("could not acquire lock: %w", err)
 	}
@@ -144,12 +144,12 @@ func (c *CLIWrapper) PharPath() string {
 		return c.CustomPharPath
 	}
 
-	return path.Join(c.cacheDir(), pharPath)
+	return filepath.Join(c.cacheDir(), pharPath)
 }
 
 // ConfigPath returns the path to the YAML config file that will be provided to the legacy CLI.
 func (c *CLIWrapper) ConfigPath() string {
-	return path.Join(c.cacheDir(), "config.yaml")
+	return filepath.Join(c.cacheDir(), "config.yaml")
 }
 
 // debugLog logs a debugging message, if debug is enabled
