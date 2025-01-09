@@ -140,8 +140,7 @@ func (c *CLIWrapper) Init() error {
 
 // Exec a legacy CLI command with the given arguments
 func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
-	args = append([]string{c.PharPath()}, args...)
-	cmd := exec.CommandContext(ctx, c.PHPPath(), args...) //nolint:gosec
+	cmd := c.makeCmd(ctx, args)
 	if c.Stdin != nil {
 		cmd.Stdin = c.Stdin
 	} else {
@@ -189,6 +188,18 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 	}
 
 	return nil
+}
+
+// makeCmd makes a legacy CLI command with the given context and arguments.
+func (c *CLIWrapper) makeCmd(ctx context.Context, args []string) *exec.Cmd {
+	iniSettings := c.phpSettings()
+	var cmdArgs = make([]string, 0, len(args)+2+len(iniSettings)*2)
+	for _, s := range iniSettings {
+		cmdArgs = append(cmdArgs, "-d", s)
+	}
+	cmdArgs = append(cmdArgs, c.PharPath())
+	cmdArgs = append(cmdArgs, args...)
+	return exec.CommandContext(ctx, c.PHPPath(), cmdArgs...) //nolint:gosec
 }
 
 // PharPath returns the path to the legacy CLI's Phar file.

@@ -1,7 +1,6 @@
 internal/legacy/archives/*
 dist/
 php-*
-!internal/legacy/archives/windows_php.ini.tpl
 completion
 
 # Binaries for programs and plugins

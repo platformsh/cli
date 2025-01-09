@@ -10,14 +10,10 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"text/template"
 )
 
 //go:embed archives/php_windows.zip
 var phpCLI []byte
-
-//go:embed archives/windows_php.ini.tpl
-var phpIniTemplate string
 
 //go:embed archives/cacert.pem
 var caCert []byte
@@ -61,12 +57,6 @@ func (c *CLIWrapper) copyPHP() error {
 		}
 	}
 
-	w, err := os.Create(path.Join(c.cacheDir(), "php", "php.ini"))
-	if err != nil {
-		return fmt.Errorf("could not open php.ini file for writing: %w", err)
-	}
-	defer w.Close()
-	template.Must(template.New("php.ini").Parse(phpIniTemplate)).Execute(w, map[string]string{"CLIDir": c.cacheDir()})
 	copyFile(path.Join(c.cacheDir(), "php", "extras", "cacert.pem"), caCert)
 
 	return nil
@@ -75,4 +65,8 @@ func (c *CLIWrapper) copyPHP() error {
 // PHPPath returns the path that the PHP CLI will reside
 func (c *CLIWrapper) PHPPath() string {
 	return path.Join(c.cacheDir(), "php", "php.exe")
+}
+
+func (c *CLIWrapper) phpSettings() []string {
+	return []string{"openssl.cafile", path.Join(c.cacheDir(), "php", "extras", "cacert.pem")}
 }
