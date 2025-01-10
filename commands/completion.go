@@ -3,7 +3,7 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -50,7 +50,7 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 					pharPath,
 					cnf.Application.Executable,
 				),
-				path.Base(pharPath),
+				filepath.Base(pharPath),
 				cnf.Application.Executable,
 			)
 			fmt.Fprintln(cmd.OutOrStdout(), "#compdef "+cnf.Application.Executable)
