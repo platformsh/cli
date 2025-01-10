@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 
 	"github.com/gofrs/flock"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/platformsh/cli/internal/config"
 	"github.com/platformsh/cli/internal/file"
@@ -75,20 +76,28 @@ func (c *CLIWrapper) init() error {
 	c.debugLog("lock acquired: %s", fileLock.Path())
 	defer fileLock.Unlock() //nolint:errcheck
 
-	if err := file.CopyIfChanged(c.pharPath(cacheDir), phar, 0o644); err != nil {
-		return fmt.Errorf("could not copy phar file: %w", err)
-	}
+	g := errgroup.Group{}
+	g.Go(func() error {
+		if err := file.CopyIfChanged(c.pharPath(cacheDir), phar, 0o644); err != nil {
+			return fmt.Errorf("could not copy phar file: %w", err)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		configContent, err := config.LoadYAML()
+		if err != nil {
+			return fmt.Errorf("could not load config for checking: %w", err)
+		}
+		if err := file.CopyIfChanged(filepath.Join(cacheDir, configBasename), configContent, 0o644); err != nil {
+			return fmt.Errorf("could not write config: %w", err)
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return c.copyPHP(cacheDir)
+	})
 
-	// Always write the config.yaml file if it changed.
-	configContent, err := config.LoadYAML()
-	if err != nil {
-		return fmt.Errorf("could not load config for checking: %w", err)
-	}
-	if err := file.CopyIfChanged(filepath.Join(cacheDir, configBasename), configContent, 0o644); err != nil {
-		return fmt.Errorf("could not write config: %w", err)
-	}
-
-	return c.copyPHP(cacheDir)
+	return g.Wait()
 }
 
 // Exec a legacy CLI command with the given arguments
