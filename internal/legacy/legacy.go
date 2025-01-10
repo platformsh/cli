@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/gofrs/flock"
 	"golang.org/x/sync/errgroup"
@@ -69,11 +70,12 @@ func (c *CLIWrapper) init() error {
 		return err
 	}
 
+	preLock := time.Now()
 	fileLock := flock.New(filepath.Join(cacheDir, ".lock"))
 	if err := fileLock.Lock(); err != nil {
 		return fmt.Errorf("could not acquire lock: %w", err)
 	}
-	c.debugLog("lock acquired: %s", fileLock.Path())
+	c.debugLog("lock acquired (%s): %s", time.Since(preLock), fileLock.Path())
 	defer fileLock.Unlock() //nolint:errcheck
 
 	g := errgroup.Group{}
@@ -102,9 +104,12 @@ func (c *CLIWrapper) init() error {
 
 // Exec a legacy CLI command with the given arguments
 func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
+	preInit := time.Now()
 	if err := c.init(); err != nil {
-		return fmt.Errorf("failed to initialize CLI: %w", err)
+		return fmt.Errorf("failed to initialize PHP CLI: %w", err)
 	}
+	c.debugLog("initialized PHP CLI (%s)", time.Since(preInit))
+
 	cacheDir, err := c.cacheDir()
 	if err != nil {
 		return err
@@ -150,7 +155,7 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 		c.Version,
 	))
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("could not run legacy CLI command: %w", err)
+		return fmt.Errorf("could not run PHP CLI command: %w", err)
 	}
 
 	return nil
