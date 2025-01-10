@@ -68,5 +68,11 @@ func (c *CLIWrapper) PHPPath() string {
 }
 
 func (c *CLIWrapper) phpSettings() []string {
-	return []string{"openssl.cafile", path.Join(c.cacheDir(), "php", "extras", "cacert.pem")}
+	cacheDir := c.cacheDir()
+
+	return []string{
+		"extension=" + filepath.Join(cacheDir, "php", "ext", "php_curl.dll"),
+		"extension=" + filepath.Join(cacheDir, "php", "ext", "php_openssl.dll"),
+		"openssl.cafile=" + filepath.Join(cacheDir, "php", "extras", "cacert.pem"),
+	}
 }
