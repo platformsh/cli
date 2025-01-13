@@ -49,7 +49,7 @@ type CLIWrapper struct {
 
 func (c *CLIWrapper) cacheDir() (string, error) {
 	if c._cacheDir == "" {
-		cd, err := c.Config.CacheDir()
+		cd, err := c.Config.TempDir()
 		if err != nil {
 			return "", err
 		}

@@ -5,6 +5,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 )
 
 // Config provides YAML configuration for the CLI.
@@ -103,8 +105,15 @@ func (c *Config) WritableUserDir() (string, error) {
 	return path, nil
 }
 
-// CacheDir returns the path to a cache directory.
-func (c *Config) CacheDir() (string, error) {
+// TempDir returns the path to a user-specific temporary directory.
+//
+// It creates the temporary directory if it does not already exist.
+//
+// It does not use os.TempDir on Linux as that usually returns /tmp which could
+// conflict with other users. It also does not use os.MkdirTemp as the CLI
+// usually needs a stable (not random) directory path. It therefore uses
+// os.UserCacheDir which in turn will use XDG_CACHE_HOME or the home directory.
+func (c *Config) TempDir() (string, error) {
 	if c.cacheDir != "" {
 		return c.cacheDir, nil
 	}
@@ -112,6 +121,15 @@ func (c *Config) CacheDir() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	// Windows has a user-specific temporary directory.
+	if runtime.GOOS == "windows" {
+		tempDir := os.TempDir()
+		if strings.HasPrefix(tempDir, ucd) {
+			ucd = tempDir
+		}
+	}
+
 	path := filepath.Join(ucd, c.Application.TempSubDir)
 	if err := mkDirIfNotExists(path); err != nil {
 		return "", err

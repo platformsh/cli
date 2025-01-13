@@ -41,7 +41,7 @@ func TestFromYAML(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, filepath.Join(homeDir, cnf.Application.WritableUserDir), writableDir)
 
-		_, err = cnf.CacheDir()
+		_, err = cnf.TempDir()
 		assert.NoError(t, err)
 	})
 }
