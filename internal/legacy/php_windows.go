@@ -53,22 +53,28 @@ func (c *CLIWrapper) phpPath(cacheDir string) string {
 	return filepath.Join(cacheDir, "php", "php.exe")
 }
 
+// copyZipFile extracts a file from the Zip to the destination directory.
+// If the file already exists and has the correct size, it will be skipped.
 func copyZipFile(f *zip.File, destDir string) error {
 	before := time.Now()
-	absPath := filepath.Join(destDir, f.Name)
-	if !strings.HasPrefix(absPath, filepath.Clean(destDir)+string(os.PathSeparator)) {
-		return fmt.Errorf("invalid file path: %s", absPath)
+	destPath := filepath.Join(destDir, f.Name)
+	if !strings.HasPrefix(destPath, filepath.Clean(destDir)+string(os.PathSeparator)) {
+		return fmt.Errorf("invalid file path: %s", destPath)
 	}
 
 	if f.FileInfo().IsDir() {
-		if err := os.MkdirAll(absPath, 0755); err != nil {
-			return fmt.Errorf("could not create extracted directory %s: %w", absPath, err)
+		if err := os.MkdirAll(destPath, 0755); err != nil {
+			return fmt.Errorf("could not create extracted directory %s: %w", destPath, err)
 		}
 		return nil
 	}
 
-	if err := os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
-		return fmt.Errorf("could not create parent directory for extracted file %s: %w", absPath, err)
+	if existingFileInfo, err := os.Lstat(destPath); err == nil && uint64(existingFileInfo.Size()) == f.UncompressedSize64 {
+		return nil
+	}
+
+	if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+		return fmt.Errorf("could not create parent directory for extracted file %s: %w", destPath, err)
 	}
 
 	rc, err := f.Open()
@@ -82,8 +88,8 @@ func copyZipFile(f *zip.File, destDir string) error {
 		return fmt.Errorf("could not extract zipped file %s: %w", f.Name, err)
 	}
 
-	if err := file.CopyIfChanged(absPath, b, f.Mode()); err != nil {
-		return fmt.Errorf("could not write extracted file %s: %w", absPath, err)
+	if err := file.Write(destPath, b, f.Mode()); err != nil {
+		return fmt.Errorf("could not write extracted file %s: %w", destPath, err)
 	}
 
 	log.Printf("took %s to extract %s", time.Since(before), f.Name)

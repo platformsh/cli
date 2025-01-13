@@ -24,11 +24,11 @@ func CopyIfChanged(destFilename string, source []byte, perm os.FileMode) error {
 	defer func() {
 		log.Printf("took %s to copy file: %s", time.Since(beforeCheck), destFilename)
 	}()
-	return writeFile(destFilename, source, perm)
+	return Write(destFilename, source, perm)
 }
 
-// writeFile creates or overwrites a file, somewhat atomically, using a temporary file next to it.
-func writeFile(path string, content []byte, fileMode fs.FileMode) error {
+// Write creates or overwrites a file, somewhat atomically, using a temporary file next to it.
+func Write(path string, content []byte, fileMode fs.FileMode) error {
 	tmpFile := path + ".tmp"
 	if err := os.WriteFile(tmpFile, content, fileMode); err != nil {
 		return err
