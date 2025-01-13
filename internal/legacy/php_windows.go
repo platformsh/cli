@@ -32,18 +32,21 @@ func (c *CLIWrapper) copyPHP(cacheDir string) error {
 	}
 
 	g := errgroup.Group{}
-	g.SetLimit(runtime.GOMAXPROCS(0) * 2)
+	g.SetLimit(runtime.NumCPU() * 4)
 	for _, f := range r.File {
 		g.Go(func() error {
 			return copyZipFile(f, destDir)
 		})
 	}
+	if err := g.Wait(); err != nil {
+		return err
+	}
 
-	g.Go(func() error {
-		return file.CopyIfChanged(filepath.Join(destDir, "extras", "cacert.pem"), caCert, 0o644)
-	})
+	if err := file.CopyIfChanged(filepath.Join(destDir, "extras", "cacert.pem"), caCert, 0o644); err != nil {
+		return err
+	}
 
-	return g.Wait()
+	return nil
 }
 
 // phpPath returns the path to the temporary PHP-CLI binary
