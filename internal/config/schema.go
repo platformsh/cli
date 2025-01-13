@@ -56,7 +56,7 @@ type Config struct {
 		DomainWildcards []string `validate:"required" yaml:"domain_wildcards"` // e.g. ["*.platform.sh"]
 	} `validate:"required"`
 
-	cacheDir        string `yaml:"-"`
+	tempDir         string `yaml:"-"`
 	writableUserDir string `yaml:"-"`
 }
 

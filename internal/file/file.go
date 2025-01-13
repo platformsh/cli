@@ -47,13 +47,16 @@ func probablyMatches(filename string, data []byte) (bool, error) {
 		return false, nil
 	}
 
-	// Read the end of the file (up to 32 KB).
-	buf := make([]byte, min(32*1024, len(data)))
-	offset := max(0, len(data)-32*1024)
+	return matchEndOfFile(f, data, 32*1024)
+}
+
+func matchEndOfFile(f *os.File, b []byte, size int) (bool, error) {
+	buf := make([]byte, min(size, len(b)))
+	offset := max(0, len(b)-size)
 	n, err := f.ReadAt(buf, int64(offset))
 	if err != nil && err != io.EOF {
 		return false, err
 	}
 
-	return bytes.Equal(data[offset:], buf[:n]), nil
+	return bytes.Equal(b[offset:], buf[:n]), nil
 }
