@@ -80,12 +80,15 @@ func (c *CLIWrapper) init() error {
 
 	g := errgroup.Group{}
 	g.Go(func() error {
+		before := time.Now()
 		if err := file.CopyIfChanged(c.pharPath(cacheDir), phar, 0o644); err != nil {
 			return fmt.Errorf("could not copy phar file: %w", err)
 		}
+		log.Println("copied phar took", time.Since(before))
 		return nil
 	})
 	g.Go(func() error {
+		before := time.Now()
 		configContent, err := config.LoadYAML()
 		if err != nil {
 			return fmt.Errorf("could not load config for checking: %w", err)
@@ -93,9 +96,14 @@ func (c *CLIWrapper) init() error {
 		if err := file.CopyIfChanged(filepath.Join(cacheDir, configBasename), configContent, 0o644); err != nil {
 			return fmt.Errorf("could not write config: %w", err)
 		}
+		log.Println("copied config took", time.Since(before))
 		return nil
 	})
 	g.Go(func() error {
+		before := time.Now()
+		defer func() {
+			log.Println("copied php took", time.Since(before))
+		}()
 		return c.copyPHP(cacheDir)
 	})
 
