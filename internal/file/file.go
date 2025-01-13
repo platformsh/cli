@@ -5,25 +5,15 @@ import (
 	"errors"
 	"io"
 	"io/fs"
-	"log"
 	"os"
-	"path/filepath"
-	"time"
 )
 
 // CopyIfChanged copies source data to a destination filename if it has changed.
 func CopyIfChanged(destFilename string, source []byte, perm os.FileMode) error {
-	beforeCheck := time.Now()
 	matches, err := probablyMatches(destFilename, source)
 	if err != nil || matches {
-		if matches {
-			log.Printf("took %s to check file: %s", time.Since(beforeCheck), filepath.Base(destFilename))
-		}
 		return err
 	}
-	defer func() {
-		log.Printf("took %s to copy file: %s", time.Since(beforeCheck), destFilename)
-	}()
 	return Write(destFilename, source, perm)
 }
 

@@ -6,12 +6,10 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -56,7 +54,6 @@ func (c *CLIWrapper) phpPath(cacheDir string) string {
 // copyZipFile extracts a file from the Zip to the destination directory.
 // If the file already exists and has the correct size, it will be skipped.
 func copyZipFile(f *zip.File, destDir string) error {
-	before := time.Now()
 	destPath := filepath.Join(destDir, f.Name)
 	if !strings.HasPrefix(destPath, filepath.Clean(destDir)+string(os.PathSeparator)) {
 		return fmt.Errorf("invalid file path: %s", destPath)
@@ -91,8 +88,6 @@ func copyZipFile(f *zip.File, destDir string) error {
 	if err := file.Write(destPath, b, f.Mode()); err != nil {
 		return fmt.Errorf("could not write extracted file %s: %w", destPath, err)
 	}
-
-	log.Printf("took %s to extract %s", time.Since(before), f.Name)
 
 	return nil
 }
