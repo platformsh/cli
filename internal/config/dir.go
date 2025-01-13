@@ -2,11 +2,11 @@ package config
 
 import (
 	"errors"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 )
 
 // HomeDir returns the user's home directory, which can be overridden with the {ENV_PREFIX}HOME variable.
@@ -28,7 +28,7 @@ func (c *Config) WritableUserDir() (string, error) {
 		return "", err
 	}
 	path := filepath.Join(hd, c.Application.WritableUserDir)
-	if err := mkDirIfNotExists(path); err != nil {
+	if err := os.MkdirAll(path, 0o700); err != nil {
 		return "", err
 	}
 	c.writableUserDir = path
@@ -66,18 +66,18 @@ func (c *Config) TempDir() (string, error) {
 	}
 
 	path := filepath.Join(d, c.Application.TempSubDir)
-	if err := mkDirIfNotExists(path); err != nil {
-		return "", err
+
+	// If the subdirectory cannot be created due to a read-only filesystem, fall back to /tmp.
+	if err := os.MkdirAll(path, 0o700); err != nil {
+		if !errors.Is(err, syscall.EROFS) {
+			return "", err
+		}
+		path = filepath.Join(os.TempDir(), c.Application.TempSubDir)
+		if err := os.MkdirAll(path, 0o700); err != nil {
+			return "", err
+		}
 	}
 	c.cacheDir = path
 
 	return path, nil
-}
-
-func mkDirIfNotExists(path string) error {
-	err := os.Mkdir(path, 0o700)
-	if errors.Is(err, fs.ErrExist) {
-		return nil
-	}
-	return err
 }

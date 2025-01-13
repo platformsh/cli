@@ -2,7 +2,6 @@ package config_test
 
 import (
 	_ "embed"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -51,10 +50,6 @@ func TestFromYAML(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, filepath.Join(homeDir, cnf.Application.WritableUserDir), writableDir)
 
-		_, err = cnf.TempDir()
-		assert.ErrorIs(t, err, fs.ErrNotExist)
-
-		require.NoError(t, os.Mkdir(filepath.Join(tempDir, "tmp"), 0o700))
 		d, err := cnf.TempDir()
 		assert.NoError(t, err)
 		assert.Equal(t, filepath.Join(tempDir, "tmp", cnf.Application.TempSubDir), d)
