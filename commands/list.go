@@ -3,12 +3,8 @@ package commands
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"os"
-	"os/exec"
 
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -28,14 +24,14 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				Version:            version,
 				CustomPharPath:     viper.GetString("phar-path"),
 				Debug:              viper.GetBool("debug"),
+				DebugLogFunc:       debugLog,
 				DisableInteraction: viper.GetBool("no-interaction"),
 				Stdout:             &b,
 				Stderr:             cmd.ErrOrStderr(),
 				Stdin:              cmd.InOrStdin(),
 			}
 			if err := c.Init(); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				os.Exit(1)
+				exitWithError(cmd, err)
 				return
 			}
 
@@ -47,20 +43,13 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				arguments = append(arguments, args[0])
 			}
 			if err := c.Exec(cmd.Context(), arguments...); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				exitCode := 1
-				var execErr *exec.ExitError
-				if errors.As(err, &execErr) {
-					exitCode = execErr.ExitCode()
-				}
-				os.Exit(exitCode)
+				exitWithError(cmd, err)
 				return
 			}
 
 			var list List
 			if err := json.Unmarshal(b.Bytes(), &list); err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				os.Exit(1)
+				exitWithError(cmd, err)
 				return
 			}
 
@@ -99,21 +88,14 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				c.Stdout = cmd.OutOrStdout()
 				arguments := []string{"list", "--format=" + format}
 				if err := c.Exec(cmd.Context(), arguments...); err != nil {
-					debugLog("%s\n", color.RedString(err.Error()))
-					exitCode := 1
-					var execErr *exec.ExitError
-					if errors.As(err, &execErr) {
-						exitCode = execErr.ExitCode()
-					}
-					os.Exit(exitCode)
+					exitWithError(cmd, err)
 				}
 				return
 			}
 
 			result, err := formatter.Format(&list, config.FromContext(cmd.Context()))
 			if err != nil {
-				debugLog("%s\n", color.RedString(err.Error()))
-				os.Exit(1)
+				exitWithError(cmd, err)
 				return
 			}
 
