@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"time"
 
 	"github.com/gofrs/flock"
 
@@ -77,6 +78,8 @@ type CLIWrapper struct {
 	Debug              bool
 	DisableInteraction bool
 	DebugLogFunc       func(string, ...any)
+
+	initialized bool
 }
 
 func (c *CLIWrapper) debug(msg string, args ...any) {
@@ -89,19 +92,25 @@ func (c *CLIWrapper) cacheDir() string {
 	return path.Join(os.TempDir(), fmt.Sprintf("%s-%s-%s", c.Config.Application.Slug, PHPVersion, LegacyCLIVersion))
 }
 
-// Init the CLI wrapper, creating a temporary directory and copying over files
-func (c *CLIWrapper) Init() error {
+// init initializes the CLI wrapper, creating a temporary directory and copying over files.
+func (c *CLIWrapper) init() error {
+	if c.initialized {
+		return nil
+	}
+	preInit := time.Now()
+
 	if _, err := os.Stat(c.cacheDir()); os.IsNotExist(err) {
 		c.debug("Cache directory does not exist, creating: %s", c.cacheDir())
 		if err := os.Mkdir(c.cacheDir(), 0o700); err != nil {
 			return fmt.Errorf("could not create temporary directory: %w", err)
 		}
 	}
+	preLock := time.Now()
 	fileLock := flock.New(path.Join(c.cacheDir(), ".lock"))
 	if err := fileLock.Lock(); err != nil {
 		return fmt.Errorf("could not acquire lock: %w", err)
 	}
-	c.debug("Lock acquired: %s", fileLock.Path())
+	c.debug("lock acquired (%s): %s", time.Since(preLock), fileLock.Path())
 	//nolint:errcheck
 	defer fileLock.Unlock()
 
@@ -141,11 +150,18 @@ func (c *CLIWrapper) Init() error {
 		}
 	}
 
+	c.initialized = true
+	c.debug("initialized PHP CLI (%s)", time.Since(preInit))
+
 	return nil
 }
 
 // Exec a legacy CLI command with the given arguments
 func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
+	if err := c.init(); err != nil {
+		return err
+	}
+
 	cmd := c.makeCmd(ctx, args)
 	if c.Stdin != nil {
 		cmd.Stdin = c.Stdin
