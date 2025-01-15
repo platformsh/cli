@@ -8,9 +8,10 @@ import (
 	"os"
 )
 
-// CopyIfChanged copies source data to a destination filename if it has changed.
-func CopyIfChanged(destFilename string, source []byte, perm os.FileMode) error {
-	matches, err := probablyMatches(destFilename, source)
+// WriteIfNeeded writes data to a destination file, only if the file does not exist or if it was partially written.
+// To save time, it only checks that the file size is correct, and then matches the end of its contents (up to 32KB).
+func WriteIfNeeded(destFilename string, source []byte, perm os.FileMode) error {
+	matches, err := probablyMatches(destFilename, source, 32*1024)
 	if err != nil || matches {
 		return err
 	}
@@ -27,9 +28,8 @@ func Write(path string, content []byte, fileMode fs.FileMode) error {
 	return os.Rename(tmpFile, path)
 }
 
-// probablyMatches checks, heuristically, if a file matches source data.
-// To save time, it only compares the file size and the end of its contents (up to 32KB).
-func probablyMatches(filename string, data []byte) (bool, error) {
+// probablyMatches checks if a file exists and matches the end of source data (up to checkSize bytes).
+func probablyMatches(filename string, data []byte, checkSize int) (bool, error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -47,16 +47,12 @@ func probablyMatches(filename string, data []byte) (bool, error) {
 		return false, nil
 	}
 
-	return matchEndOfFile(f, data, 32*1024)
-}
-
-func matchEndOfFile(f *os.File, b []byte, size int) (bool, error) {
-	buf := make([]byte, min(size, len(b)))
-	offset := max(0, len(b)-size)
+	buf := make([]byte, min(checkSize, len(data)))
+	offset := max(0, len(data)-checkSize)
 	n, err := f.ReadAt(buf, int64(offset))
 	if err != nil && err != io.EOF {
 		return false, err
 	}
 
-	return bytes.Equal(b[offset:], buf[:n]), nil
+	return bytes.Equal(data[offset:], buf[:n]), nil
 }

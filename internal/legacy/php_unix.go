@@ -11,7 +11,7 @@ import (
 
 // copyPHP to destination, if it does not exist
 func (c *CLIWrapper) copyPHP(cacheDir string) error {
-	return file.CopyIfChanged(c.phpPath(cacheDir), phpCLI, 0o755)
+	return file.WriteIfNeeded(c.phpPath(cacheDir), phpCLI, 0o755)
 }
 
 // phpPath returns the path to the temporary PHP-CLI binary

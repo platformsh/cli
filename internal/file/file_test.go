@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCopyIfChanged(t *testing.T) {
+func TestWriteIfNeeded(t *testing.T) {
 	largeContentLength := 128 * 1024
 	largeContent := make([]byte, largeContentLength)
 	largeContent[0] = 'f'
@@ -50,24 +50,26 @@ func TestCopyIfChanged(t *testing.T) {
 				time.Sleep(time.Millisecond * 5)
 			}
 
-			var modTimeBeforeCopy time.Time
+			var modTimeBefore time.Time
 			stat, err := os.Stat(destFile)
 			if c.initialData == nil {
 				require.True(t, os.IsNotExist(err))
 			} else {
 				require.NoError(t, err)
-				modTimeBeforeCopy = stat.ModTime()
+				modTimeBefore = stat.ModTime()
 			}
 
-			err = CopyIfChanged(destFile, c.sourceData, 0o600)
+			err = WriteIfNeeded(destFile, c.sourceData, 0o600)
 			require.NoError(t, err)
 
-			statAfterCopy, err := os.Stat(destFile)
+			statAfter, err := os.Stat(destFile)
 			require.NoError(t, err)
+			modTimeAfter := statAfter.ModTime()
+
 			if c.expectWrite {
-				assert.Greater(t, statAfterCopy.ModTime().Truncate(time.Millisecond), modTimeBeforeCopy.Truncate(time.Millisecond))
+				assert.Greater(t, modTimeAfter.Truncate(time.Millisecond), modTimeBefore.Truncate(time.Millisecond))
 			} else {
-				assert.Equal(t, modTimeBeforeCopy.Truncate(time.Millisecond), statAfterCopy.ModTime().Truncate(time.Millisecond))
+				assert.Equal(t, modTimeBefore.Truncate(time.Millisecond), modTimeAfter.Truncate(time.Millisecond))
 			}
 
 			data, err := os.ReadFile(destFile)

@@ -42,7 +42,7 @@ func (c *CLIWrapper) copyPHP(cacheDir string) error {
 		return err
 	}
 
-	if err := file.CopyIfChanged(filepath.Join(destDir, "extras", "cacert.pem"), caCert, 0o644); err != nil {
+	if err := file.WriteIfNeeded(filepath.Join(destDir, "extras", "cacert.pem"), caCert, 0o644); err != nil {
 		return err
 	}
 

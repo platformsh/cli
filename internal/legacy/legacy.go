@@ -80,7 +80,7 @@ func (c *CLIWrapper) init() error {
 
 	g := errgroup.Group{}
 	g.Go(func() error {
-		if err := file.CopyIfChanged(c.pharPath(cacheDir), phar, 0o644); err != nil {
+		if err := file.WriteIfNeeded(c.pharPath(cacheDir), phar, 0o644); err != nil {
 			return fmt.Errorf("could not copy phar file: %w", err)
 		}
 		return nil
@@ -90,7 +90,7 @@ func (c *CLIWrapper) init() error {
 		if err != nil {
 			return fmt.Errorf("could not load config for checking: %w", err)
 		}
-		if err := file.CopyIfChanged(filepath.Join(cacheDir, configBasename), configContent, 0o644); err != nil {
+		if err := file.WriteIfNeeded(filepath.Join(cacheDir, configBasename), configContent, 0o644); err != nil {
 			return fmt.Errorf("could not write config: %w", err)
 		}
 		return nil
