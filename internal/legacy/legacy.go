@@ -108,9 +108,8 @@ func (c *CLIWrapper) init() error {
 		}
 		return nil
 	})
-	g.Go(func() error {
-		return c.copyPHP(cacheDir)
-	})
+
+	g.Go(newPHPManager(cacheDir).copy)
 
 	if err := g.Wait(); err != nil {
 		return err
@@ -176,14 +175,15 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 
 // makeCmd makes a legacy CLI command with the given context and arguments.
 func (c *CLIWrapper) makeCmd(ctx context.Context, args []string, cacheDir string) *exec.Cmd {
-	iniSettings := c.phpSettings(cacheDir)
-	var cmdArgs = make([]string, 0, len(args)+2+len(iniSettings)*2)
-	for _, s := range iniSettings {
+	phpMgr := newPHPManager(cacheDir)
+	settings := phpMgr.iniSettings()
+	var cmdArgs = make([]string, 0, len(args)+2+len(settings)*2)
+	for _, s := range settings {
 		cmdArgs = append(cmdArgs, "-d", s)
 	}
 	cmdArgs = append(cmdArgs, c.pharPath(cacheDir))
 	cmdArgs = append(cmdArgs, args...)
-	return exec.CommandContext(ctx, c.phpPath(cacheDir), cmdArgs...) //nolint:gosec
+	return exec.CommandContext(ctx, phpMgr.binPath(), cmdArgs...) //nolint:gosec
 }
 
 // PharPath returns the path to the legacy CLI's Phar file.
