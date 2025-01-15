@@ -1,8 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Config provides YAML configuration for the CLI.
@@ -60,6 +63,8 @@ type Config struct {
 	SSH struct {
 		DomainWildcards []string `validate:"required" yaml:"domain_wildcards"` // e.g. ["*.platform.sh"]
 	} `validate:"required"`
+
+	raw []byte `yaml:"-"`
 }
 
 // applyDefaults applies defaults to config before parsing.
@@ -98,4 +103,16 @@ func (c *Config) WritableUserDir() (string, error) {
 	}
 
 	return path, nil
+}
+
+// Raw returns the config before it was unmarshalled, or a marshaled version if that is not available.
+func (c *Config) Raw() ([]byte, error) {
+	if len(c.raw) == 0 {
+		b, err := yaml.Marshal(c)
+		if err != nil {
+			return nil, fmt.Errorf("could not load raw config: %w", err)
+		}
+		c.raw = b
+	}
+	return c.raw, nil
 }

@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"sync"
+	"time"
 
 	"github.com/gofrs/flock"
 
@@ -22,9 +24,6 @@ var (
 	LegacyCLIVersion = "0.0.0"
 	PHPVersion       = "0.0.0"
 )
-
-var phpPath = fmt.Sprintf("php-%s", PHPVersion)
-var pharPath = fmt.Sprintf("phar-%s", LegacyCLIVersion)
 
 // copyFile from the given bytes to destination
 func copyFile(destination string, fin []byte) error {
@@ -73,10 +72,11 @@ type CLIWrapper struct {
 	Stdin              io.Reader
 	Config             *config.Config
 	Version            string
-	CustomPharPath     string
 	Debug              bool
 	DisableInteraction bool
 	DebugLogFunc       func(string, ...any)
+
+	initOnce sync.Once
 }
 
 func (c *CLIWrapper) debug(msg string, args ...any) {
@@ -89,27 +89,33 @@ func (c *CLIWrapper) cacheDir() string {
 	return path.Join(os.TempDir(), fmt.Sprintf("%s-%s-%s", c.Config.Application.Slug, PHPVersion, LegacyCLIVersion))
 }
 
-// Init the CLI wrapper, creating a temporary directory and copying over files
-func (c *CLIWrapper) Init() error {
+// runInitOnce runs the init method, only once for this object.
+func (c *CLIWrapper) runInitOnce() error {
+	var err error
+	c.initOnce.Do(func() { err = c.init() })
+	return err
+}
+
+// init initializes the CLI wrapper, creating a temporary directory and copying over files.
+func (c *CLIWrapper) init() error {
+	preInit := time.Now()
+
 	if _, err := os.Stat(c.cacheDir()); os.IsNotExist(err) {
 		c.debug("Cache directory does not exist, creating: %s", c.cacheDir())
 		if err := os.Mkdir(c.cacheDir(), 0o700); err != nil {
 			return fmt.Errorf("could not create temporary directory: %w", err)
 		}
 	}
+	preLock := time.Now()
 	fileLock := flock.New(path.Join(c.cacheDir(), ".lock"))
 	if err := fileLock.Lock(); err != nil {
 		return fmt.Errorf("could not acquire lock: %w", err)
 	}
-	c.debug("Lock acquired: %s", fileLock.Path())
+	c.debug("Lock acquired (%s): %s", time.Since(preLock), fileLock.Path())
 	//nolint:errcheck
 	defer fileLock.Unlock()
 
 	if _, err := os.Stat(c.PharPath()); os.IsNotExist(err) {
-		if c.CustomPharPath != "" {
-			return fmt.Errorf("legacy CLI phar file not found: %w", err)
-		}
-
 		c.debug("Phar file does not exist, copying: %s", c.PharPath())
 		if err := copyFile(c.PharPath(), phar); err != nil {
 			return fmt.Errorf("could not copy phar file: %w", err)
@@ -117,9 +123,9 @@ func (c *CLIWrapper) Init() error {
 	}
 
 	// Always write the config.yaml file if it changed.
-	configContent, err := config.LoadYAML()
+	configContent, err := c.Config.Raw()
 	if err != nil {
-		return fmt.Errorf("could not load config for checking: %w", err)
+		return err
 	}
 	changed, err := fileChanged(c.ConfigPath(), configContent)
 	if err != nil {
@@ -141,11 +147,17 @@ func (c *CLIWrapper) Init() error {
 		}
 	}
 
+	c.debug("Initialized PHP CLI (%s)", time.Since(preInit))
+
 	return nil
 }
 
 // Exec a legacy CLI command with the given arguments
 func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
+	if err := c.runInitOnce(); err != nil {
+		return fmt.Errorf("failed to initialize PHP CLI: %w", err)
+	}
+
 	cmd := c.makeCmd(ctx, args)
 	if c.Stdin != nil {
 		cmd.Stdin = c.Stdin
@@ -173,9 +185,6 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 		envPrefix+"WRAPPED=1",
 		envPrefix+"APPLICATION_VERSION="+c.Version,
 	)
-	if c.Debug {
-		cmd.Env = append(cmd.Env, envPrefix+"CLI_DEBUG=1")
-	}
 	if c.DisableInteraction {
 		cmd.Env = append(cmd.Env, envPrefix+"NO_INTERACTION=1")
 	}
@@ -210,11 +219,11 @@ func (c *CLIWrapper) makeCmd(ctx context.Context, args []string) *exec.Cmd {
 
 // PharPath returns the path to the legacy CLI's Phar file.
 func (c *CLIWrapper) PharPath() string {
-	if c.CustomPharPath != "" {
-		return c.CustomPharPath
+	if customPath := os.Getenv(c.Config.Application.EnvPrefix + "PHAR_PATH"); customPath != "" {
+		return customPath
 	}
 
-	return path.Join(c.cacheDir(), pharPath)
+	return path.Join(c.cacheDir(), c.Config.Application.Executable+".phar")
 }
 
 // ConfigPath returns the path to the YAML config file that will be provided to the legacy CLI.

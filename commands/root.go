@@ -76,7 +76,10 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 			}
 		},
 		Run: func(cmd *cobra.Command, _ []string) {
-			runLegacyCLI(cmd.Context(), cnf, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin(), os.Args[1:])
+			c := makeLegacyCLIWrapper(cnf, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin())
+			if err := c.Exec(cmd.Context(), os.Args[1:]...); err != nil {
+				exitWithError(err)
+			}
 		},
 		PersistentPostRun: func(cmd *cobra.Command, _ []string) {
 			checkShellConfigLeftovers(cmd.ErrOrStderr(), cnf)
@@ -103,13 +106,13 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 			args = []string{"help"}
 		}
 
-		runLegacyCLI(cmd.Context(), cnf, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin(), args)
+		c := makeLegacyCLIWrapper(cnf, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin())
+		if err := c.Exec(cmd.Context(), args...); err != nil {
+			exitWithError(err)
+		}
 	})
 
 	cmd.PersistentFlags().BoolP("version", "V", false, fmt.Sprintf("Displays the %s version", cnf.Application.Name))
-	cmd.PersistentFlags().String("phar-path", "",
-		fmt.Sprintf("Uses a local .phar file for the Legacy %s", cnf.Application.Name),
-	)
 	cmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
 	cmd.PersistentFlags().Bool("no-interaction", false, "Enable non-interactive mode")
 	cmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
@@ -239,40 +242,27 @@ func debugLog(format string, v ...any) {
 	fmt.Fprintf(color.Error, prefix+" "+strings.TrimSpace(format)+"\n", v...)
 }
 
-func exitWithError(cmd *cobra.Command, err error) {
-	cmd.PrintErrln(color.RedString(err.Error()))
-	exitCode := 1
+func exitWithError(err error) {
 	var execErr *exec.ExitError
 	if errors.As(err, &execErr) {
-		exitCode = execErr.ExitCode()
+		exitCode := execErr.ExitCode()
+		debugLog(err.Error())
+		os.Exit(exitCode)
 	}
-	os.Exit(exitCode)
+	if !viper.GetBool("quiet") {
+		fmt.Fprintln(color.Error, color.RedString(err.Error()))
+	}
+	os.Exit(1)
 }
 
-func runLegacyCLI(ctx context.Context, cnf *config.Config, stdout, stderr io.Writer, stdin io.Reader, args []string) {
-	c := &legacy.CLIWrapper{
+func makeLegacyCLIWrapper(cnf *config.Config, stdout, stderr io.Writer, stdin io.Reader) *legacy.CLIWrapper {
+	return &legacy.CLIWrapper{
 		Config:             cnf,
 		Version:            version,
-		CustomPharPath:     viper.GetString("phar-path"),
-		Debug:              viper.GetBool("debug"),
 		DebugLogFunc:       debugLog,
 		DisableInteraction: viper.GetBool("no-interaction"),
 		Stdout:             stdout,
 		Stderr:             stderr,
 		Stdin:              stdin,
-	}
-	if err := c.Init(); err != nil {
-		fmt.Fprintln(stderr, color.RedString(err.Error()))
-		os.Exit(1)
-	}
-
-	if err := c.Exec(ctx, args...); err != nil {
-		debugLog("%s\n", color.RedString(err.Error()))
-		exitCode := 1
-		var execErr *exec.ExitError
-		if errors.As(err, &execErr) {
-			exitCode = execErr.ExitCode()
-		}
-		os.Exit(exitCode)
 	}
 }
