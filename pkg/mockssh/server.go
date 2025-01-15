@@ -12,7 +12,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"os"
 	"os/exec"
 	"sync"
 	"testing"
@@ -31,9 +30,9 @@ type Server struct {
 	CertAuthorityKeys []ssh.PublicKey
 	CertChecker       ssh.CertChecker
 
-	// RemoteEnv, RemoteDir and CommandHandler are optional configuration.
-	RemoteEnv      []string
-	RemoteDir      string
+	// An optional CommandHandler, which responds to commands sent over SSH.
+	// NewServer will give this a default using ExecHandler, which can also
+	// be reused from custom handlers.
 	CommandHandler CommandHandler
 
 	// listener and port are set after Start.
@@ -47,7 +46,7 @@ type CommandIO struct {
 	StdErr io.Writer
 }
 
-type CommandHandler func(conn ssh.ConnMetadata, command string, io CommandIO) int
+type CommandHandler func(conn ssh.ConnMetadata, command string, commandIO CommandIO) int
 
 // NewServer creates and starts a local SSH server for a test.
 // It must be stopped with the Server.Stop method.
@@ -65,9 +64,8 @@ func NewServer(t *testing.T, authorityEndpoint string) (*Server, error) {
 	}
 
 	s := &Server{t: t, hostKey: hk}
-	s.CommandHandler = s.defaultCommandHandler
+	s.CommandHandler = ExecHandler("", nil)
 	s.CertChecker = s.defaultCertChecker()
-	s.RemoteDir = t.TempDir()
 	s.CertAuthorityKeys = keys
 
 	if err := s.start(); err != nil {
@@ -87,6 +85,10 @@ func (s *Server) HostKeyConfig() string {
 		s.hostKey.PublicKey().Type(),
 		base64.StdEncoding.EncodeToString(s.hostKey.PublicKey().Marshal()),
 	)
+}
+
+func (s *Server) HostKey() ssh.PublicKey {
+	return s.hostKey.PublicKey()
 }
 
 func (s *Server) start() error {
@@ -148,22 +150,25 @@ func (s *Server) Stop() error {
 	return nil
 }
 
-func (s *Server) defaultCommandHandler(_ ssh.ConnMetadata, command string, commandIO CommandIO) int {
-	c := exec.Command("bash", "-c", command)
-	c.Stdout = commandIO.StdOut
-	c.Stderr = commandIO.StdErr
-	c.Stdin = commandIO.StdIn
-	c.Dir = s.RemoteDir
-	c.Env = append(os.Environ(), s.RemoteEnv...)
-	if err := c.Run(); err != nil {
-		exitErr := &exec.ExitError{}
-		if errors.As(err, &exitErr) {
-			return exitErr.ExitCode()
+// ExecHandler returns a CommandHandler to execute a command in the given environment.
+func ExecHandler(workingDir string, env []string) CommandHandler {
+	return func(_ ssh.ConnMetadata, command string, commandIO CommandIO) int {
+		c := exec.Command("bash", "-c", command)
+		c.Stdout = commandIO.StdOut
+		c.Stderr = commandIO.StdErr
+		c.Stdin = commandIO.StdIn
+		c.Dir = workingDir
+		c.Env = env
+		if err := c.Run(); err != nil {
+			exitErr := &exec.ExitError{}
+			if errors.As(err, &exitErr) {
+				return exitErr.ExitCode()
+			}
+			_, _ = fmt.Fprintf(commandIO.StdErr, "Failed to execute command: %v", err)
+			return 1
 		}
-		_, _ = fmt.Fprintf(commandIO.StdErr, "Failed to execute command: %v", err)
-		return 1
+		return 0
 	}
-	return 0
 }
 
 func (s *Server) defaultCertChecker() ssh.CertChecker {
@@ -253,9 +258,9 @@ func (s *Server) handleChannels(conn ssh.ConnMetadata, chans <-chan ssh.NewChann
 		for {
 			select {
 			case s := <-exitWithStatus:
-				_, err = channel.SendRequest("exit-status", false, ssh.Marshal(struct{ Status int }{s}))
+				_, err = channel.SendRequest("exit-status", false, ssh.Marshal(struct{ Status uint32 }{uint32(s)})) //nolint: gosec
 				if err != nil {
-					t.Errorf("Failed to send exit status: %v", err)
+					t.Fatalf("Failed to send exit status: %v", err)
 				}
 				goto closeChannel
 			case <-timer.C:
