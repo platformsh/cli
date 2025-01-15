@@ -27,7 +27,6 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 			c := &legacy.CLIWrapper{
 				Config:             cnf,
 				Version:            version,
-				CustomPharPath:     viper.GetString("phar-path"),
 				Debug:              viper.GetBool("debug"),
 				DisableInteraction: viper.GetBool("no-interaction"),
 				Stdout:             &b,

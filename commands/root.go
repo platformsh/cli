@@ -100,9 +100,6 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 	})
 
 	cmd.PersistentFlags().BoolP("version", "V", false, fmt.Sprintf("Displays the %s version", cnf.Application.Name))
-	cmd.PersistentFlags().String("phar-path", "",
-		fmt.Sprintf("Uses a local .phar file for the Legacy %s", cnf.Application.Name),
-	)
 	cmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
 	cmd.PersistentFlags().Bool("no-interaction", false, "Enable non-interactive mode")
 	cmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
@@ -246,7 +243,6 @@ func makeLegacyCLIWrapper(cnf *config.Config, stdout, stderr io.Writer, stdin io
 	return &legacy.CLIWrapper{
 		Config:             cnf,
 		Version:            version,
-		CustomPharPath:     viper.GetString("phar-path"),
 		Debug:              viper.GetBool("debug"),
 		DisableInteraction: viper.GetBool("no-interaction"),
 		Stdout:             stdout,

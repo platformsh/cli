@@ -40,7 +40,6 @@ type CLIWrapper struct {
 	Stdin              io.Reader
 	Config             *config.Config
 	Version            string
-	CustomPharPath     string
 	Debug              bool
 	DisableInteraction bool
 
@@ -175,20 +174,17 @@ func (c *CLIWrapper) makeCmd(ctx context.Context, args []string, cacheDir string
 
 // PharPath returns the path to the legacy CLI's Phar file.
 func (c *CLIWrapper) PharPath() (string, error) {
-	if c.CustomPharPath != "" {
-		return c.CustomPharPath, nil
-	}
 	cacheDir, err := c.cacheDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(cacheDir, pharBasename), nil
+	return c.pharPath(cacheDir), nil
 }
 
 func (c *CLIWrapper) pharPath(cacheDir string) string {
-	if c.CustomPharPath != "" {
-		return c.CustomPharPath
+	if customPath := os.Getenv(c.Config.Application.EnvPrefix + "PHAR_PATH"); customPath != "" {
+		return customPath
 	}
 
 	return filepath.Join(cacheDir, pharBasename)
