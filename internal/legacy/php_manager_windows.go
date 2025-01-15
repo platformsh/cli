@@ -22,9 +22,8 @@ var phpCLI []byte
 //go:embed archives/cacert.pem
 var caCert []byte
 
-// copyPHP to destination, if it does not exist
-func (c *CLIWrapper) copyPHP(cacheDir string) error {
-	destDir := filepath.Join(cacheDir, "php")
+func (m *phpManagerPerOS) copy() error {
+	destDir := filepath.Join(m.cacheDir, "php")
 
 	r, err := zip.NewReader(bytes.NewReader(phpCLI), int64(len(phpCLI)))
 	if err != nil {
@@ -49,9 +48,16 @@ func (c *CLIWrapper) copyPHP(cacheDir string) error {
 	return nil
 }
 
-// phpPath returns the path to the temporary PHP-CLI binary
-func (c *CLIWrapper) phpPath(cacheDir string) string {
-	return filepath.Join(cacheDir, "php", "php.exe")
+func (m *phpManagerPerOS) phpPath() string {
+	return filepath.Join(m.cacheDir, "php", "php.exe")
+}
+
+func (m *phpManagerPerOS) phpSettings() []string {
+	return []string{
+		"extension=" + filepath.Join(m.cacheDir, "php", "ext", "php_curl.dll"),
+		"extension=" + filepath.Join(m.cacheDir, "php", "ext", "php_openssl.dll"),
+		"openssl.cafile=" + filepath.Join(m.cacheDir, "php", "extras", "cacert.pem"),
+	}
 }
 
 // copyZipFile extracts a file from the Zip to the destination directory.
@@ -89,16 +95,8 @@ func copyZipFile(f *zip.File, destDir string) error {
 	}
 
 	if err := file.Write(destPath, b, f.Mode()); err != nil {
-		return fmt.Errorf("could not write extracted file %s: %w", destPath, err)
+		return fmt.Errorf("could not copy extracted file %s: %w", destPath, err)
 	}
 
 	return nil
-}
-
-func (c *CLIWrapper) phpSettings(cacheDir string) []string {
-	return []string{
-		"extension=" + filepath.Join(cacheDir, "php", "ext", "php_curl.dll"),
-		"extension=" + filepath.Join(cacheDir, "php", "ext", "php_openssl.dll"),
-		"openssl.cafile=" + filepath.Join(cacheDir, "php", "extras", "cacert.pem"),
-	}
 }
