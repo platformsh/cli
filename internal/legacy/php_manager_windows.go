@@ -19,9 +19,6 @@ import (
 //go:embed archives/php_windows.zip
 var phpCLI []byte
 
-//go:embed archives/cacert.pem
-var caCert []byte
-
 func (m *phpManagerPerOS) copy() error {
 	destDir := filepath.Join(m.cacheDir, "php")
 
@@ -37,15 +34,8 @@ func (m *phpManagerPerOS) copy() error {
 			return copyZipFile(f, destDir)
 		})
 	}
-	if err := g.Wait(); err != nil {
-		return err
-	}
 
-	if err := file.WriteIfNeeded(filepath.Join(destDir, "extras", "cacert.pem"), caCert, 0o644); err != nil {
-		return err
-	}
-
-	return nil
+	return g.Wait()
 }
 
 func (m *phpManagerPerOS) binPath() string {
@@ -56,7 +46,6 @@ func (m *phpManagerPerOS) iniSettings() []string {
 	return []string{
 		"extension=" + filepath.Join(m.cacheDir, "php", "ext", "php_curl.dll"),
 		"extension=" + filepath.Join(m.cacheDir, "php", "ext", "php_openssl.dll"),
-		"openssl.cafile=" + filepath.Join(m.cacheDir, "php", "extras", "cacert.pem"),
 	}
 }
 
