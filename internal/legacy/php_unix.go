@@ -19,7 +19,7 @@ func (c *CLIWrapper) copyPHP() error {
 
 // PHPPath returns the path that the PHP CLI will reside
 func (c *CLIWrapper) PHPPath() string {
-	return path.Join(c.cacheDir(), phpPath)
+	return path.Join(c.cacheDir(), "php")
 }
 
 func (c *CLIWrapper) phpSettings() []string {
