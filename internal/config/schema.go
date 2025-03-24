@@ -1,8 +1,9 @@
 package config
 
 import (
-	"os"
-	"path/filepath"
+	"fmt"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Config provides YAML configuration for the CLI.
@@ -60,6 +61,10 @@ type Config struct {
 	SSH struct {
 		DomainWildcards []string `validate:"required" yaml:"domain_wildcards"` // e.g. ["*.platform.sh"]
 	} `validate:"required"`
+
+	raw             []byte `yaml:"-"`
+	tempDir         string `yaml:"-"`
+	writableUserDir string `yaml:"-"`
 }
 
 // applyDefaults applies defaults to config before parsing.
@@ -80,22 +85,14 @@ func (c *Config) applyDynamicDefaults() {
 	}
 }
 
-// WritableUserDir returns the path to a writable user-level directory.
-func (c *Config) WritableUserDir() (string, error) {
-	// Attempt to create the directory under $HOME first.
-	if homeDir, err := os.UserHomeDir(); err == nil {
-		path := filepath.Join(homeDir, c.Application.WritableUserDir)
-		if err := os.Mkdir(path, 0o700); err != nil && !os.IsExist(err) {
-			return "", err
+// Raw returns the config before it was unmarshalled, or a marshaled version if that is not available.
+func (c *Config) Raw() ([]byte, error) {
+	if len(c.raw) == 0 {
+		b, err := yaml.Marshal(c)
+		if err != nil {
+			return nil, fmt.Errorf("could not load raw config: %w", err)
 		}
-		return path, nil
+		c.raw = b
 	}
-
-	// Otherwise,attempt to create it in the temporary directory.
-	path := filepath.Join(os.TempDir(), c.Application.TempSubDir)
-	if err := os.Mkdir(path, 0o700); err != nil && !os.IsExist(err) {
-		return "", err
-	}
-
-	return path, nil
+	return c.raw, nil
 }

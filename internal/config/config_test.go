@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/platformsh/cli/internal/config"
 )
@@ -25,6 +26,14 @@ func TestFromYAML(t *testing.T) {
 		cnf, err := config.FromYAML([]byte(validConfig))
 		assert.NoError(t, err)
 
+		tempDir := t.TempDir()
+		require.NoError(t, os.Setenv(cnf.Application.EnvPrefix+"HOME", tempDir))
+		require.NoError(t, os.Setenv(cnf.Application.EnvPrefix+"TMP", filepath.Join(tempDir, "tmp")))
+		t.Cleanup(func() {
+			_ = os.Unsetenv(cnf.Application.EnvPrefix + "HOME")
+			_ = os.Unsetenv(cnf.Application.EnvPrefix + "TMP")
+		})
+
 		// Test defaults
 		assert.Equal(t, "state.json", cnf.Application.UserStateFile)
 		assert.Equal(t, true, cnf.Updates.Check)
@@ -33,13 +42,16 @@ func TestFromYAML(t *testing.T) {
 		assert.Equal(t, "example-cli-tmp", cnf.Application.TempSubDir)
 		assert.Equal(t, "platform", cnf.Service.ProjectConfigFlavor)
 
+		homeDir, err := cnf.HomeDir()
+		require.NoError(t, err)
+		assert.Equal(t, tempDir, homeDir)
+
 		writableDir, err := cnf.WritableUserDir()
 		assert.NoError(t, err)
+		assert.Equal(t, filepath.Join(homeDir, cnf.Application.WritableUserDir), writableDir)
 
-		if homeDir, err := os.UserHomeDir(); err == nil {
-			assert.Equal(t, filepath.Join(homeDir, cnf.Application.WritableUserDir), writableDir)
-		} else {
-			assert.Equal(t, filepath.Join(os.TempDir(), cnf.Application.TempSubDir), writableDir)
-		}
+		d, err := cnf.TempDir()
+		assert.NoError(t, err)
+		assert.Equal(t, filepath.Join(tempDir, "tmp", cnf.Application.TempSubDir), d)
 	})
 }
