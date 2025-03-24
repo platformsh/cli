@@ -1,4 +1,4 @@
-PHP_VERSION = 8.2.26
+PHP_VERSION = 8.2.27
 LEGACY_CLI_VERSION = 4.22.0
 
 GORELEASER_ID ?= platform
@@ -25,7 +25,7 @@ VERSION := $(shell git describe --always)
 
 # Tooling versions
 GORELEASER_VERSION=v1.26
-GOLANGCI_LINT_VERSION=v1.63
+GOLANGCI_LINT_VERSION=v1.64
 
 internal/legacy/archives/platform.phar:
 	curl -L https://github.com/platformsh/legacy-cli/releases/download/v$(LEGACY_CLI_VERSION)/platform.phar -o internal/legacy/archives/platform.phar
@@ -49,14 +49,21 @@ internal/legacy/archives/php_linux_$(GOARCH):
 		--progress=plain \
 		ext/static-php-cli/docker
 
+PHP_WINDOWS_REMOTE_FILENAME := "php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip"
 internal/legacy/archives/php_windows.zip:
-	mkdir -p internal/legacy/archives
-	wget https://windows.php.net/downloads/releases/php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip -O internal/legacy/archives/php_windows.zip
+	( \
+	  set -e ;\
+	  mkdir -p internal/legacy/archives ;\
+	  cd internal/legacy/archives ;\
+	  curl -f "https://windows.php.net/downloads/releases/$(PHP_WINDOWS_REMOTE_FILENAME)" > php_windows.zip ;\
+	  curl -f https://windows.php.net/downloads/releases/sha256sum.txt | grep "$(PHP_WINDOWS_REMOTE_FILENAME)" | sed s/"$(PHP_WINDOWS_REMOTE_FILENAME)"/"php_windows.zip"/g > php_windows.zip.sha256 ;\
+	  sha256sum -c php_windows.zip.sha256 ;\
+	)
 
 .PHONY: internal/legacy/archives/cacert.pem
 internal/legacy/archives/cacert.pem:
 	mkdir -p internal/legacy/archives
-	wget https://curl.se/ca/cacert.pem -O internal/legacy/archives/cacert.pem
+	curl https://curl.se/ca/cacert.pem > internal/legacy/archives/cacert.pem
 
 php: $(PHP_BINARY_PATH)
 

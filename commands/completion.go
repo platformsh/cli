@@ -2,18 +2,13 @@ package commands
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
-	"os"
-	"os/exec"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/legacy"
 )
 
 func newCompletionCommand(cnf *config.Config) *cobra.Command {
@@ -28,42 +23,24 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 				completionArgs = append(completionArgs, "--shell-type", args[0])
 			}
 			var b bytes.Buffer
-			c := &legacy.CLIWrapper{
-				Config:             cnf,
-				Version:            version,
-				CustomPharPath:     viper.GetString("phar-path"),
-				Debug:              viper.GetBool("debug"),
-				DebugLogFunc:       debugLog,
-				DisableInteraction: viper.GetBool("no-interaction"),
-				Stdout:             &b,
-				Stderr:             cmd.ErrOrStderr(),
-				Stdin:              cmd.InOrStdin(),
-			}
-
-			if err := c.Init(); err != nil {
-				debugLog(err.Error())
-				os.Exit(1)
-				return
-			}
+			c := makeLegacyCLIWrapper(cnf, &b, cmd.ErrOrStderr(), cmd.InOrStdin())
 
 			if err := c.Exec(cmd.Context(), completionArgs...); err != nil {
-				debugLog(err.Error())
-				exitCode := 1
-				var execErr *exec.ExitError
-				if errors.As(err, &execErr) {
-					exitCode = execErr.ExitCode()
-				}
-				os.Exit(exitCode)
-				return
+				exitWithError(err)
+			}
+
+			pharPath, err := c.PharPath()
+			if err != nil {
+				exitWithError(err)
 			}
 
 			completions := strings.ReplaceAll(
 				strings.ReplaceAll(
 					b.String(),
-					c.PharPath(),
+					pharPath,
 					cnf.Application.Executable,
 				),
-				path.Base(c.PharPath()),
+				filepath.Base(pharPath),
 				cnf.Application.Executable,
 			)
 			fmt.Fprintln(cmd.OutOrStdout(), "#compdef "+cnf.Application.Executable)

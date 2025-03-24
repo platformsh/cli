@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/legacy"
 )
 
 func newListCommand(cnf *config.Config) *cobra.Command {
@@ -18,23 +17,6 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 		Short: "Lists commands",
 		Args:  cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			var b bytes.Buffer
-			c := &legacy.CLIWrapper{
-				Config:             cnf,
-				Version:            version,
-				CustomPharPath:     viper.GetString("phar-path"),
-				Debug:              viper.GetBool("debug"),
-				DebugLogFunc:       debugLog,
-				DisableInteraction: viper.GetBool("no-interaction"),
-				Stdout:             &b,
-				Stderr:             cmd.ErrOrStderr(),
-				Stdin:              cmd.InOrStdin(),
-			}
-			if err := c.Init(); err != nil {
-				exitWithError(cmd, err)
-				return
-			}
-
 			arguments := []string{"list", "--format=json"}
 			if viper.GetBool("all") {
 				arguments = append(arguments, "--all")
@@ -42,15 +24,17 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 			if len(args) > 0 {
 				arguments = append(arguments, args[0])
 			}
+
+			var b bytes.Buffer
+			c := makeLegacyCLIWrapper(cnf, &b, cmd.ErrOrStderr(), cmd.InOrStdin())
+
 			if err := c.Exec(cmd.Context(), arguments...); err != nil {
-				exitWithError(cmd, err)
-				return
+				exitWithError(err)
 			}
 
 			var list List
 			if err := json.Unmarshal(b.Bytes(), &list); err != nil {
-				exitWithError(cmd, err)
-				return
+				exitWithError(err)
 			}
 
 			// Override the application name and executable with our own config.
@@ -88,15 +72,14 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				c.Stdout = cmd.OutOrStdout()
 				arguments := []string{"list", "--format=" + format}
 				if err := c.Exec(cmd.Context(), arguments...); err != nil {
-					exitWithError(cmd, err)
+					exitWithError(err)
 				}
 				return
 			}
 
 			result, err := formatter.Format(&list, config.FromContext(cmd.Context()))
 			if err != nil {
-				exitWithError(cmd, err)
-				return
+				exitWithError(err)
 			}
 
 			fmt.Fprintln(cmd.OutOrStdout(), string(result))

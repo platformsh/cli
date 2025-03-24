@@ -33,6 +33,7 @@ func FromYAML(b []byte) (*Config, error) {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
 	c.applyDynamicDefaults()
+	c.raw = b
 	return c, nil
 }
 
