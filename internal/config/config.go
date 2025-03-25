@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
 )
 
@@ -28,8 +27,7 @@ func FromYAML(b []byte) (*Config, error) {
 	if err := yaml.Unmarshal(b, c); err != nil {
 		return nil, fmt.Errorf("invalid config YAML: %w", err)
 	}
-	v := validator.New()
-	if err := v.Struct(c); err != nil {
+	if err := getValidator().Struct(c); err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
 	c.applyDynamicDefaults()
@@ -51,4 +49,9 @@ func FromContext(ctx context.Context) *Config {
 		panic("Config not set or wrong format")
 	}
 	return v
+}
+
+func MaybeFromContext(ctx context.Context) (*Config, bool) {
+	v, ok := ctx.Value(contextKey{}).(*Config)
+	return v, ok
 }

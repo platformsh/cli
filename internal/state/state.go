@@ -11,7 +11,11 @@ import (
 type State struct {
 	Updates struct {
 		LastChecked int64 `json:"last_checked"`
-	} `json:"updates"`
+	} `json:"updates,omitempty"`
+
+	ConfigUpdates struct {
+		LastChecked int64 `json:"last_checked"`
+	} `json:"config_updates,omitempty"`
 }
 
 // Load reads state from the filesystem.

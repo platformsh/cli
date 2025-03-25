@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/symfony-cli/terminal"
 
 	"github.com/platformsh/cli/commands"
 	"github.com/platformsh/cli/internal/config"
@@ -30,6 +31,13 @@ func main() {
 		viper.SetEnvPrefix(strings.TrimSuffix(cnf.Application.EnvPrefix, "_"))
 		viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 		viper.AutomaticEnv()
+
+		if os.Getenv(cnf.Application.EnvPrefix+"NO_INTERACTION") == "1" {
+			viper.Set("no-interaction", true)
+		}
+		if viper.GetBool("no-interaction") {
+			terminal.Stdin.SetInteractive(false)
+		}
 	})
 
 	if err := commands.Execute(cnf); err != nil {

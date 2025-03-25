@@ -77,11 +77,10 @@ func (c *Config) WritableUserDir() (string, error) {
 	return path, nil
 }
 
-// HomeDir returns the user's home directory, which can be overridden with the {ENV_PREFIX}HOME variable.
+// HomeDir returns the home directory configured via an environment variable, or the OS's user home directory otherwise.
 func (c *Config) HomeDir() (string, error) {
-	d := os.Getenv(c.Application.EnvPrefix + "HOME")
-	if d != "" {
-		return d, nil
+	if fromEnv := os.Getenv(c.Application.EnvPrefix + "HOME"); fromEnv != "" {
+		return fromEnv, nil
 	}
 	return os.UserHomeDir()
 }
