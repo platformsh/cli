@@ -246,7 +246,7 @@ brews:
       name: Antonis Kalipetis
       email: antonis.kalipetis@platform.sh
 
-    homepage: https://docs.deployfriday.net/administration/cli.html
+    homepage: https://docs.upsun.com/administration/cli.html
     description: Upsun CLI
     license: MIT
 
@@ -292,7 +292,7 @@ scoops:
       name: Antonis Kalipetis
       email: antonis.kalipetis@platform.sh
 
-    homepage: https://docs.deployfriday.net/administration/cli.html
+    homepage: https://docs.upsun.com/administration/cli.html
     description: Upsun CLI
     license: MIT
 
@@ -317,7 +317,7 @@ nfpms:
         dst: /usr/local/share/zsh/site-functions/_platform
 
   - id: upsun
-    homepage: https://docs.deployfriday.net/administration/cli.html
+    homepage: https://docs.upsun.com/administration/cli.html
     package_name: upsun-cli
     description: Upsun CLI
     maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
