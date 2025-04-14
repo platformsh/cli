@@ -279,6 +279,15 @@ scoops:
     description: Platform.sh CLI
     license: MIT
 
+    depends:
+      # PHP currently depends on the Microsoft Visual C++ Redistributable
+      - vcredist2022
+    scripts:
+      pre_install: |
+        if (-not (scoop bucket list | Select-String -Pattern '^extras\s')) {
+          scoop bucket add extras
+        }
+
   - name: upsun
     repository:
       owner: platformsh
@@ -295,6 +304,15 @@ scoops:
     homepage: https://docs.upsun.com/administration/cli.html
     description: Upsun CLI
     license: MIT
+
+    depends:
+      # PHP currently depends on the Microsoft Visual C++ Redistributable
+      - vcredist2022
+    scripts:
+      pre_install: |
+        if (-not (scoop bucket list | Select-String -Pattern '^extras\s')) {
+          scoop bucket add extras
+        }
 
 nfpms:
   - id: platform
