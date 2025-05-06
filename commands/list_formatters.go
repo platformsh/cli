@@ -72,7 +72,7 @@ func (f *TXTListFormatter) Format(list *List, cnf *config.Config) ([]byte, error
 			if len(cmd.Aliases) > 0 {
 				name = name + " (" + strings.Join(cmd.Aliases, ", ") + ")"
 			}
-			fmt.Fprintf(writer, "  %s\t%s\n", name, cmd.Description.String())
+			fmt.Fprintf(writer, "  %s\t%s\n", name, cmd.Description)
 		}
 	}
 	writer.Flush()
@@ -86,7 +86,7 @@ func (f *RawListFormatter) Format(list *List, _ *config.Config) ([]byte, error) 
 	var b bytes.Buffer
 	writer := tabwriter.NewWriter(&b, 0, 8, 16, ' ', 0)
 	for _, cmd := range list.Commands {
-		fmt.Fprintf(writer, "%s\t%s\n", cmd.Name.String(), cmd.Description.String())
+		fmt.Fprintf(writer, "%s\t%s\n", cmd.Name.String(), cmd.Description)
 	}
 	writer.Flush()
 
@@ -122,7 +122,7 @@ func (f *MDListFormatter) Format(list *List, cnf *config.Config) ([]byte, error)
 
 	for _, cmd := range list.Commands {
 		b.H2(md.Code(cmd.Name.String()))
-		b.Paragraph(cmd.Description.String()).Ln()
+		b.Paragraph(cmd.Description).Ln()
 
 		if len(cmd.Aliases) > 0 {
 			aliases := make([]string, 0, len(cmd.Aliases))
@@ -141,13 +141,12 @@ func (f *MDListFormatter) Format(list *List, cnf *config.Config) ([]byte, error)
 		}
 
 		if cmd.Help != "" {
-			b.Paragraph(cmd.Help.String()).Ln()
+			b.Paragraph(cmd.Help).Ln()
 		}
 
-		if cmd.Definition.Arguments != nil && cmd.Definition.Arguments.Len() > 0 {
+		if len(cmd.Definition.Arguments) > 0 {
 			b.H4("Arguments")
-			for pair := cmd.Definition.Arguments.Oldest(); pair != nil; pair = pair.Next() {
-				arg := pair.Value
+			for _, arg := range cmd.Definition.Arguments {
 				line := md.Code(arg.Name)
 				opts := make([]string, 0, 2)
 				if arg.IsRequired {
@@ -162,15 +161,14 @@ func (f *MDListFormatter) Format(list *List, cnf *config.Config) ([]byte, error)
 
 				b.ListItem(line)
 				if arg.Description != "" {
-					b.Paragraph("  " + arg.Description.String()).Ln()
+					b.Paragraph("  " + arg.Description).Ln()
 				}
 			}
 		}
 
-		if cmd.Definition.Options != nil && cmd.Definition.Options.Len() > 0 {
+		if len(cmd.Definition.Options) > 0 {
 			b.H4("Options")
-			for pair := cmd.Definition.Options.Oldest(); pair != nil; pair = pair.Next() {
-				opt := pair.Value
+			for _, opt := range cmd.Definition.Options {
 				line := md.Code(opt.Name)
 				if opt.Shortcut != "" {
 					line += " (" + md.Code(opt.Shortcut) + ")"
@@ -180,7 +178,7 @@ func (f *MDListFormatter) Format(list *List, cnf *config.Config) ([]byte, error)
 				}
 				b.ListItem(line)
 				if opt.Description != "" {
-					b.Paragraph("  " + opt.Description.String()).Ln()
+					b.Paragraph("  " + opt.Description).Ln()
 				}
 			}
 		}
@@ -188,7 +186,7 @@ func (f *MDListFormatter) Format(list *List, cnf *config.Config) ([]byte, error)
 		if len(cmd.Examples) > 0 {
 			b.H3("Examples")
 			for _, example := range cmd.Examples {
-				b.ListItem(example.Description.String() + ":")
+				b.ListItem(example.Description + ":")
 				b.CodeBlock(cnf.Application.Executable + " " + cmd.Name.String() + " " + example.Commandline).Ln()
 			}
 		}
