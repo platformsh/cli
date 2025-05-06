@@ -100,7 +100,7 @@ golangci-lint:
 lint: golangci-lint ## Run linter
 	golangci-lint run --timeout=10m --verbose
 
-.goreleaser.vendor.yaml: check-vendor
+.goreleaser.vendor.yaml: check-vendor ## Generate the goreleaser vendor config
 	cat .goreleaser.vendor.yaml.tpl | envsubst > .goreleaser.vendor.yaml
 
 .PHONY: check-vendor
@@ -117,5 +117,9 @@ vendor-release:  check-vendor .goreleaser.vendor.yaml goreleaser clean-phar inte
 	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) VENDOR_BINARY="$(VENDOR_BINARY)" VENDOR_NAME="$(VENDOR_NAME)" goreleaser release --clean --config=.goreleaser.vendor.yaml
 
 .PHONY: vendor-snapshot
-vendor-snapshot: .goreleaser.vendor.yaml goreleaser internal/legacy/archives/platform.phar php ## Build a vendor CLI snapshot
+vendor-snapshot: check-vendor .goreleaser.vendor.yaml goreleaser internal/legacy/archives/platform.phar php ## Build a vendor CLI snapshot
 	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) VENDOR_BINARY="$(VENDOR_BINARY)" VENDOR_NAME="$(VENDOR_NAME)" goreleaser build --snapshot --clean --config=.goreleaser.vendor.yaml
+
+.PHONY: goreleaser-check
+goreleaser-check:  goreleaser ## Check the goreleaser configs
+	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser check --config=.goreleaser.yaml
