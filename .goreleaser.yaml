@@ -281,12 +281,7 @@ scoops:
 
     depends:
       # PHP currently depends on the Microsoft Visual C++ Redistributable
-      - vcredist2022
-    scripts:
-      pre_install: |
-        if (-not (scoop bucket list | Select-String -Pattern '^extras\s')) {
-          scoop bucket add extras
-        }
+      - extras/vcredist2022
 
   - name: upsun
     repository:
@@ -307,12 +302,7 @@ scoops:
 
     depends:
       # PHP currently depends on the Microsoft Visual C++ Redistributable
-      - vcredist2022
-    scripts:
-      pre_install: |
-        if (-not (scoop bucket list | Select-String -Pattern '^extras\s')) {
-          scoop bucket add extras
-        }
+      - extras/vcredist2022
 
 nfpms:
   - id: platform
