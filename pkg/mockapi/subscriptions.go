@@ -2,6 +2,7 @@ package mockapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -17,11 +18,14 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 	}{}
 	err := json.NewDecoder(req.Body).Decode(&createOptions)
 	require.NoError(h.t, err)
+	orgID := chi.URLParam(req, "organization_id")
 	id := NumericID()
 	projectID := ProjectID()
 	sub := Subscription{
-		ID:            id,
-		Links:         MakeHALLinks("self=" + "/subscriptions/" + url.PathEscape(id)),
+		ID: id,
+		Links: MakeHALLinks(
+			"self=" + "/organizations/" + url.PathEscape(orgID) + "/subscriptions/" + url.PathEscape(id),
+		),
 		ProjectRegion: createOptions.Region,
 		ProjectTitle:  createOptions.Title,
 		Status:        "provisioning",
@@ -40,7 +44,10 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 		Links:          MakeHALLinks("self=/projects/" + projectID),
 		Repository:     ProjectRepository{URL: projectID + "@git.example.com:" + projectID + ".git"},
 		SubscriptionID: sub.ID,
-		Organization:   chi.URLParam(req, "organization_id"),
+		Subscription: ProjectSubscriptionInfo{
+			LicenseURI: fmt.Sprintf("/licenses/%s", url.PathEscape(sub.ID)),
+		},
+		Organization: chi.URLParam(req, "organization_id"),
 	}
 	h.store.Unlock()
 

@@ -61,7 +61,24 @@ type Project struct {
 	CreatedAt     time.Time         `json:"created_at"`
 	UpdatedAt     time.Time         `json:"updated_at"`
 
+	Subscription ProjectSubscriptionInfo `json:"subscription,omitempty"`
+
 	SubscriptionID string `json:"-"`
+}
+
+type ProjectSubscriptionInfo struct {
+	LicenseURI string `json:"license_uri,omitempty"`
+
+	Plan          string `json:"plan,omitempty"`
+	Environments  int    `json:"environments,omitempty"`
+	Storage       int    `json:"storage,omitempty"`
+	IncludedUsers int    `json:"included_users,omitempty"`
+	UserLicenses  int    `json:"user_licenses,omitempty"`
+
+	ManagementURI string `json:"subscription_management_uri,omitempty"`
+
+	Restricted bool `json:"restricted,omitempty"`
+	Suspended  bool `json:"suspended,omitempty"`
 }
 
 func (p *Project) AsRef() *ProjectRef {
