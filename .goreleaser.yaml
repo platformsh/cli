@@ -89,10 +89,10 @@ builds:
       - -s -w
       - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
       - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
-      - -X "github.com/platformsh/cli/commands.version={{.Version}}"
-      - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
-      - -X "github.com/platformsh/cli/commands.date={{.Date}}"
-      - -X "github.com/platformsh/cli/commands.builtBy=goreleaser"
+      - -X "github.com/platformsh/cli/internal/config.Version={{.Version}}"
+      - -X "github.com/platformsh/cli/internal/config.Commit={{.Commit}}"
+      - -X "github.com/platformsh/cli/internal/config.Date={{.Date}}"
+      - -X "github.com/platformsh/cli/internal/config.BuiltBy=goreleaser"
     main: ./cmd/platform
 
 checksum:
