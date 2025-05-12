@@ -53,6 +53,7 @@ func NewHandler(t *testing.T) *Handler {
 
 	h.Mux.Post("/organizations/{organization_id}/subscriptions", h.handleCreateSubscription)
 	h.Mux.Get("/subscriptions/{subscription_id}", h.handleGetSubscription)
+	h.Mux.Get("/organizations/{organization_id}/subscriptions/{subscription_id}", h.handleGetSubscription)
 	h.Mux.Get("/organizations/{organization_id}/subscriptions/can-create", h.handleCanCreateSubscriptions)
 	h.Mux.Get("/organizations/{organization_id}/setup/options", func(w http.ResponseWriter, _ *http.Request) {
 		type options struct {
