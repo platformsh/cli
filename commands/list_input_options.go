@@ -3,8 +3,6 @@ package commands
 import (
 	"fmt"
 
-	"github.com/fatih/color"
-
 	"github.com/platformsh/cli/internal/config"
 )
 
@@ -29,10 +27,10 @@ func NoInteractionOption(cnf *config.Config) Option {
 		AcceptValue:     false,
 		IsValueRequired: false,
 		IsMultiple:      false,
-		Description: CleanString("Do not ask any interactive questions; accept default values. " +
+		Description: "Do not ask any interactive questions; accept default values. " +
 			"Equivalent to using the environment variable: " +
-			color.YellowString(fmt.Sprintf("%sNO_INTERACTION=1", cnf.Application.EnvPrefix))),
-		Default: Any{false},
+			fmt.Sprintf("%sNO_INTERACTION=1", cnf.Application.EnvPrefix),
+		Default: false,
 		Hidden:  false,
 	}
 }
@@ -45,7 +43,7 @@ var (
 		IsValueRequired: false,
 		IsMultiple:      false,
 		Description:     "Display this help message",
-		Default:         Any{false},
+		Default:         false,
 		Hidden:          false,
 	}
 	VerboseOption = Option{
@@ -55,7 +53,7 @@ var (
 		IsValueRequired: false,
 		IsMultiple:      false,
 		Description:     "Increase the verbosity of messages",
-		Default:         Any{false},
+		Default:         false,
 		Hidden:          false,
 	}
 	VersionOption = Option{
@@ -65,7 +63,7 @@ var (
 		IsValueRequired: false,
 		IsMultiple:      false,
 		Description:     "Display this application version",
-		Default:         Any{false},
+		Default:         false,
 		Hidden:          false,
 	}
 	YesOption = Option{
@@ -76,7 +74,7 @@ var (
 		IsMultiple:      false,
 		Description: "Answer \"yes\" to confirmation questions; " +
 			"accept the default value for other questions; disable interaction",
-		Default: Any{false},
+		Default: false,
 		Hidden:  false,
 	}
 	AnsiOption = Option{
@@ -86,7 +84,7 @@ var (
 		IsValueRequired: false,
 		IsMultiple:      false,
 		Description:     "Force ANSI output",
-		Default:         Any{false},
+		Default:         false,
 		Hidden:          true,
 	}
 	NoAnsiOption = Option{
@@ -96,7 +94,7 @@ var (
 		IsValueRequired: false,
 		IsMultiple:      false,
 		Description:     "Disable ANSI output",
-		Default:         Any{false},
+		Default:         false,
 		Hidden:          true,
 	}
 	NoOption = Option{
@@ -107,7 +105,7 @@ var (
 		IsMultiple:      false,
 		Description: "Answer \"no\" to confirmation questions; " +
 			"accept the default value for other questions; disable interaction",
-		Default: Any{false},
+		Default: false,
 		Hidden:  true,
 	}
 	QuietOption = Option{
@@ -117,7 +115,7 @@ var (
 		IsValueRequired: false,
 		IsMultiple:      false,
 		Description:     "Do not output any message",
-		Default:         Any{false},
+		Default:         false,
 		Hidden:          true,
 	}
 )
