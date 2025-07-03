@@ -51,6 +51,7 @@ type ProjectRepository struct {
 
 type Project struct {
 	ID            string            `json:"id"`
+	Attributes    map[string]string `json:"attributes"`
 	Title         string            `json:"title"`
 	Region        string            `json:"region"`
 	Organization  string            `json:"organization"`
