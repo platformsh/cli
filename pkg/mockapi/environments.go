@@ -77,6 +77,29 @@ func (h *Handler) handleGetEnvironmentSettings(w http.ResponseWriter, req *http.
 	_ = json.NewEncoder(w).Encode(settings)
 }
 
+func (h *Handler) handleSetEnvironmentSettings(w http.ResponseWriter, req *http.Request) {
+	env := h.findEnvironment(chi.URLParam(req, "project_id"), chi.URLParam(req, "environment_id"))
+	if env == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	h.store.Lock()
+	defer h.store.Unlock()
+
+	settings := make(map[string]any)
+	err := json.NewDecoder(req.Body).Decode(&settings)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	env.settings = settings
+	h.store.environments[env.ID] = env
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"_embedded": map[string]any{"entity": settings},
+	})
+}
+
 func (h *Handler) handleDeployEnvironment(w http.ResponseWriter, req *http.Request) {
 	env := h.findEnvironment(chi.URLParam(req, "project_id"), chi.URLParam(req, "environment_id"))
 	if env == nil {
