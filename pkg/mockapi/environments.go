@@ -93,7 +93,9 @@ func (h *Handler) handleSetEnvironmentSettings(w http.ResponseWriter, req *http.
 		return
 	}
 
-	env.settings = settings
+	for k, v := range settings {
+		env.settings[k] = v
+	}
 	h.store.environments[env.ID] = env
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"_embedded": map[string]any{"entity": settings},
