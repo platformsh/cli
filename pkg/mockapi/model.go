@@ -109,10 +109,18 @@ type Environment struct {
 	Links       HalLinks  `json:"_links"`
 
 	currentDeployment *Deployment
+	settings          map[string]any
 }
 
 func (e *Environment) SetCurrentDeployment(d *Deployment) {
 	e.currentDeployment = d
+}
+
+func (e *Environment) SetSetting(key string, val any) {
+	if e.settings == nil {
+		e.settings = make(map[string]any)
+	}
+	e.settings[key] = val
 }
 
 type Mount struct {

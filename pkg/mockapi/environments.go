@@ -60,6 +60,57 @@ func (h *Handler) handlePatchEnvironment(w http.ResponseWriter, req *http.Reques
 	_ = json.NewEncoder(w).Encode(&patched)
 }
 
+func (h *Handler) handleGetEnvironmentSettings(w http.ResponseWriter, req *http.Request) {
+	env := h.findEnvironment(chi.URLParam(req, "project_id"), chi.URLParam(req, "environment_id"))
+	if env == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	h.store.Lock()
+	defer h.store.Unlock()
+
+	settings := make(map[string]any)
+	if env.settings != nil {
+		settings = env.settings
+	}
+	settings["_links"] = MakeHALLinks(
+		"self=/projects/"+env.Project+"/environments/"+env.ID+"/settings",
+		"#edit=/projects/"+env.Project+"/environments/"+env.ID+"/settings",
+	)
+
+	_ = json.NewEncoder(w).Encode(settings)
+}
+
+func (h *Handler) handleSetEnvironmentSettings(w http.ResponseWriter, req *http.Request) {
+	env := h.findEnvironment(chi.URLParam(req, "project_id"), chi.URLParam(req, "environment_id"))
+	if env == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	h.store.Lock()
+	defer h.store.Unlock()
+
+	settings := make(map[string]any)
+	err := json.NewDecoder(req.Body).Decode(&settings)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	for k, v := range settings {
+		env.settings[k] = v
+	}
+	settings["_links"] = MakeHALLinks(
+		"self=/projects/"+env.Project+"/environments/"+env.ID+"/settings",
+		"#edit=/projects/"+env.Project+"/environments/"+env.ID+"/settings",
+	)
+
+	h.store.environments[env.ID] = env
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"_embedded": map[string]any{"entity": settings},
+	})
+}
+
 func (h *Handler) handleDeployEnvironment(w http.ResponseWriter, req *http.Request) {
 	env := h.findEnvironment(chi.URLParam(req, "project_id"), chi.URLParam(req, "environment_id"))
 	if env == nil {
