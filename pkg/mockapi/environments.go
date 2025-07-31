@@ -73,6 +73,10 @@ func (h *Handler) handleGetEnvironmentSettings(w http.ResponseWriter, req *http.
 	if env.settings != nil {
 		settings = env.settings
 	}
+	settings["_links"] = MakeHALLinks(
+		"self=/projects/"+env.Project+"/environments/"+env.ID+"/settings",
+		"#edit=/projects/"+env.Project+"/environments/"+env.ID+"/settings",
+	)
 
 	_ = json.NewEncoder(w).Encode(settings)
 }
@@ -96,6 +100,11 @@ func (h *Handler) handleSetEnvironmentSettings(w http.ResponseWriter, req *http.
 	for k, v := range settings {
 		env.settings[k] = v
 	}
+	settings["_links"] = MakeHALLinks(
+		"self=/projects/"+env.Project+"/environments/"+env.ID+"/settings",
+		"#edit=/projects/"+env.Project+"/environments/"+env.ID+"/settings",
+	)
+
 	h.store.environments[env.ID] = env
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"_embedded": map[string]any{"entity": settings},
