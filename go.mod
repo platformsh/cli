@@ -1,8 +1,8 @@
 module github.com/platformsh/cli
 
-go 1.23.0
+go 1.23.5
 
-toolchain go1.24.2
+toolchain go1.24.4
 
 require (
 	github.com/Masterminds/semver/v3 v3.3.1
@@ -16,6 +16,7 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	github.com/symfony-cli/terminal v1.0.7
+	github.com/upsun/convsun v0.3.5
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	golang.org/x/crypto v0.37.0
 	golang.org/x/sync v0.13.0
@@ -32,6 +33,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
+	github.com/getsentry/sentry-go v0.28.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
@@ -57,6 +59,7 @@ require (
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/upsun/lib-sun v0.3.15 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
