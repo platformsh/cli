@@ -53,6 +53,14 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				list.AddCommand(&appConfigValidateCommand)
 			}
 
+			// Add ClonSun to command list
+			appCloneProjectCommand := innerCloneProjectCommand(cnf)
+
+			if !list.DescribesNamespace() || list.Namespace == appCloneProjectCommand.Name.Namespace {
+				list.AddCommand(&appCloneProjectCommand)
+			}
+			// End of ClonSun
+
 			format := viper.GetString("format")
 			raw := viper.GetBool("raw")
 

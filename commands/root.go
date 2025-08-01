@@ -143,6 +143,14 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		fmt.Println(internalCmd.HelpPage(cnf))
 	})
 
+	// Add ClonSun to command
+	cloneCommand := NewCloneProjectCommand()
+	cloneCommand.SetHelpFunc(func(_ *cobra.Command, _ []string) {
+		internalCmd := innerCloneProjectCommand(cnf)
+		fmt.Println(internalCmd.HelpPage(cnf))
+	})
+	// End of ClonSun
+
 	// Add subcommands.
 	cmd.AddCommand(
 		newConfigInstallCommand(),
@@ -152,6 +160,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		projectInitCmd,
 		validateCmd,
 		versionCommand,
+		cloneCommand,
 	)
 
 	//nolint:errcheck
