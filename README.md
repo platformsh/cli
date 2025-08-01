@@ -187,6 +187,18 @@ The New Platform.sh CLI is built with backwards compatibility in mind. This is w
 
 ## Building binaries, snapshots and releases
 
+Dependencies:
+  - docker
+  - docker-buildx
+  - make
+  - goreleaser
+
+Clone the project
+
+```
+git clone --recursive git@github.com:platformsh/cli.git
+```
+
 Build a single binary
 
 ```console
