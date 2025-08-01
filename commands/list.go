@@ -53,6 +53,14 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				list.AddCommand(&appConfigValidateCommand)
 			}
 
+			// Add ConvSun to command list
+			appConfigConvertCommand := innerConvertConfigCommand(cnf)
+
+			if !list.DescribesNamespace() || list.Namespace == appConfigConvertCommand.Name.Namespace {
+				list.AddCommand(&appConfigConvertCommand)
+			}
+			// End of ConvSun
+
 			format := viper.GetString("format")
 			raw := viper.GetBool("raw")
 

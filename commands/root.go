@@ -143,6 +143,14 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		fmt.Println(internalCmd.HelpPage(cnf))
 	})
 
+	// Add ConvSun to command
+	convertCommand := NewConvertConfigCommand()
+	convertCommand.SetHelpFunc(func(_ *cobra.Command, _ []string) {
+		internalCmd := innerConvertConfigCommand(cnf)
+		fmt.Println(internalCmd.HelpPage(cnf))
+	})
+	// End of ConvSun
+
 	// Add subcommands.
 	cmd.AddCommand(
 		newConfigInstallCommand(),
@@ -152,6 +160,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		projectInitCmd,
 		validateCmd,
 		versionCommand,
+		convertCommand,
 	)
 
 	//nolint:errcheck
