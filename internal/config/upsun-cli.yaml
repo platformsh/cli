@@ -14,6 +14,8 @@ application:
   env_prefix: "UPSUN_CLI_"
   user_config_dir: ".upsun-cli"
 
+  mark_unwrapped_legacy: true
+
   disabled_commands:
     - self:install
     - self:update
@@ -55,11 +57,10 @@ api:
   oauth2_client_id: "upsun-cli"
 
   organizations: true
-  centralized_permissions: true
-  teams: true
   user_verification: true
   metrics: true
   sizing: true
+  teams: true
 
   vendor_filter: upsun
 
@@ -86,3 +87,10 @@ browser_login:
 
 messages:
   region_discount: Get a <options=bold;fg=green>3% discount</> on resources for regions with a carbon intensity of less than 100 gCO2eq/kWh.
+
+warnings:
+  guaranteed_resources_msg: |
+    You have chosen to allocate guaranteed resources for app(s) and/or service(s).
+    This change may affect resource costs. See: <info>https://upsun.com/pricing/</info>
+
+    This process requires a redeployment of containers on their own host, which may take a few minutes to complete.

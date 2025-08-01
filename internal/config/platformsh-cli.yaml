@@ -19,6 +19,8 @@ application:
   manifest_url: 'https://platform.sh/cli/manifest.json'
   github_repo: 'platformsh/legacy-cli'
 
+  mark_unwrapped_legacy: true
+
   disabled_commands:
     - self:install
     - self:update
@@ -56,10 +58,9 @@ api:
   oauth2_client_id: 'platform-cli'
 
   organizations: true
-  centralized_permissions: true
-  teams: true
   user_verification: true
   metrics: true
+  teams: true
 
   vendor_filter: 'platformsh'
 
