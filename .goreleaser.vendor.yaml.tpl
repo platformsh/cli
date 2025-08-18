@@ -75,7 +75,7 @@ archives:
         format: zip
 
 nfpms:
-  - homepage: https://docs.platform.sh/administration/cli.html
+  - homepage: https://docs.upsun.com/anchors/fixed/cli/
     package_name: ${VENDOR_BINARY}-cli
     description: ${VENDOR_NAME} CLI
     maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
