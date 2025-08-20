@@ -64,7 +64,7 @@ func innerConvertConfigCommand(cnf *config.Config) Command {
 func NewConvertConfigCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "project:convert ",
-		Short:   "Locally create and upsun config",
+		Short:   "Locally create an upsun config",
 		Aliases: []string{"convert"},
 		//Args:  cobra.ExactArgs(1),
 		RunE: runConvertConfig,
@@ -82,5 +82,5 @@ func runConvertConfig(cmd *cobra.Command, args []string) error {
 		api.Convert(rootProject, upsunFolder)
 	}
 
-	return nil
+	return err
 }
