@@ -146,6 +146,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 	// Add subcommands.
 	cmd.AddCommand(
 		newConfigInstallCommand(),
+		newAPICurlCommand(cnf),
 		newCompletionCommand(cnf),
 		newHelpCommand(cnf),
 		newListCommand(cnf),
