@@ -39,6 +39,7 @@ type CLIWrapper struct {
 	Version            string
 	Debug              bool
 	DisableInteraction bool
+	ForceColor         bool
 	DebugLogFunc       func(string, ...any)
 
 	initOnce  sync.Once
@@ -158,6 +159,9 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 	)
 	if c.DisableInteraction {
 		cmd.Env = append(cmd.Env, envPrefix+"NO_INTERACTION=1")
+	}
+	if c.ForceColor {
+		cmd.Env = append(cmd.Env, "CLICOLOR_FORCE=1")
 	}
 	cmd.Env = append(cmd.Env, fmt.Sprintf(
 		"%sUSER_AGENT={APP_NAME_DASH}/%s ({UNAME_S}; {UNAME_R}; PHP %s; WRAPPER %s)",

@@ -45,8 +45,10 @@ type Config struct {
 		BaseURL string `validate:"required,url" yaml:"base_url"`            // e.g. "https://api.platform.sh"
 		AuthURL string `validate:"omitempty,url" yaml:"auth_url,omitempty"` // e.g. "https://auth.api.platform.sh"
 
-		UserAgent string `validate:"omitempty" yaml:"user_agent,omitempty"` // a template - see UserAgent method
+		UserAgent string `validate:"omitempty" yaml:"user_agent,omitempty"`       // a template - see UserAgent method
+		SessionID string `validate:"omitempty,ascii" yaml:"session_id,omitempty"` // the ID for the authentication session - defaults to "default"
 
+		OAuth2ClientID     string `validate:"required_without=AuthURL,omitempty" yaml:"oauth2_client_id,omitempty"`      // e.g. "upsun-cli"
 		OAuth2AuthorizeURL string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_auth_url,omitempty"`   // e.g. "https://auth.api.platform.sh/oauth2/authorize"
 		OAuth2RevokeURL    string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_revoke_url,omitempty"` // e.g. "https://auth.api.platform.sh/oauth2/revoke"
 		OAuth2TokenURL     string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_token_url,omitempty"`  // e.g. "https://auth.api.platform.sh/oauth2/token"
