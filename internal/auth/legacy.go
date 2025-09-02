@@ -26,7 +26,7 @@ func (ts *legacyCLITokenSource) unsafeGetLegacyCLIToken() (*oauth2.Token, error)
 		return nil, fmt.Errorf("cannot retrieve token: %w", err)
 	}
 
-	at, err := unsafeParseJWT(bt.String())
+	expiry, err := unsafeGetJWTExpiry(bt.String())
 
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse token: %w", err)
@@ -35,7 +35,7 @@ func (ts *legacyCLITokenSource) unsafeGetLegacyCLIToken() (*oauth2.Token, error)
 	return &oauth2.Token{
 		AccessToken: bt.String(),
 		TokenType:   "Bearer",
-		Expiry:      at.ExpiresAt.Time(),
+		Expiry:      expiry,
 	}, nil
 }
 
