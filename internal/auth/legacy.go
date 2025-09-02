@@ -8,8 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/platformsh/cli/internal/legacy"
 	"golang.org/x/oauth2"
+
+	"github.com/platformsh/cli/internal/legacy"
 )
 
 type legacyCLITokenSource struct {
@@ -19,7 +20,7 @@ type legacyCLITokenSource struct {
 	mu      sync.Mutex
 }
 
-func (ts *legacyCLITokenSource) getLegacyCLIToken() (*oauth2.Token, error) {
+func (ts *legacyCLITokenSource) unsafeGetLegacyCLIToken() (*oauth2.Token, error) {
 	bt := bytes.NewBuffer(nil)
 	ts.wrapper.Stdout = bt
 	if err := ts.wrapper.Exec(ts.ctx, "auth:token", "-W"); err != nil {
@@ -40,6 +41,13 @@ func (ts *legacyCLITokenSource) getLegacyCLIToken() (*oauth2.Token, error) {
 }
 
 func (ts *legacyCLITokenSource) refreshToken() error {
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
+
+	return ts.unsafeRefreshToken()
+}
+
+func (ts *legacyCLITokenSource) unsafeRefreshToken() error {
 	ts.cached = nil
 	ts.wrapper.Stdout = io.Discard
 	if err := ts.wrapper.Exec(ts.ctx, "auth:info", "--refresh"); err != nil {
@@ -50,6 +58,13 @@ func (ts *legacyCLITokenSource) refreshToken() error {
 }
 
 func (ts *legacyCLITokenSource) invalidateToken() error {
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
+
+	return ts.unsafeInvalidateToken()
+}
+
+func (ts *legacyCLITokenSource) unsafeInvalidateToken() error {
 	if ts.cached != nil {
 		ts.cached.AccessToken = ""
 	}
@@ -62,7 +77,7 @@ func (ts *legacyCLITokenSource) Token() (*oauth2.Token, error) {
 	defer ts.mu.Unlock()
 
 	if ts.cached == nil {
-		tok, err := ts.getLegacyCLIToken()
+		tok, err := ts.unsafeGetLegacyCLIToken()
 		if err != nil {
 			return nil, err
 		}
@@ -73,11 +88,11 @@ func (ts *legacyCLITokenSource) Token() (*oauth2.Token, error) {
 		return ts.cached, nil
 	}
 
-	if err := ts.refreshToken(); err != nil {
+	if err := ts.unsafeRefreshToken(); err != nil {
 		return nil, err
 	}
 
-	tok, err := ts.getLegacyCLIToken()
+	tok, err := ts.unsafeGetLegacyCLIToken()
 	if err != nil {
 		return nil, err
 	}
