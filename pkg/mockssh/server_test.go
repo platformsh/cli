@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -32,6 +33,7 @@ func TestServer(t *testing.T) {
 	})
 
 	tempDir := t.TempDir()
+	tempDir, _ = filepath.EvalSymlinks(tempDir)
 	sshServer.CommandHandler = mockssh.ExecHandler(tempDir, []string{})
 
 	cert := getTestSSHAuth(t, authServer.URL)
