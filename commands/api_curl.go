@@ -15,7 +15,7 @@ import (
 
 // newAPICurlCommand creates the `api:curl` command which performs an authenticated HTTP request
 // against the configured API, using OAuth2 tokens from the credentials store and retrying once on 401.
-func newAPICurlCommand(cnf *config.Config) *cobra.Command {
+func newAPICurlCommand(_ *config.Config) *cobra.Command {
 	var (
 		method             string
 		data               string
@@ -113,15 +113,16 @@ func newAPICurlCommand(cnf *config.Config) *cobra.Command {
 				}
 				// Support "Name: value" and "Name=value" forms.
 				var name, value string
-				if strings.Contains(h, ":") {
+				switch {
+				case strings.Contains(h, ":"):
 					parts := strings.SplitN(h, ":", 2)
 					name = strings.TrimSpace(parts[0])
 					value = strings.TrimSpace(parts[1])
-				} else if strings.Contains(h, "=") {
+				case strings.Contains(h, "="):
 					parts := strings.SplitN(h, "=", 2)
 					name = strings.TrimSpace(parts[0])
 					value = strings.TrimSpace(parts[1])
-				} else {
+				default:
 					return fmt.Errorf("invalid header format: %q", h)
 				}
 				if name == "" {
@@ -181,20 +182,6 @@ func newAPICurlCommand(cnf *config.Config) *cobra.Command {
 	cmd.Flags().StringArrayVarP(&headerFlags, "header", "H", nil, "Extra header(s) (multiple values allowed)")
 
 	return cmd
-}
-
-// helpers
-func cloneHeader(h http.Header) http.Header {
-	out := make(http.Header, len(h))
-	for k, v := range h {
-		out[k] = append([]string(nil), v...)
-	}
-	return out
-}
-
-func readAllToString(r io.Reader) string {
-	b, _ := io.ReadAll(r)
-	return string(b)
 }
 
 func isBrokenPipe(err error) bool {
