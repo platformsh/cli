@@ -11,36 +11,27 @@ import (
 
 	"github.com/platformsh/cli/internal/auth"
 	"github.com/platformsh/cli/internal/config"
-	"golang.org/x/oauth2"
 )
 
 // newAPICurlCommand creates the `api:curl` command which performs an authenticated HTTP request
 // against the configured API, using OAuth2 tokens from the credentials store and retrying once on 401.
 func newAPICurlCommand(cnf *config.Config) *cobra.Command {
 	var (
-		method              string
-		data                string
-		jsonBody            string
-		includeHeaders      bool
-		headOnly            bool
-		disableCompression  bool
-		enableGlob          bool // accepted for compatibility; no effect
-		noRetry401          bool
-		failNoOutput        bool
-		headerFlags         []string
-		userSetFailExplicit bool
+		method             string
+		data               string
+		jsonBody           string
+		includeHeaders     bool
+		headOnly           bool
+		disableCompression bool
+		enableGlob         bool // accepted for compatibility; no effect
+		failNoOutput       bool
+		headerFlags        []string
 	)
 
 	cmd := &cobra.Command{
 		Use:   "api:curl [flags] [path]",
 		Short: "Run an authenticated cURL request on the Upsun API",
 		Args:  cobra.RangeArgs(0, 1),
-		PreRun: func(cmd *cobra.Command, _ []string) {
-			// Track if user explicitly set --fail to avoid overriding it dynamically below.
-			if f := cmd.Flags().Lookup("fail"); f != nil && f.Changed {
-				userSetFailExplicit = true
-			}
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			cfg := config.FromContext(ctx)
@@ -77,11 +68,6 @@ func newAPICurlCommand(cnf *config.Config) *cobra.Command {
 				return fmt.Errorf("cannot use --data and --json together")
 			}
 
-			// Dynamic default for --fail: true unless --no-retry-401, unless user specified explicitly.
-			if !userSetFailExplicit {
-				failNoOutput = !noRetry401
-			}
-
 			// Base transport: optionally disable compression.
 			baseRT := http.DefaultTransport
 			if t, ok := http.DefaultTransport.(*http.Transport); ok && disableCompression {
@@ -91,23 +77,14 @@ func newAPICurlCommand(cnf *config.Config) *cobra.Command {
 			}
 
 			var httpClient *http.Client
-			if noRetry401 {
-				// Use plain oauth2 transport (no 401 retry logic).
-				ts, err := auth.NewTokenSource(ctx)
-				if err != nil {
-					return err
-				}
-				httpClient = &http.Client{Transport: &oauth2.Transport{Source: ts, Base: baseRT}}
-			} else {
-				// Use our retrying transport via NewClient and inject baseRT via context.
-				ctxWithRT := auth.WithTransport(ctx, baseRT)
-				legacyCLI := makeLegacyCLIWrapper(cfg, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin())
-				c, err := auth.NewLegacyCLIClient(ctxWithRT, legacyCLI)
-				if err != nil {
-					return err
-				}
-				httpClient = c
+			// Use our retrying transport via NewClient and inject baseRT via context.
+			ctxWithRT := auth.WithTransport(ctx, baseRT)
+			legacyCLI := makeLegacyCLIWrapper(cfg, cmd.OutOrStdout(), cmd.ErrOrStderr(), cmd.InOrStdin())
+			c, err := auth.NewLegacyCLIClient(ctxWithRT, legacyCLI)
+			if err != nil {
+				return err
 			}
+			httpClient = c
 
 			// Build request.
 			var body io.Reader
@@ -200,7 +177,6 @@ func newAPICurlCommand(cnf *config.Config) *cobra.Command {
 	cmd.Flags().BoolVarP(&headOnly, "head", "I", false, "Fetch headers only")
 	cmd.Flags().BoolVar(&disableCompression, "disable-compression", false, "Do not request compressed responses")
 	cmd.Flags().BoolVar(&enableGlob, "enable-glob", false, "Enable curl globbing (no effect)")
-	cmd.Flags().BoolVar(&noRetry401, "no-retry-401", false, "Disable automatic retry on 401 errors")
 	cmd.Flags().BoolVarP(&failNoOutput, "fail", "f", false, "Fail with no output on an error response")
 	cmd.Flags().StringArrayVarP(&headerFlags, "header", "H", nil, "Extra header(s) (multiple values allowed)")
 
