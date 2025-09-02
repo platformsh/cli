@@ -3,6 +3,7 @@ package auth
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -40,7 +41,9 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// Retry on 401
 	if resp != nil && resp.StatusCode == http.StatusUnauthorized {
 		_ = t.log("The access token has been refreshed. Retrying request.")
-		_ = t.refresher.invalidateToken()
+		if err := t.refresher.invalidateToken(); err != nil {
+			return nil, fmt.Errorf("failed to invalidate token: %w", err)
+		}
 		flushReader(resp.Body)
 		resp, err = t.base.RoundTrip(req)
 	}
