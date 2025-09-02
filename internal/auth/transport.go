@@ -7,8 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/platformsh/cli/internal/legacy"
 )
 
 type refresher interface {
@@ -27,8 +25,7 @@ type Transport struct {
 	// so we can clear its cached token on 401.
 	refresher refresher
 
-	wrapper *legacy.CLIWrapper
-	logger  *log.Logger
+	logger *log.Logger
 }
 
 // RoundTrip adds Authorization via the underlying oauth2.Transport. If the

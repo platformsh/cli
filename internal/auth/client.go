@@ -33,8 +33,7 @@ func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*http.
 				Source: ts,
 				Base:   baseRT,
 			},
-			wrapper: wrapper,
-			logger:  log.New(os.Stderr, "", 0),
+			logger: log.New(os.Stderr, "", 0),
 		},
 	}, nil
 }
