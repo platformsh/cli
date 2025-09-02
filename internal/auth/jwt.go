@@ -6,24 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/go-jose/go-jose/v4/jwt"
 )
 
 // jwtClaims represents the expected claims contained in the JWT token.
 type jwtClaims struct {
-	AccessID           string         `json:"access_id"`
-	Actor              map[string]any `json:"act,omitempty"`
-	AuthMethods        []string       `json:"amr,omitempty"`
-	AuthenticationTime int64          `json:"auth_time,omitempty"`
-	ClientID           string         `json:"cid,omitempty"`
-	ExpiresAt          int64          `json:"exp,omitempty"`
-	GrantType          string         `json:"grant,omitempty"`
-	IssuedAt           int64          `json:"iat,omitempty"`
-	Issuer             string         `json:"iss,omitempty"`
-	JWTID              string         `json:"jti,omitempty"`
-	NotBefore          int64          `json:"nbf,omitempty"`
-	Namespace          string         `json:"ns,omitempty"`
-	Scopes             []string       `json:"scp,omitempty"`
-	Subject            string         `json:"sub,omitempty"`
+	ExpiresAt *jwt.NumericDate `json:"exp,omitempty"`
 }
 
 // unsafeParseJWT parses a JWT without verifying its signature and returns its claims.
