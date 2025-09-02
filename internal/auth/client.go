@@ -3,10 +3,13 @@ package auth
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+
+	"golang.org/x/oauth2"
 
 	"github.com/platformsh/cli/internal/legacy"
-	"golang.org/x/oauth2"
 )
 
 func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*http.Client, error) {
@@ -15,7 +18,10 @@ func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*http.
 		return nil, fmt.Errorf("oauth2: create token source: %w", err)
 	}
 
-	refresher := ts.(refresher)
+	refresher, ok := ts.(refresher)
+	if !ok {
+		return nil, fmt.Errorf("token source does not implement refresher")
+	}
 	baseRT := http.DefaultTransport
 	if rt, ok := TransportFromContext(ctx); ok && rt != nil {
 		baseRT = rt
@@ -28,6 +34,7 @@ func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*http.
 				Base:   baseRT,
 			},
 			wrapper: wrapper,
+			logger:  log.New(os.Stderr, "", 0),
 		},
 	}, nil
 }

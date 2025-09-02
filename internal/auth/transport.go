@@ -3,11 +3,9 @@ package auth
 import (
 	"bytes"
 	"context"
-	"errors"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
-	"os"
 
 	"github.com/platformsh/cli/internal/legacy"
 )
@@ -29,6 +27,7 @@ type Transport struct {
 	refresher refresher
 
 	wrapper *legacy.CLIWrapper
+	logger  *log.Logger
 }
 
 // RoundTrip adds Authorization via the underlying oauth2.Transport. If the
@@ -40,19 +39,21 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	// Retry on 401
 	if resp != nil && resp.StatusCode == http.StatusUnauthorized {
-		fmt.Fprintln(os.Stderr, "401: refreshing token...")
-		t.refresher.invalidateToken()
+		_ = t.log("The access token has been refreshed. Retrying request.")
+		_ = t.refresher.invalidateToken()
 		flushReader(resp.Body)
 		resp, err = t.base.RoundTrip(req)
 	}
 
-	if errors.Is(err, ErrNoValidCredentials) {
-		fmt.Fprintln(os.Stderr, "invalid credentials: re-authenticating...")
-		t.refresher.refreshToken()
-		resp, err = t.base.RoundTrip(req)
-	}
-
 	return resp, err
+}
+
+func (t *Transport) log(msg string, args ...any) error {
+	if t.logger == nil {
+		return nil
+	}
+	t.logger.Printf(msg, args...)
+	return nil
 }
 
 // context key for storing a custom RoundTripper.
