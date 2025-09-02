@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"sync"
-	"time"
 
 	"golang.org/x/oauth2"
 
@@ -36,7 +35,7 @@ func (ts *legacyCLITokenSource) unsafeGetLegacyCLIToken() (*oauth2.Token, error)
 	return &oauth2.Token{
 		AccessToken: bt.String(),
 		TokenType:   "Bearer",
-		Expiry:      time.Unix(at.ExpiresAt, 0),
+		Expiry:      at.ExpiresAt.Time(),
 	}, nil
 }
 
