@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -25,7 +24,7 @@ type Transport struct {
 	// so we can clear its cached token on 401.
 	refresher refresher
 
-	logger *log.Logger
+	LogFunc func(msg string, args ...any)
 }
 
 // RoundTrip adds Authorization via the underlying oauth2.Transport. If the
@@ -49,10 +48,10 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func (t *Transport) log(msg string, args ...any) error {
-	if t.logger == nil {
+	if t.LogFunc == nil {
 		return nil
 	}
-	t.logger.Printf(msg, args...)
+	t.LogFunc(msg, args...)
 	return nil
 }
 

@@ -3,9 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 
 	"golang.org/x/oauth2"
 
@@ -33,7 +31,6 @@ func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*http.
 				Source: ts,
 				Base:   baseRT,
 			},
-			logger: log.New(os.Stderr, "", 0),
 		},
 	}, nil
 }
