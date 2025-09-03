@@ -36,7 +36,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	// Retry on 401
 	if resp != nil && resp.StatusCode == http.StatusUnauthorized {
-		_ = t.log("The access token has been refreshed. Retrying request.")
+		_ = t.log("The access token needs to be refreshed. Retrying request.")
 		if err := t.refresher.invalidateToken(); err != nil {
 			return nil, fmt.Errorf("failed to invalidate token: %w", err)
 		}
