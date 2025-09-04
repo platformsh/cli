@@ -10,6 +10,8 @@ import (
 	"github.com/platformsh/cli/internal/legacy"
 )
 
+// NewLegacyCLIClient creates an HTTP client authenticated through the legacy CLI.
+// The wrapper argument must be a dedicated wrapper, not used by other callers.
 func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*http.Client, error) {
 	ts, err := NewLegacyCLITokenSource(ctx, wrapper)
 	if err != nil {
