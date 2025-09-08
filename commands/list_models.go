@@ -36,13 +36,12 @@ func innerProjectInitCommand(cnf *config.Config) Command {
 			},
 		},
 		Definition: Definition{
-			Arguments: []Argument{},
-			Options: []Option{
-				HelpOption,
-				VerboseOption,
-				VersionOption,
-				YesOption,
-				noInteractionOption,
+			Options: map[string]Option{
+				"help":           HelpOption,
+				"verbose":        VerboseOption,
+				"version":        VersionOption,
+				"yes":            YesOption,
+				"no-interaction": noInteractionOption,
 			},
 		},
 		Hidden: false,
@@ -72,13 +71,12 @@ func innerAppConfigValidateCommand(cnf *config.Config) Command {
 			},
 		},
 		Definition: Definition{
-			Arguments: []Argument{},
-			Options: []Option{
-				HelpOption,
-				VerboseOption,
-				VersionOption,
-				YesOption,
-				noInteractionOption,
+			Options: map[string]Option{
+				"help":           HelpOption,
+				"verbose":        VerboseOption,
+				"version":        VersionOption,
+				"yes":            YesOption,
+				"no-interaction": noInteractionOption,
 			},
 		},
 		Hidden: false,
@@ -206,8 +204,8 @@ type Example struct {
 }
 
 type Definition struct {
-	Arguments []Argument `json:"arguments"`
-	Options   []Option   `json:"options"`
+	Arguments map[string]Argument `json:"arguments"`
+	Options   map[string]Option   `json:"options"`
 }
 
 type Argument struct {
