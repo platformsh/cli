@@ -56,6 +56,8 @@ api:
   auth_url: "https://auth.upsun.com"
   oauth2_client_id: "upsun-cli"
 
+  ai_url: "https://ai.upsun.com"
+
   organization_types: [flexible, fixed]
   default_organization_type: flexible
 
