@@ -1,142 +1,75 @@
-linters-settings:
-  errcheck:
-    # report about not checking of errors in type assertions: `a := b.(MyStruct)`;
-    # default is false: such cases aren't reported by default.
-    check-type-assertions: true
-  goconst:
-    # minimal occurrences count to trigger, 3 by default
-    min-occurrences: 5
-  gocritic:
-    # Enable multiple checks by tags, run `GL_DEBUG=gocritic golangci-lint run` to see all tags and checks.
-    # Empty list by default. See https://github.com/go-critic/go-critic#usage -> section "Tags".
-    enabled-tags:
-      - diagnostic
-      - experimental
-      - opinionated
-      - performance
-      - style
-    disabled-checks:
-      - whyNoLint
-      - emptyStringTest
-  goimports:
-    # put imports beginning with prefix after 3rd-party packages;
-    # it's a comma-separated list of prefixes
-    local-prefixes: github.com/platformsh/cli
-  lll:
-    # max line length, lines longer will be reported. Default is 120.
-    # '\t' is counted as 1 character by default, and can be changed with the tab-width option
-    line-length: 120
-  misspell:
-    # Correct spellings using locale preferences for US or UK.
-    # Default is to use a neutral variety of English.
-    # Setting locale to US will correct the British spelling of 'colour' to 'color'.
-    locale: US
-  nolintlint:
-    # Enable to ensure that nolint directives are all used. Default is true.
-    allow-unused: false
-    # Require to specify linter that is being skipped. Default is false
-    require-specific: true
-  prealloc:
-    # Report preallocation suggestions on for loops, false by default
-    for-loops: true
-
+version: "2"
 linters:
-  # please, do not use `enable-all`: it's deprecated and will be removed soon.
-  # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint
-  disable-all: true
+  default: none
   enable:
-    # Simple linter to check that your code does not contain non-ASCII identifiers
-    # - asciicheck
-    # checks whether HTTP response body is closed successfully
     - bodyclose
-    # Checks assignments with too many blank identifiers (e.g. x, , , _, := f())
     - dogsled
-    # Tool for code clone detection
-    # - dupl
-    # Errcheck is a program for checking for unchecked errors in go programs. These unchecked errors can be critical bugs in some cases
     - errcheck
-    # Tool for detection of long functions
-    # - funlen
-    # Checks that no globals are present in Go code
-    # - gochecknoglobals
-    # Checks that no init functions are present in Go code
-    # - gochecknoinits
-    # Computes and checks the cognitive complexity of functions
-    # - gocognit
-    # Finds repeated strings that could be replaced by a constant
     - goconst
-    # The most opinionated Go source code linter
     - gocritic
-    # Computes and checks the cyclomatic complexity of functions
-    # - gocyclo
-    # Check if comments end in a period
-    # - godot
-    # Tool for detection of FIXME, TODO and other comment keywords
-    # - godox
-    # Golang linter to check the errors handling expressions
-    # - goerr113
-    # Gofmt checks whether code was gofmt-ed. By default this tool runs with -s option to check for code simplification
-    - gofmt
-    # Goimports does everything that gofmt does. Additionally, it checks unused imports
-    - goimports
-    # Golint differs from gofmt. Gofmt reformats Go source code, whereas golint prints out style mistakes
-    - revive
-    # An analyzer to detect magic numbers.
-    # - gomnd
-    # Allow and block list linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations.
-    # - gomodguard
-    # Checks that printf-like functions are named with f at the end
     - goprintffuncname
-    # Inspects source code for security problems
     - gosec
-    # Linter for Go source code that specializes in simplifying a code
-    - gosimple
-    # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
     - govet
-    # Detects when assignments to existing variables are not used
     - ineffassign
-    # Linter that suggests narrower interface types
-    # - interfacer
-    # Reports long lines
     - lll
-    # Tool to detect Go structs that would take less memory if their fields were sorted
-    # - maligned
-    # Finds commonly misspelled English words in comments
     - misspell
-    # (?) Finds naked returns in functions greater than a specified function length
     - nakedret
-    # Reports deeply nested if statements
-    # - nestif
-    # Reports ill-formed or insufficient nolint directives
     - nolintlint
-    # Finds slice declarations that could potentially be preallocated
     - prealloc
-    # Find code that shadows one of Go's predeclared identifiers.
     - predeclared
-    # checks whether Err of rows is checked successfully
-    # rowserrcheck is disabled because of generics. See https://github.com/golangci/golangci-lint/issues/2649.
-    # - rowserrcheck
-    # Scopelint checks for unpinned variables in go programs
-    # - scopelint
-    # Staticcheck is a go vet on steroids, applying a ton of static analysis checks
+    - revive
     - staticcheck
-    # Stylecheck is a replacement for golint
-    - stylecheck
-    # linter that makes you use a separate _test package
-    # - testpackage
-    # Like the front-end of a Go compiler, parses and type-checks Go code
-    - typecheck
-    # Remove unnecessary type conversions
     - unconvert
-    # (?) Reports unused function parameters
-    # - unparam
-    # Checks Go code for unused constants, variables, functions and types
     - unused
-    # Tool for detection of leading and trailing whitespace
     - whitespace
-    # Whitespace Linter - Forces you to use empty lines!
-    # - wsl
-
-issues:
-  exclude-dirs:
-    - vendor
+  settings:
+    errcheck:
+      check-type-assertions: true
+    goconst:
+      min-occurrences: 5
+    gocritic:
+      disabled-checks:
+        - whyNoLint
+        - emptyStringTest
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    lll:
+      line-length: 120
+    misspell:
+      locale: US
+    nolintlint:
+      require-specific: true
+      allow-unused: false
+    prealloc:
+      for-loops: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - vendor
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/platformsh/cli
+  exclusions:
+    generated: lax
+    paths:
+      - vendor
+      - third_party$
+      - builtin$
+      - examples$

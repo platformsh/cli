@@ -15,13 +15,13 @@ import (
 )
 
 func (h *Handler) handleOrgRefs(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	require.NoError(h.t, req.ParseForm())
 	ids := strings.Split(req.Form.Get("in"), ",")
 	refs := make(map[string]*OrgRef, len(ids))
 	for _, id := range ids {
-		if o, ok := h.store.orgs[id]; ok {
+		if o, ok := h.orgs[id]; ok {
 			refs[id] = o.AsRef()
 		} else {
 			refs[id] = nil
@@ -31,13 +31,13 @@ func (h *Handler) handleOrgRefs(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handleListOrgs(w http.ResponseWriter, _ *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	var (
-		orgs     = make([]*Org, 0, len(h.store.orgs))
+		orgs     = make([]*Org, 0, len(h.orgs))
 		ownerIDs = make(uniqueMap)
 	)
-	for _, o := range h.store.orgs {
+	for _, o := range h.orgs {
 		orgs = append(orgs, o)
 		ownerIDs[o.Owner] = struct{}{}
 	}
@@ -52,21 +52,21 @@ func (h *Handler) handleListOrgs(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (h *Handler) handleGetOrg(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	var org *Org
 
 	orgID := chi.URLParam(req, "organization_id")
 	if strings.HasPrefix(orgID, "name%3D") {
 		name := strings.TrimPrefix(orgID, "name%3D")
-		for _, o := range h.store.orgs {
+		for _, o := range h.orgs {
 			if o.Name == name {
 				org = o
 				break
 			}
 		}
 	} else {
-		org = h.store.orgs[path.Base(req.URL.Path)]
+		org = h.orgs[path.Base(req.URL.Path)]
 	}
 
 	if org == nil {
@@ -78,33 +78,33 @@ func (h *Handler) handleGetOrg(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handleCreateOrg(w http.ResponseWriter, req *http.Request) {
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 	var org Org
 	err := json.NewDecoder(req.Body).Decode(&org)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	for _, o := range h.store.orgs {
+	for _, o := range h.orgs {
 		if o.Name == org.Name {
 			w.WriteHeader(http.StatusConflict)
 			return
 		}
 	}
 	org.ID = ulid.MustNew(ulid.Now(), rand.Reader).String()
-	org.Owner = h.store.myUser.ID
+	org.Owner = h.myUser.ID
 	org.Capabilities = []string{}
 	org.Links = MakeHALLinks("self=/organizations/" + url.PathEscape(org.ID))
-	h.store.orgs[org.ID] = &org
+	h.orgs[org.ID] = &org
 	_ = json.NewEncoder(w).Encode(&org)
 }
 
 func (h *Handler) handlePatchOrg(w http.ResponseWriter, req *http.Request) {
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 	orgID := chi.URLParam(req, "organization_id")
-	p, ok := h.store.orgs[orgID]
+	p, ok := h.orgs[orgID]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -115,6 +115,6 @@ func (h *Handler) handlePatchOrg(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	h.store.orgs[orgID] = &patched
+	h.orgs[orgID] = &patched
 	_ = json.NewEncoder(w).Encode(&patched)
 }
