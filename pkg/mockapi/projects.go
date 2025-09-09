@@ -11,13 +11,13 @@ import (
 )
 
 func (h *Handler) handleProjectRefs(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	require.NoError(h.t, req.ParseForm())
 	ids := strings.Split(req.Form.Get("in"), ",")
 	refs := make(map[string]*ProjectRef, len(ids))
 	for _, id := range ids {
-		if p, ok := h.store.projects[id]; ok {
+		if p, ok := h.projects[id]; ok {
 			refs[id] = p.AsRef()
 		} else {
 			refs[id] = nil
@@ -27,10 +27,10 @@ func (h *Handler) handleProjectRefs(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handleGetProject(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
-	if p, ok := h.store.projects[projectID]; ok {
+	if p, ok := h.projects[projectID]; ok {
 		_ = json.NewEncoder(w).Encode(p)
 		return
 	}
@@ -38,10 +38,10 @@ func (h *Handler) handleGetProject(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handlePatchProject(w http.ResponseWriter, req *http.Request) {
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 	projectID := chi.URLParam(req, "project_id")
-	p, ok := h.store.projects[projectID]
+	p, ok := h.projects[projectID]
 	if !ok {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -53,7 +53,7 @@ func (h *Handler) handlePatchProject(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	patched.UpdatedAt = time.Now()
-	h.store.projects[projectID] = &patched
+	h.projects[projectID] = &patched
 	_ = json.NewEncoder(w).Encode(&patched)
 }
 
@@ -76,16 +76,16 @@ func (h *Handler) handleListRegions(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (h *Handler) handleProjectUserAccess(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	require.NoError(h.t, req.ParseForm())
 	var (
-		projectGrants = make([]*ProjectUserGrant, 0, len(h.store.userGrants))
+		projectGrants = make([]*ProjectUserGrant, 0, len(h.userGrants))
 		userIDs       = make(uniqueMap)
 		orgIDs        = make(uniqueMap)
 	)
-	for _, g := range h.store.userGrants {
+	for _, g := range h.userGrants {
 		if g.ResourceType == "project" && g.ResourceID == projectID {
 			projectGrants = append(projectGrants, &ProjectUserGrant{
 				ProjectID:      g.ResourceID,

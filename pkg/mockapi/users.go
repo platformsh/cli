@@ -10,7 +10,7 @@ import (
 )
 
 func (h *Handler) handleUsersMe(w http.ResponseWriter, _ *http.Request) {
-	_ = json.NewEncoder(w).Encode(h.store.myUser)
+	_ = json.NewEncoder(w).Encode(h.myUser)
 }
 
 func (h *Handler) handleUserRefs(w http.ResponseWriter, req *http.Request) {
@@ -24,17 +24,17 @@ func (h *Handler) handleUserRefs(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handleUserExtendedAccess(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	userID := chi.URLParam(req, "user_id")
 	require.NoError(h.t, req.ParseForm())
 	require.Equal(h.t, "project", req.Form.Get("filter[resource_type]"))
 	var (
-		projectGrants = make([]*UserGrant, 0, len(h.store.userGrants))
+		projectGrants = make([]*UserGrant, 0, len(h.userGrants))
 		projectIDs    = make(uniqueMap)
 		orgIDs        = make(uniqueMap)
 	)
-	for _, g := range h.store.userGrants {
+	for _, g := range h.userGrants {
 		if g.ResourceType == "project" && g.UserID == userID {
 			projectGrants = append(projectGrants, g)
 			projectIDs[g.ResourceID] = struct{}{}

@@ -43,7 +43,7 @@ func (a *Alt) GenerateAndSave() error {
 }
 
 func (a *Alt) generateExecutable() string {
-	if runtime.GOOS == "windows" { //nolint:goconst
+	if runtime.GOOS == "windows" {
 		return ":: " + a.comment + "\r\n" +
 			"@echo off\r\n" +
 			"setlocal\r\n" +

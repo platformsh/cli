@@ -31,15 +31,15 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 		Status:        "provisioning",
 	}
 
-	h.store.Lock()
-	if h.store.subscriptions == nil {
-		h.store.subscriptions = make(map[string]*Subscription)
+	h.Lock()
+	if h.subscriptions == nil {
+		h.subscriptions = make(map[string]*Subscription)
 	}
-	h.store.subscriptions[sub.ID] = &sub
-	if h.store.projects == nil {
-		h.store.projects = make(map[string]*Project)
+	h.subscriptions[sub.ID] = &sub
+	if h.projects == nil {
+		h.projects = make(map[string]*Project)
 	}
-	h.store.projects[projectID] = &Project{
+	h.projects[projectID] = &Project{
 		ID:             projectID,
 		Links:          MakeHALLinks("self=/projects/" + projectID),
 		Repository:     ProjectRepository{URL: projectID + "@git.example.com:" + projectID + ".git"},
@@ -49,16 +49,16 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 		},
 		Organization: chi.URLParam(req, "organization_id"),
 	}
-	h.store.Unlock()
+	h.Unlock()
 
 	_ = json.NewEncoder(w).Encode(sub)
 
 	// Imitate "provisioning": wait a little and then activate.
 	go func(subID string, projectID string) {
 		time.Sleep(time.Second * 2)
-		h.store.Lock()
-		defer h.store.Unlock()
-		sub := h.store.subscriptions[subID]
+		h.Lock()
+		defer h.Unlock()
+		sub := h.subscriptions[subID]
 		sub.Status = "active"
 		sub.ProjectID = projectID
 		sub.ProjectUI = "http://console.example.com/projects/" + url.PathEscape(projectID)
@@ -66,10 +66,10 @@ func (h *Handler) handleCreateSubscription(w http.ResponseWriter, req *http.Requ
 }
 
 func (h *Handler) handleGetSubscription(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	id := chi.URLParam(req, "subscription_id")
-	sub := h.store.subscriptions[id]
+	sub := h.subscriptions[id]
 	if sub == nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -78,10 +78,10 @@ func (h *Handler) handleGetSubscription(w http.ResponseWriter, req *http.Request
 }
 
 func (h *Handler) handleCanCreateSubscriptions(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	id := chi.URLParam(req, "organization_id")
-	cc := h.store.canCreate[id]
+	cc := h.canCreate[id]
 	if cc == nil {
 		cc = &CanCreateResponse{CanCreate: true}
 	}
