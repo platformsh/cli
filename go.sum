@@ -90,8 +90,6 @@ github.com/pelletier/go-toml/v2 v2.2.4 h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0
 github.com/pelletier/go-toml/v2 v2.2.4/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/platformsh/platformify v0.4.0 h1:OMWjSsM8RwZN9lZuRdQD/URicy+OyKhNLMrca1JBlNg=
-github.com/platformsh/platformify v0.4.0/go.mod h1:fgmCcfQfHbhe1oXsIdIhpnniyZu8IdIMOlcBAa/ygic=
 github.com/platformsh/platformify v0.4.1 h1:SJCcCDjIF13KVUNdZtm3SC1uy6iWFhtvJIljqAuIbXQ=
 github.com/platformsh/platformify v0.4.1/go.mod h1:fgmCcfQfHbhe1oXsIdIhpnniyZu8IdIMOlcBAa/ygic=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
