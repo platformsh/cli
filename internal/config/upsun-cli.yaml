@@ -46,9 +46,9 @@ service:
 
   pricing_url: "https://upsun.com/pricing"
 
-  activity_type_list_url: "https://docs.upsun.com/integrations/activity/reference.html#type"
+  activity_type_list_url: "https://docs.upsun.com/anchors/integrations/activity-scripts/type/"
 
-  runtime_operations_help_url: "https://docs.upsun.com/create-apps/runtime-operations.html"
+  runtime_operations_help_url: "https://docs.upsun.com/anchors/app/runtime-operations/"
 
 api:
   base_url: "https://api.upsun.com"

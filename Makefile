@@ -25,7 +25,6 @@ VERSION := $(shell git describe --always)
 
 # Tooling versions
 GORELEASER_VERSION=v1.26
-GOLANGCI_LINT_VERSION=v1.64
 
 internal/legacy/archives/platform.phar:
 	curl -L https://github.com/platformsh/legacy-cli/releases/download/v$(LEGACY_CLI_VERSION)/platform.phar -o internal/legacy/archives/platform.phar
@@ -93,12 +92,9 @@ test: ## Run unit tests
 	go clean -testcache
 	go test -v -race -mod=readonly -cover ./...
 
-golangci-lint:
-	command -v golangci-lint >/dev/null || go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
-
 .PHONY: lint
-lint: golangci-lint ## Run linter
-	golangci-lint run --timeout=10m --verbose
+lint: ## Run linter
+	golangci-lint run --timeout=5m --verbose
 
 .goreleaser.vendor.yaml: check-vendor ## Generate the goreleaser vendor config
 	cat .goreleaser.vendor.yaml.tpl | envsubst > .goreleaser.vendor.yaml

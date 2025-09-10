@@ -35,9 +35,10 @@ jobs:
           touch internal/config/embedded-config.yaml
 
       - name: Run linter
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.64
+          version: v2.4
+          args: --timeout=5m
 
       - name: Run tests
         run: make test

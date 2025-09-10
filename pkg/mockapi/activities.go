@@ -9,11 +9,11 @@ import (
 )
 
 func (h *Handler) handleListProjectActivities(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
-	var activities = make([]*Activity, 0, len(h.store.activities[projectID]))
-	for _, a := range h.store.activities[projectID] {
+	var activities = make([]*Activity, 0, len(h.activities[projectID]))
+	for _, a := range h.activities[projectID] {
 		activities = append(activities, a)
 	}
 	// Sort activities in descending order by created date.
@@ -22,11 +22,11 @@ func (h *Handler) handleListProjectActivities(w http.ResponseWriter, req *http.R
 }
 
 func (h *Handler) handleGetProjectActivity(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	activityID := chi.URLParam(req, "id")
-	if projectActivities := h.store.activities[projectID]; projectActivities != nil {
+	if projectActivities := h.activities[projectID]; projectActivities != nil {
 		_ = json.NewEncoder(w).Encode(projectActivities[activityID])
 		return
 	}
@@ -34,12 +34,12 @@ func (h *Handler) handleGetProjectActivity(w http.ResponseWriter, req *http.Requ
 }
 
 func (h *Handler) handleListEnvironmentActivities(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	environmentID := chi.URLParam(req, "environment_id")
-	var activities = make([]*Activity, 0, len(h.store.activities[projectID]))
-	for _, a := range h.store.activities[projectID] {
+	var activities = make([]*Activity, 0, len(h.activities[projectID]))
+	for _, a := range h.activities[projectID] {
 		if slices.Contains(a.Environments, environmentID) {
 			activities = append(activities, a)
 		}
@@ -50,11 +50,11 @@ func (h *Handler) handleListEnvironmentActivities(w http.ResponseWriter, req *ht
 }
 
 func (h *Handler) handleGetEnvironmentActivity(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	activityID := chi.URLParam(req, "id")
-	if projectActivities := h.store.activities[projectID]; projectActivities != nil {
+	if projectActivities := h.activities[projectID]; projectActivities != nil {
 		environmentID := chi.URLParam(req, "environment_id")
 		a := projectActivities[activityID]
 		if a == nil || !slices.Contains(a.Environments, environmentID) {

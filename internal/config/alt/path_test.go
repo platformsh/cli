@@ -2,6 +2,7 @@ package alt_test
 
 import (
 	"os"
+	"path/filepath"
 	"runtime"
 	"testing"
 
@@ -13,6 +14,7 @@ import (
 
 func TestInPath(t *testing.T) {
 	tempDir := t.TempDir()
+	tempDir, _ = filepath.EvalSymlinks(tempDir)
 
 	homeDir := "/custom/home/directory"
 	require.NoError(t, os.Setenv("HOME", homeDir))

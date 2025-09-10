@@ -13,11 +13,11 @@ import (
 )
 
 func (h *Handler) handleListEnvironments(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	var envs []*Environment
-	for _, e := range h.store.environments {
+	for _, e := range h.environments {
 		if e.Project == projectID {
 			envs = append(envs, e)
 		}
@@ -26,11 +26,11 @@ func (h *Handler) handleListEnvironments(w http.ResponseWriter, req *http.Reques
 }
 
 func (h *Handler) handleGetEnvironment(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	environmentID := chi.URLParam(req, "environment_id")
-	for id, e := range h.store.environments {
+	for id, e := range h.environments {
 		if e.Project == projectID && id == environmentID {
 			_ = json.NewEncoder(w).Encode(e)
 			break
@@ -45,8 +45,8 @@ func (h *Handler) handlePatchEnvironment(w http.ResponseWriter, req *http.Reques
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 
 	patched := *env
 	err := json.NewDecoder(req.Body).Decode(&patched)
@@ -56,7 +56,7 @@ func (h *Handler) handlePatchEnvironment(w http.ResponseWriter, req *http.Reques
 	}
 
 	patched.UpdatedAt = time.Now()
-	h.store.environments[patched.ID] = &patched
+	h.environments[patched.ID] = &patched
 	_ = json.NewEncoder(w).Encode(&patched)
 }
 
@@ -66,8 +66,8 @@ func (h *Handler) handleGetEnvironmentSettings(w http.ResponseWriter, req *http.
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 
 	settings := make(map[string]any)
 	if env.settings != nil {
@@ -87,8 +87,8 @@ func (h *Handler) handleSetEnvironmentSettings(w http.ResponseWriter, req *http.
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 
 	settings := make(map[string]any)
 	err := json.NewDecoder(req.Body).Decode(&settings)
@@ -105,7 +105,7 @@ func (h *Handler) handleSetEnvironmentSettings(w http.ResponseWriter, req *http.
 		"#edit=/projects/"+env.Project+"/environments/"+env.ID+"/settings",
 	)
 
-	h.store.environments[env.ID] = env
+	h.environments[env.ID] = env
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"_embedded": map[string]any{"entity": settings},
 	})
@@ -124,12 +124,12 @@ func (h *Handler) handleDeployEnvironment(w http.ResponseWriter, req *http.Reque
 }
 
 func (h *Handler) handleGetCurrentDeployment(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	environmentID := chi.URLParam(req, "environment_id")
 	var d *Deployment
-	for _, e := range h.store.environments {
+	for _, e := range h.environments {
 		if e.Project == projectID && e.ID == environmentID {
 			d = e.currentDeployment
 		}
@@ -162,12 +162,12 @@ func (h *Handler) handleCreateBackup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (h *Handler) handleListBackups(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	environmentID := chi.URLParam(req, "environment_id")
 	var backups []*Backup
-	if projectBackups, ok := h.store.projectBackups[projectID]; ok {
+	if projectBackups, ok := h.projectBackups[projectID]; ok {
 		for _, b := range projectBackups {
 			if b.EnvironmentID == environmentID {
 				backups = append(backups, b)

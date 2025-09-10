@@ -11,21 +11,21 @@ import (
 )
 
 func (h *Handler) handleListProjectVariables(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
-	variables := h.store.projectVariables[projectID]
+	variables := h.projectVariables[projectID]
 	// Sort variables in descending order by created date.
 	slices.SortFunc(variables, func(a, b *Variable) int { return -timeCompare(a.CreatedAt, b.CreatedAt) })
 	_ = json.NewEncoder(w).Encode(variables)
 }
 
 func (h *Handler) handleGetProjectVariable(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	variableName, _ := url.PathUnescape(chi.URLParam(req, "name"))
-	for _, v := range h.store.projectVariables[projectID] {
+	for _, v := range h.projectVariables[projectID] {
 		if variableName == v.Name {
 			_ = json.NewEncoder(w).Encode(v)
 			return
@@ -35,8 +35,8 @@ func (h *Handler) handleGetProjectVariable(w http.ResponseWriter, req *http.Requ
 }
 
 func (h *Handler) handleCreateProjectVariable(w http.ResponseWriter, req *http.Request) {
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 
 	projectID := chi.URLParam(req, "project_id")
 
@@ -52,17 +52,17 @@ func (h *Handler) handleCreateProjectVariable(w http.ResponseWriter, req *http.R
 		"#edit=/projects/"+projectID+"/variables/"+newVar.Name,
 	)
 
-	for _, v := range h.store.projectVariables[projectID] {
+	for _, v := range h.projectVariables[projectID] {
 		if newVar.Name == v.Name {
 			w.WriteHeader(http.StatusConflict)
 			return
 		}
 	}
 
-	if h.store.projectVariables[projectID] == nil {
-		h.store.projectVariables = make(map[string][]*Variable)
+	if h.projectVariables[projectID] == nil {
+		h.projectVariables = make(map[string][]*Variable)
 	}
-	h.store.projectVariables[projectID] = append(h.store.projectVariables[projectID], &newVar)
+	h.projectVariables[projectID] = append(h.projectVariables[projectID], &newVar)
 
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"_embedded": map[string]any{"entity": newVar},
@@ -70,13 +70,13 @@ func (h *Handler) handleCreateProjectVariable(w http.ResponseWriter, req *http.R
 }
 
 func (h *Handler) handlePatchProjectVariable(w http.ResponseWriter, req *http.Request) {
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 
 	projectID := chi.URLParam(req, "project_id")
 	variableName, _ := url.PathUnescape(chi.URLParam(req, "name"))
 	var key = -1
-	for k, v := range h.store.projectVariables[projectID] {
+	for k, v := range h.projectVariables[projectID] {
 		if v.Name == variableName {
 			key = k
 			break
@@ -85,35 +85,35 @@ func (h *Handler) handlePatchProjectVariable(w http.ResponseWriter, req *http.Re
 	if key == -1 {
 		w.WriteHeader(http.StatusNotFound)
 	}
-	patched := *h.store.projectVariables[projectID][key]
+	patched := *h.projectVariables[projectID][key]
 	err := json.NewDecoder(req.Body).Decode(&patched)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	patched.UpdatedAt = time.Now()
-	h.store.projectVariables[projectID][key] = &patched
+	h.projectVariables[projectID][key] = &patched
 	_ = json.NewEncoder(w).Encode(&patched)
 }
 
 func (h *Handler) handleListEnvLevelVariables(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	environmentID, _ := url.PathUnescape(chi.URLParam(req, "environment_id"))
-	variables := h.store.envLevelVariables[projectID][environmentID]
+	variables := h.envLevelVariables[projectID][environmentID]
 	// Sort variables in descending order by created date.
 	slices.SortFunc(variables, func(a, b *EnvLevelVariable) int { return -timeCompare(a.CreatedAt, b.CreatedAt) })
 	_ = json.NewEncoder(w).Encode(variables)
 }
 
 func (h *Handler) handleGetEnvLevelVariable(w http.ResponseWriter, req *http.Request) {
-	h.store.RLock()
-	defer h.store.RUnlock()
+	h.RLock()
+	defer h.RUnlock()
 	projectID := chi.URLParam(req, "project_id")
 	environmentID, _ := url.PathUnescape(chi.URLParam(req, "environment_id"))
 	variableName, _ := url.PathUnescape(chi.URLParam(req, "name"))
-	for _, v := range h.store.envLevelVariables[projectID][environmentID] {
+	for _, v := range h.envLevelVariables[projectID][environmentID] {
 		if variableName == v.Name {
 			_ = json.NewEncoder(w).Encode(v)
 			return
@@ -123,8 +123,8 @@ func (h *Handler) handleGetEnvLevelVariable(w http.ResponseWriter, req *http.Req
 }
 
 func (h *Handler) handleCreateEnvLevelVariable(w http.ResponseWriter, req *http.Request) {
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 
 	projectID := chi.URLParam(req, "project_id")
 	environmentID, _ := url.PathUnescape(chi.URLParam(req, "environment_id"))
@@ -141,21 +141,21 @@ func (h *Handler) handleCreateEnvLevelVariable(w http.ResponseWriter, req *http.
 		"#edit=/projects/"+projectID+"/environments/"+environmentID+"/variables/"+newVar.Name,
 	)
 
-	for _, v := range h.store.envLevelVariables[projectID][environmentID] {
+	for _, v := range h.envLevelVariables[projectID][environmentID] {
 		if newVar.Name == v.Name {
 			w.WriteHeader(http.StatusConflict)
 			return
 		}
 	}
 
-	if h.store.envLevelVariables == nil {
-		h.store.envLevelVariables = make(map[string]map[string][]*EnvLevelVariable)
+	if h.envLevelVariables == nil {
+		h.envLevelVariables = make(map[string]map[string][]*EnvLevelVariable)
 	}
-	if h.store.envLevelVariables[projectID] == nil {
-		h.store.envLevelVariables[projectID] = make(map[string][]*EnvLevelVariable)
+	if h.envLevelVariables[projectID] == nil {
+		h.envLevelVariables[projectID] = make(map[string][]*EnvLevelVariable)
 	}
-	h.store.envLevelVariables[projectID][environmentID] = append(
-		h.store.envLevelVariables[projectID][environmentID],
+	h.envLevelVariables[projectID][environmentID] = append(
+		h.envLevelVariables[projectID][environmentID],
 		&newVar,
 	)
 
@@ -165,13 +165,13 @@ func (h *Handler) handleCreateEnvLevelVariable(w http.ResponseWriter, req *http.
 }
 
 func (h *Handler) handlePatchEnvLevelVariable(w http.ResponseWriter, req *http.Request) {
-	h.store.Lock()
-	defer h.store.Unlock()
+	h.Lock()
+	defer h.Unlock()
 	projectID := chi.URLParam(req, "project_id")
 	environmentID, _ := url.PathUnescape(chi.URLParam(req, "environment_id"))
 	variableName, _ := url.PathUnescape(chi.URLParam(req, "name"))
 	var key = -1
-	for k, v := range h.store.envLevelVariables[projectID][environmentID] {
+	for k, v := range h.envLevelVariables[projectID][environmentID] {
 		if variableName == v.Name {
 			key = k
 			break
@@ -180,13 +180,13 @@ func (h *Handler) handlePatchEnvLevelVariable(w http.ResponseWriter, req *http.R
 	if key == -1 {
 		w.WriteHeader(http.StatusNotFound)
 	}
-	patched := *h.store.envLevelVariables[projectID][environmentID][key]
+	patched := *h.envLevelVariables[projectID][environmentID][key]
 	err := json.NewDecoder(req.Body).Decode(&patched)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	patched.UpdatedAt = time.Now()
-	h.store.envLevelVariables[projectID][environmentID][key] = &patched
+	h.envLevelVariables[projectID][environmentID][key] = &patched
 	_ = json.NewEncoder(w).Encode(&patched)
 }

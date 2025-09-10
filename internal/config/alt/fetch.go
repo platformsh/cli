@@ -19,6 +19,8 @@ import (
 // needing to know the whole schema, and to preserve comments. A comment and some
 // metadata are added to the cnfNode. A "cnfStruct" is also returned to allow
 // reading some keys.
+//
+//nolint:gocritic // The "importShadow" rule complains about the url parameter.
 func FetchConfig(ctx context.Context, url string) (cnfNode *yaml.Node, cnfStruct *config.Config, err error) {
 	if err := validateConfigURL(url); err != nil {
 		return nil, nil, err
