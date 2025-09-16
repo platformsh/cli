@@ -88,9 +88,9 @@ release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Rel
 	VERSION=$(VERSION) bash cloudsmith.sh
 
 .PHONY: test
+# "We encourage users of encoding/json to test their programs with GOEXPERIMENT=jsonv2 enabled" (https://tip.golang.org/doc/go1.25)
 test: ## Run unit tests
-	go clean -testcache
-	go test -v -race -mod=readonly -cover ./...
+	GOEXPERIMENT=jsonv2 go test -v -race -cover -count=1 ./...
 
 .PHONY: lint
 lint: lint-gomod lint-golangci ## Run linters.
