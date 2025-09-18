@@ -83,7 +83,7 @@ func innerConvertConfigCommand(cnf *config.Config) Command {
 }
 
 // newConvertConfigCommand creates the cobra command for converting config.
-func newConvertConfigCommand() *cobra.Command {
+func newConvertConfigCommand(cnf *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "project:convert",
 		Short:   "Generate locally Upsun configuration from another provider",
@@ -99,6 +99,10 @@ func newConvertConfigCommand() *cobra.Command {
 	)
 
 	viper.BindPFlag("provider", cmd.Flags().Lookup("provider"))
+	cmd.SetHelpFunc(func(_ *cobra.Command, _ []string) {
+		internalCmd := innerConvertConfigCommand(cnf)
+		fmt.Println(internalCmd.HelpPage(cnf))
+	})
 	return cmd
 }
 

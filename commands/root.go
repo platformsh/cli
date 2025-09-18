@@ -144,12 +144,6 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		fmt.Println(internalCmd.HelpPage(cnf))
 	})
 
-	convertCommand := newConvertConfigCommand()
-	convertCommand.SetHelpFunc(func(_ *cobra.Command, _ []string) {
-		internalCmd := innerConvertConfigCommand(cnf)
-		fmt.Println(internalCmd.HelpPage(cnf))
-	})
-
 	// Add subcommands.
 	cmd.AddCommand(
 		newConfigInstallCommand(),
@@ -159,8 +153,10 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		projectInitCmd,
 		validateCmd,
 		versionCommand,
-		convertCommand,
 	)
+	if cnf.Service.ProjectConfigFlavor == "upsun" {
+		cmd.AddCommand(newConvertConfigCommand(cnf))
+	}
 
 	//nolint:errcheck
 	viper.BindPFlags(cmd.PersistentFlags())
