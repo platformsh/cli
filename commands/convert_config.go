@@ -36,7 +36,7 @@ func innerConvertConfigCommand(cnf *config.Config) Command {
 			Command:   "convert",
 		},
 		Usage: []string{
-			cnf.Application.Executable + " project:convert",
+			cnf.Application.Executable + " convert",
 		},
 		Aliases: []string{
 			"convert",
@@ -159,7 +159,7 @@ func runPlatformShConvert(cmd *cobra.Command) error {
 	readers.RemoveAllEntry(&metaConfig.Applications, "disk")
 
 	upsunDir := filepath.Join(cwd, ".upsun")
-	if err := os.MkdirAll(upsunDir, os.ModeDir); err != nil {
+	if err := os.MkdirAll(upsunDir, os.ModePerm); err != nil {
 		return fmt.Errorf("could not create .upsun directory: %w", err)
 	}
 
