@@ -1,4 +1,5 @@
 # GoReleaser configuration for the ${VENDOR_NAME} CLI.
+version: 2
 project_name: ${VENDOR_BINARY}
 
 before:
@@ -47,18 +48,18 @@ builds:
       - -s -w
       - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
       - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
-      - -X "github.com/platformsh/cli/commands.version={{.Version}}"
-      - -X "github.com/platformsh/cli/commands.commit={{.Commit}}"
-      - -X "github.com/platformsh/cli/commands.date={{.Date}}"
-      - -X "github.com/platformsh/cli/commands.vendor=${VENDOR_BINARY}"
-      - -X "github.com/platformsh/cli/commands.builtBy=goreleaser"
+      - -X "github.com/platformsh/cli/internal/config.Version={{.Version}}"
+      - -X "github.com/platformsh/cli/internal/config.Commit={{.Commit}}"
+      - -X "github.com/platformsh/cli/internal/config.Date={{.Date}}"
+      - -X "github.com/platformsh/cli/internal/config.Vendor=${VENDOR_BINARY}"
+      - -X "github.com/platformsh/cli/internal/config.BuiltBy=goreleaser"
     main: ./cmd/platform
 
 checksum:
   name_template: checksums.txt
 
 snapshot:
-  name_template: '{{ incpatch .Version }}-{{ .Now.Format "2006-01-02" }}-{{ .ShortCommit }}-next'
+  version_template: '{{ incpatch .Version }}-{{ .Now.Format "2006-01-02" }}-{{ .ShortCommit }}-next'
 
 universal_binaries:
   - id: ${VENDOR_BINARY}-macos
@@ -72,7 +73,7 @@ archives:
       - completion/*
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
 
 nfpms:
   - homepage: https://docs.upsun.com/anchors/fixed/cli/
@@ -81,7 +82,7 @@ nfpms:
     maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
     license: MIT
     vendor: Platform.sh
-    builds:
+    ids:
       - ${VENDOR_BINARY}
     formats:
       - apk

@@ -22,7 +22,7 @@ variables:
 
 unit-test-lint:
   stage: check
-  image: cimg/go:1.22
+  image: cimg/go:1.25
   extends: .go-cache
   script:
     # Fake some files to avoid the compiler or "typecheck" linter complaining about a missing embedded file.
@@ -116,7 +116,7 @@ build-php-macos-x86:
 
 build:
   stage: build
-  image: cimg/go:1.22
+  image: cimg/go:1.25
   extends: .go-cache
   script:
     - make single

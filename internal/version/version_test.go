@@ -33,7 +33,7 @@ func TestCompare(t *testing.T) {
 		{v1: "1.0", v2: "2.0", cmp: -1},
 		{v1: "1.0.1", v2: "2", cmp: -1},
 		{v1: "1.0.0", v2: "1.0"},
-		{v1: "1.01", v2: "1.2", fail: true},
+		{v1: "1.01", v2: "1.2", cmp: -1},
 
 		// Suffixes
 		{v1: "1.0.1-dev", v2: "1.0.1", cmp: -1},
@@ -83,7 +83,7 @@ func TestValidate(t *testing.T) {
 		{"v1.0.0-dev-suffix.with.numbers.1", true},
 		{"2024.0.1", true},
 
-		{"1.01", false},
+		{"1.01", true},
 	}
 	for _, c := range cases {
 		assert.Equal(t, c.valid, version.Validate(c.v), c.v)

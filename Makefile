@@ -1,5 +1,5 @@
 PHP_VERSION = 8.2.29
-LEGACY_CLI_VERSION = 4.24.0
+LEGACY_CLI_VERSION = 4.25.0
 
 GORELEASER_ID ?= platform
 
@@ -24,7 +24,7 @@ PHP_BINARY_PATH := internal/legacy/archives/php_$(GOOS)_$(GOARCH)
 VERSION := $(shell git describe --always)
 
 # Tooling versions
-GORELEASER_VERSION=v1.26
+GORELEASER_VERSION=v2.12.0
 
 internal/legacy/archives/platform.phar:
 	curl -L https://github.com/platformsh/legacy-cli/releases/download/v$(LEGACY_CLI_VERSION)/platform.phar -o internal/legacy/archives/platform.phar
@@ -68,7 +68,7 @@ php: $(PHP_BINARY_PATH)
 
 .PHONY: goreleaser
 goreleaser:
-	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser@$(GORELEASER_VERSION)
+	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser/v2@$(GORELEASER_VERSION)
 
 .PHONY: single
 single: goreleaser internal/legacy/archives/platform.phar php ## Build a single target release for Platform.sh or Upsun
@@ -88,13 +88,22 @@ release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Rel
 	VERSION=$(VERSION) bash cloudsmith.sh
 
 .PHONY: test
+# "We encourage users of encoding/json to test their programs with GOEXPERIMENT=jsonv2 enabled" (https://tip.golang.org/doc/go1.25)
 test: ## Run unit tests
-	go clean -testcache
-	go test -v -race -mod=readonly -cover ./...
+	GOEXPERIMENT=jsonv2 go test -v -race -cover -count=1 ./...
 
 .PHONY: lint
-lint: ## Run linter
-	golangci-lint run --timeout=5m --verbose
+lint: lint-gomod lint-golangci ## Run linters.
+
+.PHONY: lint-gomod
+lint-gomod:
+ifneq ($(shell go mod tidy -v 2>/dev/stdout | tee /dev/stderr | grep -c 'unused '),0)
+	@false
+endif
+
+.PHONY: lint-golangci
+lint-golangci:
+	golangci-lint run --timeout=2m
 
 .goreleaser.vendor.yaml: check-vendor ## Generate the goreleaser vendor config
 	cat .goreleaser.vendor.yaml.tpl | envsubst > .goreleaser.vendor.yaml

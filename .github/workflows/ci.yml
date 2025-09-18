@@ -20,7 +20,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.22
+          go-version: 1.25
 
       - name: Create fake PHP and .phar files
         run: |
@@ -34,7 +34,10 @@ jobs:
           touch internal/legacy/archives/php_darwin_arm64
           touch internal/config/embedded-config.yaml
 
-      - name: Run linter
+      - name: Run lint-gomod
+        run: make lint-gomod
+
+      - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.4
