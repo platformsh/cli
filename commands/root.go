@@ -155,7 +155,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		versionCommand,
 	)
 	if cnf.Service.ProjectConfigFlavor == "upsun" {
-		cmd.AddCommand(newConvertConfigCommand(cnf))
+		cmd.AddCommand(newProjectConvertCommand(cnf))
 	}
 
 	//nolint:errcheck

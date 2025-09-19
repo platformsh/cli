@@ -20,8 +20,8 @@ import (
 	"github.com/platformsh/cli/internal/config"
 )
 
-// innerConvertConfigCommand returns the Command struct for the convert config command.
-func innerConvertConfigCommand(cnf *config.Config) Command {
+// innerProjectConvertCommand returns the Command struct for the convert config command.
+func innerProjectConvertCommand(cnf *config.Config) Command {
 	noInteractionOption := NoInteractionOption(cnf)
 	providerOption := Option{
 		Name:            "--provider",
@@ -83,13 +83,13 @@ func innerConvertConfigCommand(cnf *config.Config) Command {
 	}
 }
 
-// newConvertConfigCommand creates the cobra command for converting config.
-func newConvertConfigCommand(cnf *config.Config) *cobra.Command {
+// newProjectConvertCommand creates the cobra command for converting config.
+func newProjectConvertCommand(cnf *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "project:convert",
 		Short:   "Generate locally Upsun configuration from another provider",
 		Aliases: []string{"convert"},
-		RunE:    runConvertConfig,
+		RunE:    runProjectConvert,
 	}
 
 	cmd.Flags().StringP(
@@ -101,14 +101,14 @@ func newConvertConfigCommand(cnf *config.Config) *cobra.Command {
 
 	_ = viper.BindPFlag("provider", cmd.Flags().Lookup("provider"))
 	cmd.SetHelpFunc(func(_ *cobra.Command, _ []string) {
-		internalCmd := innerConvertConfigCommand(cnf)
+		internalCmd := innerProjectConvertCommand(cnf)
 		fmt.Println(internalCmd.HelpPage(cnf))
 	})
 	return cmd
 }
 
-// runConvertConfig is the entry point for the convert config command.
-func runConvertConfig(cmd *cobra.Command, _ []string) error {
+// runProjectConvert is the entry point for the convert config command.
+func runProjectConvert(cmd *cobra.Command, _ []string) error {
 	if viper.GetString("provider") != "platformsh" {
 		return fmt.Errorf("only the 'platformsh' provider is currently supported")
 	}
