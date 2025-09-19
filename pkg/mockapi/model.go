@@ -162,6 +162,7 @@ type Deployment struct {
 
 type Org struct {
 	ID           string   `json:"id"`
+	Type         string   `json:"type"`
 	Name         string   `json:"name"`
 	Label        string   `json:"label"`
 	Owner        string   `json:"owner_id"`
@@ -172,6 +173,7 @@ type Org struct {
 func (o *Org) AsRef() *OrgRef {
 	return &OrgRef{
 		ID:    o.ID,
+		Type:  o.Type,
 		Name:  o.Name,
 		Label: o.Label,
 		Owner: o.Owner,
@@ -180,6 +182,7 @@ func (o *Org) AsRef() *OrgRef {
 
 type OrgRef struct {
 	ID    string `json:"id"`
+	Type  string `json:"type"`
 	Name  string `json:"name"`
 	Label string `json:"label"`
 	Owner string `json:"owner_id"`
