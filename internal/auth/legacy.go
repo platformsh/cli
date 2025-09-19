@@ -101,8 +101,6 @@ func (ts *legacyCLITokenSource) Token() (*oauth2.Token, error) {
 }
 
 func NewLegacyCLITokenSource(ctx context.Context, wrapper *legacy.CLIWrapper) (oauth2.TokenSource, error) {
-	wrapper.ForceColor = true
-	wrapper.DisableInteraction = true
 	return &legacyCLITokenSource{
 		ctx:     ctx,
 		wrapper: wrapper,

@@ -65,6 +65,9 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 					cmd.SetErr(color.Error)
 				}
 			}
+			if viper.GetBool("yes") {
+				viper.Set("no-interaction", true)
+			}
 			if viper.GetBool("version") {
 				versionCommand.Run(cmd, []string{})
 				os.Exit(0)
@@ -123,18 +126,12 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 	cmd.PersistentFlags().BoolP("version", "V", false, fmt.Sprintf("Displays the %s version", cnf.Application.Name))
 	cmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
 	cmd.PersistentFlags().Bool("no-interaction", false, "Enable non-interactive mode")
-	cmd.PersistentFlags().BoolP("yes", "y", false, "Assume 'yes' to all prompts")
+	cmd.PersistentFlags().BoolP("yes", "y", false, "Answer yes to all confirmation questions; implies --no-interaction")
 	cmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
 	cmd.PersistentFlags().BoolP("quiet", "q", false,
 		"Suppress any messages and errors (stderr), while continuing to display necessary output (stdout)."+
 			" This implies --no-interaction. Ignored in verbose mode.",
 	)
-
-	projectInitCmd := commands.NewPlatformifyCmd(assets)
-	projectInitCmd.SetHelpFunc(func(_ *cobra.Command, _ []string) {
-		internalCmd := innerProjectInitCommand(cnf)
-		fmt.Println(internalCmd.HelpPage(cnf))
-	})
 
 	validateCmd := commands.NewValidateCommand(assets)
 	validateCmd.Use = "app:config-validate"
@@ -149,8 +146,8 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		newConfigInstallCommand(),
 		newCompletionCommand(cnf),
 		newHelpCommand(cnf),
+		newInitCommand(cnf, assets),
 		newListCommand(cnf),
-		projectInitCmd,
 		validateCmd,
 		versionCommand,
 	)

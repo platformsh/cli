@@ -25,22 +25,58 @@ func innerProjectInitCommand(cnf *config.Config) Command {
 			Command:   "init",
 		},
 		Usage: []string{
-			cnf.Application.Executable + " project:init",
+			cnf.Application.Executable + " init",
 		},
 		Aliases: []string{
-			"ify",
+			"init", "ify",
 		},
 		Description: "Initialize a project",
-		Help:        "",
+		Help:        CleanString(initCommandHelp(cnf, false)),
 		Examples: []Example{
 			{
 				Commandline: "",
-				Description: "Create the starter YAML files for your project",
+				Description: "Create the starter YAML file(s) for your project",
+			},
+			{
+				Commandline: "--ai=false",
+				Description: "Disable AI mode",
+			},
+			{
+				Commandline: "--ai --context='Use PostgreSQL for the database'",
+				Description: "Add context for AI configuration",
 			},
 		},
 		Definition: Definition{
 			Arguments: &orderedmap.OrderedMap[string, Argument]{},
 			Options: orderedmap.New[string, Option](orderedmap.WithInitialData[string, Option](
+				orderedmap.Pair[string, Option]{
+					Key: "ai",
+					Value: Option{
+						Name:        "--ai",
+						AcceptValue: true,
+						Description: "Use AI configuration",
+						Default:     Any{any: false},
+					},
+				},
+				orderedmap.Pair[string, Option]{
+					Key: "context",
+					Value: Option{
+						Name:            "--context",
+						AcceptValue:     true,
+						IsValueRequired: true,
+						Description:     "Add extra context for AI configuration",
+						Default:         Any{any: ""},
+					},
+				},
+				orderedmap.Pair[string, Option]{
+					Key: "digest",
+					Value: Option{
+						Name:        "--digest",
+						AcceptValue: false,
+						Description: "Only show the repository digest (the AI configuration input), without sending it",
+						Default:     Any{any: false},
+					},
+				},
 				orderedmap.Pair[string, Option]{
 					Key:   HelpOption.GetName(),
 					Value: HelpOption,
@@ -143,6 +179,12 @@ type Command struct {
 	Hidden      bool        `json:"hidden"`
 }
 
+// indentLines adds a number of spaces to each line of the given text.
+func indentLines(text string, n int) string {
+	indent := strings.Repeat(" ", n)
+	return indent + strings.ReplaceAll(text, "\n", "\n"+indent)
+}
+
 func (c *Command) HelpPage(cnf *config.Config) string {
 	var b bytes.Buffer
 	writer := tabwriter.NewWriter(&b, 0, 8, 1, ' ', 0)
@@ -181,15 +223,19 @@ func (c *Command) HelpPage(cnf *config.Config) string {
 	}
 	if c.Help != "" {
 		fmt.Fprintln(writer, color.YellowString("Help:"))
-		fmt.Fprintln(writer, " "+c.Help)
+		fmt.Fprintln(writer, indentLines(c.Help.String(), 1))
 		fmt.Fprintln(writer, "")
 	}
 	if len(c.Examples) > 0 {
 		fmt.Fprintln(writer, color.YellowString("Examples:"))
 		for _, example := range c.Examples {
-			fmt.Fprintln(writer, " "+example.Description.String()+":")
+			fmt.Fprintln(writer, indentLines(example.Description.String()+":", 1))
+			usage := cnf.Application.Executable + " " + c.Name.String()
+			if len(c.Usage) > 0 {
+				usage = c.Usage[0]
+			}
 			fmt.Fprintln(writer,
-				color.GreenString(fmt.Sprintf("   %s %s %s", cnf.Application.Executable, c.Name.String(), example.Commandline)))
+				color.GreenString(fmt.Sprintf("   %s %s", usage, example.Commandline)))
 			fmt.Fprintln(writer, "")
 		}
 	}
