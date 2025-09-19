@@ -56,6 +56,9 @@ api:
   auth_url: "https://auth.upsun.com"
   oauth2_client_id: "upsun-cli"
 
+  organization_types: [flexible, fixed]
+  default_organization_type: flexible
+
   organizations: true
   user_verification: true
   metrics: true
