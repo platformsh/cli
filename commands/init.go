@@ -66,7 +66,7 @@ func initCommandHelp(cnf *config.Config, short bool) string {
 	bold := color.New(color.Bold)
 	fmt.Fprintf(&s,
 		"This command will generate a %s that you can build on.\n", bold.Sprint("starter configuration"))
-	fmt.Fprintln(&s, "You can use AI, or follow a step-by-step questionnaire.")
+	fmt.Fprintln(&s, "You can use AI, or follow a step-by-step setup guide.")
 
 	fmt.Fprintln(&s, "\nUsing AI will send a sanitized repository digest to OpenAI for automated analysis.")
 
@@ -154,7 +154,7 @@ func runInitCommand(
 
 		res, err := choose(stderr, "How would you like to configure your project?", []string{
 			"With AI (automatic)",
-			"Without AI (questionnaire)",
+			"Without AI (guided)",
 		})
 		if err != nil {
 			return err
