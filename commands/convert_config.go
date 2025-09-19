@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/platformsh/cli/internal/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/symfony-cli/terminal"
@@ -17,6 +16,8 @@ import (
 	utils "github.com/upsun/lib-sun/utility"
 	"github.com/upsun/lib-sun/writers"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
+
+	"github.com/platformsh/cli/internal/config"
 )
 
 // innerConvertConfigCommand returns the Command struct for the convert config command.
@@ -98,7 +99,7 @@ func newConvertConfigCommand(cnf *config.Config) *cobra.Command {
 		"The provider from which to convert the configuration. Currently, only 'platformsh' is supported.",
 	)
 
-	viper.BindPFlag("provider", cmd.Flags().Lookup("provider"))
+	_ = viper.BindPFlag("provider", cmd.Flags().Lookup("provider"))
 	cmd.SetHelpFunc(func(_ *cobra.Command, _ []string) {
 		internalCmd := innerConvertConfigCommand(cnf)
 		fmt.Println(internalCmd.HelpPage(cnf))
@@ -107,7 +108,7 @@ func newConvertConfigCommand(cnf *config.Config) *cobra.Command {
 }
 
 // runConvertConfig is the entry point for the convert config command.
-func runConvertConfig(cmd *cobra.Command, args []string) error {
+func runConvertConfig(cmd *cobra.Command, _ []string) error {
 	if viper.GetString("provider") != "platformsh" {
 		return fmt.Errorf("only the 'platformsh' provider is currently supported")
 	}

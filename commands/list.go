@@ -55,7 +55,8 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 
 			appConfigConvertCommand := innerConvertConfigCommand(cnf)
 
-			if cnf.Service.ProjectConfigFlavor == "upsun" && (!list.DescribesNamespace() || list.Namespace == appConfigConvertCommand.Name.Namespace) {
+			if cnf.Service.ProjectConfigFlavor == "upsun" &&
+				(!list.DescribesNamespace() || list.Namespace == appConfigConvertCommand.Name.Namespace) {
 				list.AddCommand(&appConfigConvertCommand)
 			}
 
