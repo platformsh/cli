@@ -138,7 +138,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 
 	validateCmd := commands.NewValidateCommand(assets)
 	validateCmd.Use = "app:config-validate"
-	validateCmd.Aliases = []string{"validate"}
+	validateCmd.Aliases = []string{"validate", "lint"}
 	validateCmd.SetHelpFunc(func(_ *cobra.Command, _ []string) {
 		internalCmd := innerAppConfigValidateCommand(cnf)
 		fmt.Println(internalCmd.HelpPage(cnf))

@@ -80,6 +80,7 @@ func innerAppConfigValidateCommand(cnf *config.Config) Command {
 		},
 		Aliases: []string{
 			"validate",
+			"lint",
 		},
 		Description: "Validate the config files of a project",
 		Help:        "",
