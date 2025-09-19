@@ -14,6 +14,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/symfony-cli/terminal v1.0.7
+	github.com/upsun/lib-sun v0.3.16
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	golang.org/x/crypto v0.42.0
 	golang.org/x/oauth2 v0.31.0
@@ -31,6 +32,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
+	github.com/getsentry/sentry-go v0.28.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect

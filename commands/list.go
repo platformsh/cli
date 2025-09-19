@@ -53,6 +53,13 @@ func newListCommand(cnf *config.Config) *cobra.Command {
 				list.AddCommand(&appConfigValidateCommand)
 			}
 
+			appProjectConvertCommand := innerProjectConvertCommand(cnf)
+
+			if cnf.Service.ProjectConfigFlavor == "upsun" &&
+				(!list.DescribesNamespace() || list.Namespace == appProjectConvertCommand.Name.Namespace) {
+				list.AddCommand(&appProjectConvertCommand)
+			}
+
 			format := viper.GetString("format")
 			raw := viper.GetBool("raw")
 

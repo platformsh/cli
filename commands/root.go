@@ -123,6 +123,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 	cmd.PersistentFlags().BoolP("version", "V", false, fmt.Sprintf("Displays the %s version", cnf.Application.Name))
 	cmd.PersistentFlags().Bool("debug", false, "Enable debug logging")
 	cmd.PersistentFlags().Bool("no-interaction", false, "Enable non-interactive mode")
+	cmd.PersistentFlags().BoolP("yes", "y", false, "Assume 'yes' to all prompts")
 	cmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
 	cmd.PersistentFlags().BoolP("quiet", "q", false,
 		"Suppress any messages and errors (stderr), while continuing to display necessary output (stdout)."+
@@ -153,6 +154,9 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 		validateCmd,
 		versionCommand,
 	)
+	if cnf.Service.ProjectConfigFlavor == "upsun" {
+		cmd.AddCommand(newProjectConvertCommand(cnf))
+	}
 
 	//nolint:errcheck
 	viper.BindPFlags(cmd.PersistentFlags())
