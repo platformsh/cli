@@ -1,149 +1,44 @@
 stages:
-  - check
-  - php
-  - build
-  - integration-test
-  - release
+  - test
 
-.go-cache:
-  variables:
-    GOPATH: $CI_PROJECT_DIR/.go
-  before_script:
-    - mkdir -p .go
-    - export PATH=$PATH:$GOPATH/bin
+image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/cimg/go:1.25
+
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+
+.go-setup:
+  interruptible: true
   cache:
+    key:
+      files:
+        - go.sum
     paths:
-      - .go/pkg/mod/
+      - ${GOMODCACHE}/
+  variables:
+    GOMODCACHE: $CI_PROJECT_DIR/.gomodcache
+  before_script:
+    - mkdir -p ${GOMODCACHE}
 
-variables:
-  DOCKER_HOST: tcp://docker:2375
-  GIT_DEPTH: 10
-  GIT_SUBMODULE_STRATEGY: recursive
+    # Create fake embedded files for lint and test purposes:
+    - mkdir -p internal/legacy/archives
+    - touch internal/legacy/archives/platform.phar
+    - touch internal/legacy/archives/php_windows_amd64
+    - touch internal/legacy/archives/php_linux_amd64
+    - touch internal/legacy/archives/php_linux_arm64
+    - touch internal/legacy/archives/php_darwin_amd64
+    - touch internal/legacy/archives/php_darwin_arm64
+    - touch internal/config/embedded-config.yaml
 
-unit-test-lint:
-  stage: check
-  image: cimg/go:1.25
-  extends: .go-cache
+test:
+  stage: test
+  extends: .go-setup
   script:
-    # Fake some files to avoid the compiler or "typecheck" linter complaining about a missing embedded file.
-    - touch internal/legacy/archives/php_linux_amd64 internal/legacy/archives/platform.phar internal/config/embedded-config.yaml
-    - export PATH=$PATH:$GOPATH/bin
-    - make lint test
+    - go test -v -race -cover ./...
   coverage: '/total:\s+\(statements\)\s+\d+.\d+%/'
 
-build-php-linux-x86:
-  cache:
-    - key:
-        files:
-          - Makefile
-      paths:
-        - internal/legacy/archives/php_linux_amd64
-  stage: php
-  image: docker:20.10-git
-  services:
-    - docker:20.10-dind
-  before_script:
-    - apk add -U make
-    - mkdir -p internal/legacy/archives
-  script:
-    - make php
-  artifacts:
-    paths:
-      - internal/legacy/archives/*
-    expire_in: 1 day
-
-build-php-linux-arm:
-  rules:
-    - if: $CI_COMMIT_TAG
-  stage: php
-  image: docker:20.10-git
-  services:
-    - docker:20.10-dind
-  before_script:
-    - apk add -U make
-    - mkdir -p internal/legacy/archives
-  script:
-    - make php
-  artifacts:
-    paths:
-      - internal/legacy/archives/*
-    expire_in: 1 day
-  tags:
-    - arm-high-cpu
-
-build-php-windows:
-  rules:
-    - if: $CI_COMMIT_TAG
-  stage: php
-  image: docker:20.10-git
-  before_script:
-    - apk add -U make wget
-    - mkdir -p internal/legacy/archives
-  script:
-    - make php GOOS=windows GOARCH=amd64
-  artifacts:
-    paths:
-      - internal/legacy/archives/*
-    expire_in: 1 day
-
-build-php-macos-arm:
-  rules:
-    - if: $CI_COMMIT_TAG
-  stage: php
-  before_script:
-    - export PATH="/opt/homebrew/bin:$PATH"
-  script:
-    - make php
-  artifacts:
-    paths:
-      - internal/legacy/archives/*
-    expire_in: 1 day
-  tags:
-    - macos-arm
-
-build-php-macos-x86:
-  rules:
-    - if: $CI_COMMIT_TAG
-  stage: php
-  script:
-    - make php
-  artifacts:
-    paths:
-      - internal/legacy/archives/*
-    expire_in: 1 day
-  tags:
-    - macos-x86
-
-build:
-  stage: build
-  image: cimg/go:1.25
-  extends: .go-cache
-  script:
-    - make single
-  dependencies:
-    - build-php-linux-x86
-  artifacts:
-    paths:
-      - dist/
-    expire_in: 1 day
-
-release:
-  stage: release
-  rules:
-    - if: $CI_COMMIT_TAG
-  extends: .go-cache
-  script:
-    - export PATH="/opt/homebrew/bin:$PATH"
-    - brew install gon wget
-    - git remote set-url origin https://github.com/platformsh/cli
-    - make release
-  dependencies:
-    - unit-test-lint
-    - integration-test-linux
-    - build-php-linux-arm
-    - build-php-linux-x86
-    - build-php-macos-arm
-    - build-php-macos-x86
-    - build-php-windows
-  tags:
-    - macos-arm
+golangci-lint:
+  stage: test
+  extends: .go-setup
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/golangci/golangci-lint:v2.4
+  script: golangci-lint run --timeout 0 --verbose

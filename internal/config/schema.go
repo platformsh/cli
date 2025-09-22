@@ -53,6 +53,9 @@ type Config struct {
 		OAuth2RevokeURL    string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_revoke_url,omitempty"` // e.g. "https://auth.api.platform.sh/oauth2/revoke"
 		OAuth2TokenURL     string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_token_url,omitempty"`  // e.g. "https://auth.api.platform.sh/oauth2/token"
 		CertifierURL       string `validate:"required_without=AuthURL,omitempty,url" yaml:"certifier_url,omitempty"`     // e.g. "https://ssh.api.platform.sh"
+
+		AIServiceURL        string `validate:"omitempty,url" yaml:"ai_url,omitempty"`    // The AI service URL, e.g. "https://ai.upsun.com".
+		EnableOrganizations bool   `validate:"omitempty" yaml:"organizations,omitempty"` // Whether the "organizations" feature is enabled.
 	} `validate:"required"`
 	Detection struct {
 		GitRemoteName string   `validate:"required" yaml:"git_remote_name"` // e.g. "platform"

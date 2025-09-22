@@ -131,21 +131,9 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 		return err
 	}
 	cmd := c.makeCmd(ctx, args, cacheDir)
-	if c.Stdin != nil {
-		cmd.Stdin = c.Stdin
-	} else {
-		cmd.Stdin = os.Stdin
-	}
-	if c.Stdout != nil {
-		cmd.Stdout = c.Stdout
-	} else {
-		cmd.Stdout = os.Stdout
-	}
-	if c.Stderr != nil {
-		cmd.Stderr = c.Stderr
-	} else {
-		cmd.Stderr = os.Stderr
-	}
+	cmd.Stdin = c.Stdin
+	cmd.Stdout = c.Stdout
+	cmd.Stderr = c.Stderr
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	envPrefix := c.Config.Application.EnvPrefix
 	cmd.Env = append(

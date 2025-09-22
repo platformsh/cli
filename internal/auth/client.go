@@ -10,9 +10,19 @@ import (
 	"github.com/platformsh/cli/internal/legacy"
 )
 
+type LegacyCLIClient struct {
+	HTTPClient  *http.Client
+	tokenSource oauth2.TokenSource
+}
+
+func (c *LegacyCLIClient) EnsureAuthenticated(_ context.Context) error {
+	_, err := c.tokenSource.Token()
+	return err
+}
+
 // NewLegacyCLIClient creates an HTTP client authenticated through the legacy CLI.
 // The wrapper argument must be a dedicated wrapper, not used by other callers.
-func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*http.Client, error) {
+func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*LegacyCLIClient, error) {
 	ts, err := NewLegacyCLITokenSource(ctx, wrapper)
 	if err != nil {
 		return nil, fmt.Errorf("oauth2: create token source: %w", err)
@@ -26,7 +36,8 @@ func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*http.
 	if rt, ok := TransportFromContext(ctx); ok && rt != nil {
 		baseRT = rt
 	}
-	return &http.Client{
+
+	httpClient := &http.Client{
 		Transport: &Transport{
 			refresher: refresher,
 			base: &oauth2.Transport{
@@ -34,5 +45,10 @@ func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*http.
 				Base:   baseRT,
 			},
 		},
+	}
+
+	return &LegacyCLIClient{
+		HTTPClient:  httpClient,
+		tokenSource: ts,
 	}, nil
 }
