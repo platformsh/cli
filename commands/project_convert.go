@@ -2,11 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/symfony-cli/terminal"
@@ -127,8 +127,24 @@ func runPlatformShConvert(cmd *cobra.Command) error {
 		return fmt.Errorf("could not normalize project workspace path: %w", err)
 	}
 
-	// Disable log for lib-sun
-	log.Default().SetOutput(io.Discard)
+	upsunDir := filepath.Join(cwd, ".upsun")
+	configPath := filepath.Join(upsunDir, "config.yaml")
+	stat, err := os.Stat(configPath)
+	if err == nil && !stat.IsDir() {
+		fmt.Fprintln(cmd.ErrOrStderr(), "The file already exists:", color.YellowString(configPath))
+		if !viper.GetBool("yes") {
+			if viper.GetBool("no-interaction") {
+				return fmt.Errorf("use the -y option to overwrite the file")
+			}
+
+			if !terminal.AskConfirmation("Do you want to overwrite it?", true) {
+				return nil
+			}
+		}
+	}
+
+	// Override lib-sun's log output to stderr.
+	log.Default().SetOutput(cmd.ErrOrStderr())
 
 	// Find config files
 	configFiles, err := detector.FindConfig(cwd)
@@ -159,31 +175,16 @@ func runPlatformShConvert(cmd *cobra.Command) error {
 	readers.ReplaceAllEntry(&metaConfig.Applications, "shared", "storage")
 	readers.RemoveAllEntry(&metaConfig.Applications, "disk")
 
-	upsunDir := filepath.Join(cwd, ".upsun")
 	if err := os.MkdirAll(upsunDir, os.ModePerm); err != nil {
 		return fmt.Errorf("could not create .upsun directory: %w", err)
 	}
 
-	configPath := filepath.Join(upsunDir, "config.yaml")
-	stat, err := os.Stat(configPath)
-	if err == nil && !stat.IsDir() {
-		cmd.Printf("The file %v already exists.\n", configPath)
-		if !viper.GetBool("yes") {
-			if viper.GetBool("no-interaction") {
-				return fmt.Errorf("use the -y option to overwrite the file")
-			}
-
-			if !terminal.AskConfirmation("Do you want to overwrite it?", true) {
-				return nil
-			}
-		}
-	}
 	writers.GenerateUpsunConfigFile(metaConfig, configPath)
 
 	// Move extra config
 	utils.TransferConfigCustom(cwd, upsunDir)
 
-	cmd.Println("Your configuration was successfully converted to the Upsun format.")
-	cmd.Printf("Check the generated files in %v\n", upsunDir)
+	fmt.Fprintln(cmd.ErrOrStderr(), "Your configuration was successfully converted to the Upsun format.")
+	fmt.Fprintln(cmd.ErrOrStderr(), "Check the generated files in:", color.GreenString(upsunDir))
 	return nil
 }
