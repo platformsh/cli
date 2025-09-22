@@ -40,14 +40,7 @@ func PlatformshToUpsun(path string, stderr io.Writer) error {
 		}
 	}
 
-	// Disable log for lib-sun
-	log.Default().SetOutput(io.Discard)
-
-	fmt.Fprintln(stderr, "CWD:", cwd)
-	entries, _ := os.ReadDir(cwd)
-	for _, e := range entries {
-		fmt.Fprintln(stderr, e.Name())
-	}
+	log.Default().SetOutput(stderr)
 
 	// Find config files
 	configFiles, err := detector.FindConfig(cwd)
@@ -68,24 +61,30 @@ func PlatformshToUpsun(path string, stderr io.Writer) error {
 	readers.ReadRoutes(&metaConfig, configFiles[entity.PSH_ROUTE])
 
 	// Remove size and resources entries
+	fmt.Fprintln(stderr, "Removing any `size`, `resources` or `disk` keys.")
+	fmt.Fprintln(stderr,
+		"Upsun disk sizes are set using Console or the "+color.GreenString("upsun resources:set")+" command.")
 	readers.RemoveAllEntry(&metaConfig.Services, "size")
 	readers.RemoveAllEntry(&metaConfig.Applications, "size")
 	readers.RemoveAllEntry(&metaConfig.Services, "resources")
 	readers.RemoveAllEntry(&metaConfig.Applications, "resources")
-
-	// Fix storage to match Upsun format
-	readers.ReplaceAllEntry(&metaConfig.Applications, "local", "instance")
-	readers.ReplaceAllEntry(&metaConfig.Applications, "shared", "storage")
 	readers.RemoveAllEntry(&metaConfig.Applications, "disk")
 	readers.RemoveAllEntry(&metaConfig.Services, "disk")
+
+	// Fix storage to match Upsun format
+	fmt.Fprintln(stderr, "Replacing mount types (`local` becomes `instance`, and `shared` becomes `storage`).")
+	readers.ReplaceAllEntry(&metaConfig.Applications, "local", "instance")
+	readers.ReplaceAllEntry(&metaConfig.Applications, "shared", "storage")
 
 	if err := os.MkdirAll(upsunDir, os.ModePerm); err != nil {
 		return fmt.Errorf("could not create .upsun directory: %w", err)
 	}
 
+	fmt.Fprintln(stderr, "Creating combined configuration file.")
 	writers.GenerateUpsunConfigFile(metaConfig, configPath)
 
 	// Move extra config
+	fmt.Fprintln(stderr, "Copying additional files if necessary.")
 	utils.TransferConfigCustom(cwd, upsunDir)
 
 	fmt.Fprintln(stderr, "Your configuration was successfully converted to the Upsun format.")
