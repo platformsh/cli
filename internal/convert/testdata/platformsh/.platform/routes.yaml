@@ -1,0 +1,8 @@
+# This is my default route
+“https://{default}/“:
+    type: upstream
+    upstream: app:http
+# Redirect just...
+“http://{default}“:
+    type: redirect
+    to: “https://{default}/”

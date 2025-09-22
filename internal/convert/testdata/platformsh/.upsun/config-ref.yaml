@@ -1,0 +1,192 @@
+applications:
+    drupal:
+        type: php:8.1
+        source:
+            root: drupal
+        dependencies:
+            php:
+                composer/composer: ^2
+            nodejs:
+                n: "*"
+        variables:
+            env:
+                N_PREFIX: /app/.global
+            php:
+                memory_limit: "256M"
+        runtime:
+            extensions:
+                - redis
+                - newrelic
+                - apcu
+        relationships:
+            database: drupaldb:mysql
+            databox: drupaldb:databox
+            redis: cache:redis
+            auctionssearch: search_solr:auctionssearch
+            databasesearch: search_solr:databasesearch
+            userssearch: search_solr:userssearch
+            orderssearch: search_solr:orderssearch
+            collectionsearch: search_solr:collectionsearch
+        mounts:
+            web/sites/default/files:
+                source: instance
+                source_path: files
+            /tmp:
+                source: instance
+                source_path: tmp
+            /private:
+                source: instance
+                source_path: private
+            /.drush:
+                source: instance
+                source_path: drush
+            /drush-backups:
+                source: instance
+                source_path: drush-backups
+            /.console:
+                source: instance
+                source_path: console
+            /storage:
+                source: instance
+                source_path: storage
+        build:
+            flavor: none
+        hooks:
+            build: |
+                set -e
+                n auto
+                hash -r
+                composer install --no-dev --prefer-dist --no-progress --no-interaction --optimize-autoloader --apcu-autoloader
+                composer dumpautoload -o
+                curl -fsS https://platform.sh/cli/installer | php
+            deploy: |
+                set -e
+                php ./drush/platformsh_generate_drush_yml.php
+                drush -y updatedb
+                drush -y config-import
+                drush -y cache-rebuild
+                drush locale:check
+                drush locale:update
+        web:
+            locations:
+                /:
+                    root: web
+                    expires: 1d
+                    passthru: /index.php
+                    allow: false
+                    headers:
+                        Access-Control-Allow-Origin: "*"
+                    rules:
+                        \.(jpe?g|png|gif|svgz?|css|js|map|ico|bmp|eot|woff2?|otf|ttf|webmanifest)$:
+                            allow: true
+                        ^/robots\.txt:
+                            allow: true
+                        ^/sitemap\.xml$:
+                            allow: true
+                        ^/sites/sites\.php$:
+                            scripts: false
+                        ^/sites/[^/]+/settings.*?\.php$:
+                            scripts: false
+                /sites/default/files:
+                    allow: true
+                    expires: 2w
+                    passthru: /index.php
+                    root: web/sites/default/files
+                    scripts: false
+                    rules:
+                        ^/sites/default/files/(css|js):
+                            expires: 2w
+        crons:
+            drupal:
+                spec: '*/5 * * * *'
+                cmd: drush core-cron
+            backup:
+                spec: '0 5 * * *'
+                cmd: |
+                    if [ "$PLATFORM_ENVIRONMENT_TYPE" = production ]; then
+                        platform backup:create --yes --no-wait
+                    fi
+        workers:
+            queues:
+                commands:
+                    start: php worker.php
+    app2:
+        type: php:8.1
+        source:
+            root: app2
+    app:
+        # Runtime pre-install
+        type: 'php:8.2'
+        dependencies:
+            php:
+                composer/composer: "^2"
+        # vHost config
+        web:
+            locations:
+                "/":
+                    root: "public"
+                    passthru: "/index.php"
+                    allow: true
+                    scripts: true
+        relationships:
+            database: "mysql:mysql"
+        variables:
+            env:
+                CI_ENVIRONMENT: "production"
+        # RW fs !!
+        mounts:
+            "writable/cache":
+                source: instance
+                source_path: "writable/cache"
+            "writable/debugbar": {source: instance, source_path: "writable/debugbar"}
+            "writable/logs":
+                source: instance
+                source_path: "writable/logs"
+            "writable/session":
+                source: instance
+                source_path: "writable/session"
+            "writable/upload":
+                source: instance
+                source_path: "writable/upload"
+            "config":
+                source: instance
+                source_path: "config"
+        # Custom commands
+        hooks:
+            build: |
+                set -e
+                composer install --no-dev --optimize-autoloader
+            deploy: |
+                set -e
+                php generate_env.php
+        source:
+            operations:
+                auto-update:
+                    command: |
+                        curl -fsS https://raw.githubusercontent.com/platformsh/source-operations/main/setup.sh | { bash /dev/fd/3 sop-autoupdate; } 3<&0
+            root: /
+services:
+    sqldb:
+        # (https://docs.platform.sh/configuration/services/mysql.html#supported-versions)
+        type: mysql:10.5
+    timedb:
+        # (https://docs.platform.sh/configuration/services/influxdb.html#supported-versions)
+        type: influxdb:1.8
+    searchelastic:
+        # (https://docs.platform.sh/configuration/services/elasticsearch.html#supported-versions)
+        type: elasticsearch:7.10
+    queuerabbit:
+        # (https://docs.platform.sh/configuration/services/rabbitmq.html#supported-versions)
+        type: rabbitmq:3.8
+    headlessbrowser:
+        # (https://docs.platform.sh/configuration/services/headless-chrome.html#supported-versions)
+        type: chrome-headless:91
+routes:
+    # This is my default route
+    “https://{default}/“:
+        type: upstream
+        upstream: app:http
+    # Redirect just...
+    “http://{default}“:
+        type: redirect
+        to: “https://{default}/”

@@ -1,0 +1,35 @@
+sqldb:
+    # (https://docs.platform.sh/configuration/services/mysql.html#supported-versions)
+    type: mysql:10.5
+    disk: 1024
+    size: M
+
+timedb:
+    # (https://docs.platform.sh/configuration/services/influxdb.html#supported-versions)
+    type: influxdb:1.8
+    disk: 1024
+
+searchelastic:
+    # (https://docs.platform.sh/configuration/services/elasticsearch.html#supported-versions)
+    type: elasticsearch:7.10
+    size: AUTO
+    disk: 9216
+    resources:
+        base_memory: 512
+        memory_ratio: 512
+
+queuerabbit:
+    # (https://docs.platform.sh/configuration/services/rabbitmq.html#supported-versions)
+    type: rabbitmq:3.8
+    # Canot be down size at 512Mo but consom 500Mo by default => Alerting (but why 512Mo limit ???)
+    # https://docs.platform.sh/configuration/services/rabbitmq.html#example-configuration
+    # https://www.rabbitmq.com/quorum-queues.html#resource-use
+    disk: 1024
+
+headlessbrowser:
+    # (https://docs.platform.sh/configuration/services/headless-chrome.html#supported-versions)
+    type: chrome-headless:91
+    #size: 4XL
+    resources:
+        base_memory: 512
+        memory_ratio: 512
