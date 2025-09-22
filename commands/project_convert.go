@@ -165,23 +165,30 @@ func runPlatformShConvert(cmd *cobra.Command) error {
 	readers.ReadRoutes(&metaConfig, configFiles[entity.PSH_ROUTE])
 
 	// Remove size and resources entries
+	fmt.Fprintln(cmd.ErrOrStderr(), "Removing any `size`, `resources` or `disk` keys.")
+	fmt.Fprintln(cmd.ErrOrStderr(),
+		"Upsun disk sizes are set using Console or the "+color.GreenString("upsun resources:set")+" command.")
 	readers.RemoveAllEntry(&metaConfig.Services, "size")
 	readers.RemoveAllEntry(&metaConfig.Applications, "size")
 	readers.RemoveAllEntry(&metaConfig.Services, "resources")
 	readers.RemoveAllEntry(&metaConfig.Applications, "resources")
+	readers.RemoveAllEntry(&metaConfig.Applications, "disk")
+	readers.RemoveAllEntry(&metaConfig.Services, "disk")
 
 	// Fix storage to match Upsun format
+	fmt.Fprintln(cmd.ErrOrStderr(), "Replacing mount types (`local` becomes `instance`, and `shared` becomes `storage`).")
 	readers.ReplaceAllEntry(&metaConfig.Applications, "local", "instance")
 	readers.ReplaceAllEntry(&metaConfig.Applications, "shared", "storage")
-	readers.RemoveAllEntry(&metaConfig.Applications, "disk")
 
 	if err := os.MkdirAll(upsunDir, os.ModePerm); err != nil {
 		return fmt.Errorf("could not create .upsun directory: %w", err)
 	}
 
+	fmt.Fprintln(cmd.ErrOrStderr(), "Creating combined configuration file.")
 	writers.GenerateUpsunConfigFile(metaConfig, configPath)
 
 	// Move extra config
+	fmt.Fprintln(cmd.ErrOrStderr(), "Copying additional files if necessary.")
 	utils.TransferConfigCustom(cwd, upsunDir)
 
 	fmt.Fprintln(cmd.ErrOrStderr(), "Your configuration was successfully converted to the Upsun format.")
