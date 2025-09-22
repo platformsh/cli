@@ -158,6 +158,7 @@ func runPlatformShConvert(cmd *cobra.Command) error {
 	readers.ReplaceAllEntry(&metaConfig.Applications, "local", "instance")
 	readers.ReplaceAllEntry(&metaConfig.Applications, "shared", "storage")
 	readers.RemoveAllEntry(&metaConfig.Applications, "disk")
+	readers.RemoveAllEntry(&metaConfig.Services, "disk")
 
 	upsunDir := filepath.Join(cwd, ".upsun")
 	if err := os.MkdirAll(upsunDir, os.ModePerm); err != nil {
