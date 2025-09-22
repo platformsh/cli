@@ -41,10 +41,6 @@ func innerProjectInitCommand(cnf *config.Config) Command {
 				Commandline: "--ai=false",
 				Description: "Disable AI mode",
 			},
-			{
-				Commandline: "--ai --context='Use PostgreSQL for the database'",
-				Description: "Add context for AI configuration",
-			},
 		},
 		Definition: Definition{
 			Arguments: &orderedmap.OrderedMap[string, Argument]{},
@@ -56,16 +52,6 @@ func innerProjectInitCommand(cnf *config.Config) Command {
 						AcceptValue: true,
 						Description: "Use AI configuration",
 						Default:     Any{any: false},
-					},
-				},
-				orderedmap.Pair[string, Option]{
-					Key: "context",
-					Value: Option{
-						Name:            "--context",
-						AcceptValue:     true,
-						IsValueRequired: true,
-						Description:     "Add extra context for AI configuration",
-						Default:         Any{any: ""},
 					},
 				},
 				orderedmap.Pair[string, Option]{
