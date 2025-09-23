@@ -79,7 +79,7 @@ nfpms:
   - homepage: https://docs.upsun.com/anchors/fixed/cli/
     package_name: ${VENDOR_BINARY}-cli
     description: ${VENDOR_NAME} CLI
-    maintainer: Antonis Kalipetis <antonis.kalipetis@platform.sh>
+    maintainer: Antonis Kalipetis <antonis.kalipetis@upsun.com>
     license: MIT
     vendor: Platform.sh
     ids:

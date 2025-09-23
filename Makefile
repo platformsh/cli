@@ -1,7 +1,7 @@
 PHP_VERSION = 8.2.29
 LEGACY_CLI_VERSION = 4.26.0
 
-GORELEASER_ID ?= platform
+GORELEASER_ID ?= upsun
 
 ifeq ($(GOOS), darwin)
 	GORELEASER_ID=$(GORELEASER_ID)-macos
@@ -71,10 +71,10 @@ goreleaser:
 	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser/v2@$(GORELEASER_VERSION)
 
 .PHONY: single
-single: goreleaser internal/legacy/archives/platform.phar php ## Build a single target release for Platform.sh or Upsun
+single: goreleaser internal/legacy/archives/platform.phar php ## Build a single target release
 	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --clean
 
-.PHONY: snapshot ## Build a snapshot release for Platform.sh and Upsun
+.PHONY: snapshot ## Build a snapshot release
 snapshot: goreleaser internal/legacy/archives/platform.phar php
 	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser build --snapshot --clean
 
@@ -83,7 +83,7 @@ clean-phar: ## Clean up the legacy CLI phar
 	rm -f internal/legacy/archives/platform.phar
 
 .PHONY: release
-release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Release the Platform.sh and Upsun CLIs
+release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Create and publish a release
 	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser release --clean
 	VERSION=$(VERSION) bash cloudsmith.sh
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Platform.sh CLI installer
+# Upsun CLI installer
 
 set -euo pipefail
 
@@ -11,10 +11,10 @@ set -euo pipefail
 
 : "${URL:=https://github.com/platformsh/cli/releases/download}"
 
-# Force Platform.sh CLI installation in this directory instead of system directory
+# Force Upsun CLI installation in this directory instead of system directory
 : "${INSTALL_DIR:=}"
 
-# Platform.sh CLI version to install
+# Upsun CLI version to install
 : "${VERSION:=}"
 
 # macOS specifics
@@ -24,8 +24,8 @@ set -euo pipefail
 # GitHub token check
 : "${GITHUB_TOKEN:=}"
 
-# Platform.sh CLI vendor to install
-: "${VENDOR:=platformsh}"
+# Upsun CLI vendor to install
+: "${VENDOR:=upsun}"
 
 # CI specifics
 : "${CI:=}"
@@ -34,7 +34,7 @@ set -euo pipefail
 
 # global variables
 binary="platform"
-vendor_name="Platform.sh"
+vendor_name="Upsun (formerly Platform.sh)"
 cloudsmith_repository="cli"
 cmd_shasum=""
 cmd_sudo=""
@@ -45,8 +45,8 @@ kernel=""
 machine=""
 version=""
 package="platformsh-cli"
-docs_url="https://docs.platform.sh"
-support_url="https://platform.sh/contact"
+docs_url="https://docs.upsun.com"
+support_url="https://upsun.com/contact"
 
 if [ "$VENDOR" == "upsun" ]; then
     BREW_FORMULA="platformsh/tap/upsun-cli"

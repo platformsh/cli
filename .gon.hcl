@@ -4,7 +4,7 @@ source = [
 bundle_id = "sh.platform.cli"
 
 apple_id {
-  username = "antonis.kalipetis@platform.sh"
+  username = "antonis.kalipetis@upsun.com"
   password = "@env:AC_PASSWORD"
 }
 
