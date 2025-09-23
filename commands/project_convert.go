@@ -2,22 +2,14 @@ package commands
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/symfony-cli/terminal"
-	"github.com/upsun/lib-sun/detector"
-	"github.com/upsun/lib-sun/entity"
-	"github.com/upsun/lib-sun/readers"
-	utils "github.com/upsun/lib-sun/utility"
-	"github.com/upsun/lib-sun/writers"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 
 	"github.com/platformsh/cli/internal/config"
+	"github.com/platformsh/cli/internal/convert"
 )
 
 // innerProjectConvertCommand returns the Command struct for the convert config command.
@@ -109,81 +101,14 @@ func newProjectConvertCommand(cnf *config.Config) *cobra.Command {
 
 // runProjectConvert is the entry point for the convert config command.
 func runProjectConvert(cmd *cobra.Command, _ []string) error {
-	if viper.GetString("provider") != "platformsh" {
-		return fmt.Errorf("only the 'platformsh' provider is currently supported")
-	}
-	return runPlatformShConvert(cmd)
-}
-
-// runPlatformShConvert performs the conversion from Platform.sh config to Upsun config.
-func runPlatformShConvert(cmd *cobra.Command) error {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("could not get current working directory: %w", err)
 	}
 
-	cwd, err = filepath.Abs(filepath.Clean(cwd))
-	if err != nil {
-		return fmt.Errorf("could not normalize project workspace path: %w", err)
+	if viper.GetString("provider") == "platformsh" {
+		return convert.PlatformshToUpsun(cwd, cmd.ErrOrStderr())
 	}
 
-	// Disable log for lib-sun
-	log.Default().SetOutput(io.Discard)
-
-	// Find config files
-	configFiles, err := detector.FindConfig(cwd)
-	if err != nil {
-		return fmt.Errorf("could not detect configuration files: %w", err)
-	}
-
-	// Read PSH application config files
-	var metaConfig entity.MetaConfig
-	readers.ReadApplications(&metaConfig, configFiles[entity.PSH_APPLICATION], cwd)
-	readers.ReadPlatforms(&metaConfig, configFiles[entity.PSH_PLATFORM], cwd)
-	if metaConfig.Applications.IsZero() {
-		return fmt.Errorf("no Platform.sh applications found")
-	}
-
-	// Read PSH services and routes config files
-	readers.ReadServices(&metaConfig, configFiles[entity.PSH_SERVICE])
-	readers.ReadRoutes(&metaConfig, configFiles[entity.PSH_ROUTE])
-
-	// Remove size and resources entries
-	readers.RemoveAllEntry(&metaConfig.Services, "size")
-	readers.RemoveAllEntry(&metaConfig.Applications, "size")
-	readers.RemoveAllEntry(&metaConfig.Services, "resources")
-	readers.RemoveAllEntry(&metaConfig.Applications, "resources")
-
-	// Fix storage to match Upsun format
-	readers.ReplaceAllEntry(&metaConfig.Applications, "local", "instance")
-	readers.ReplaceAllEntry(&metaConfig.Applications, "shared", "storage")
-	readers.RemoveAllEntry(&metaConfig.Applications, "disk")
-
-	upsunDir := filepath.Join(cwd, ".upsun")
-	if err := os.MkdirAll(upsunDir, os.ModePerm); err != nil {
-		return fmt.Errorf("could not create .upsun directory: %w", err)
-	}
-
-	configPath := filepath.Join(upsunDir, "config.yaml")
-	stat, err := os.Stat(configPath)
-	if err == nil && !stat.IsDir() {
-		cmd.Printf("The file %v already exists.\n", configPath)
-		if !viper.GetBool("yes") {
-			if viper.GetBool("no-interaction") {
-				return fmt.Errorf("use the -y option to overwrite the file")
-			}
-
-			if !terminal.AskConfirmation("Do you want to overwrite it?", true) {
-				return nil
-			}
-		}
-	}
-	writers.GenerateUpsunConfigFile(metaConfig, configPath)
-
-	// Move extra config
-	utils.TransferConfigCustom(cwd, upsunDir)
-
-	cmd.Println("Your configuration was successfully converted to the Upsun format.")
-	cmd.Printf("Check the generated files in %v\n", upsunDir)
-	return nil
+	return fmt.Errorf("only the 'platformsh' provider is currently supported")
 }

@@ -1,0 +1,67 @@
+name: app
+
+# Runtime pre-install
+type: 'php:8.2'
+
+# Disk for App
+disk: 2048
+
+# Flexible Ressources
+resources:
+      base_memory: 1024
+      memory_ratio: 1024
+
+dependencies:
+  php:
+    composer/composer: "^2"
+
+# vHost config
+web:
+  locations:
+    "/":
+        root: "public"
+        passthru: "/index.php"
+        allow: true
+        scripts: true
+
+relationships:
+  database: "mysql:mysql"
+
+variables:
+  env:
+      CI_ENVIRONMENT: "production"
+
+# RW fs !!
+mounts:
+    "writable/cache":
+      source: local
+      source_path: "writable/cache"
+    "writable/debugbar": { source: local,  source_path: "writable/debugbar"}
+    "writable/logs":
+      source: local
+      source_path: "writable/logs"
+    "writable/session":
+      source: local
+      source_path: "writable/session"
+    "writable/upload":
+      source: local
+      source_path: "writable/upload"
+    "config":
+      source: local
+      source_path: "config"
+
+# Custom commands
+hooks:
+  build: |
+    set -e
+    composer install --no-dev --optimize-autoloader
+  deploy: | 
+    set -e
+    php generate_env.php
+
+source:
+    operations:
+        auto-update:
+            command: |
+                curl -fsS https://raw.githubusercontent.com/platformsh/source-operations/main/setup.sh | { bash /dev/fd/3 sop-autoupdate; } 3<&0
+
