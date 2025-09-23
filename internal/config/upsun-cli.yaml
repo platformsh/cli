@@ -74,8 +74,8 @@ ssh:
 
 detection:
   git_remote_name: "upsun"
-  git_domain: "upsun.com"
-  site_domains: ["platformsh.site", "tst.site", "upsunapp.com"]
+  git_domain: "platform.sh" # matches git.eu-5.platform.sh, etc.
+  site_domains: ["platformsh.site", "tst.site", "upsunapp.com", "upsun.app"]
   cluster_header: 'X-Platform-Cluster'
 
 browser_login:
