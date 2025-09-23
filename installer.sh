@@ -25,7 +25,7 @@ set -euo pipefail
 : "${GITHUB_TOKEN:=}"
 
 # Upsun CLI vendor to install
-: "${VENDOR:=upsun}"
+: "${VENDOR:=platform}"
 
 # CI specifics
 : "${CI:=}"
