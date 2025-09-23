@@ -26,11 +26,11 @@ type Config struct {
 
 	Application struct {
 		// Fields required for both the PHP and Go applications.
-		Name            string `validate:"required"`                                     // e.g. "Platform.sh CLI"
-		EnvPrefix       string `validate:"required" yaml:"env_prefix"`                   // e.g. "PLATFORMSH_CLI_"
-		Executable      string `validate:"required"`                                     // e.g. "platform"
-		Slug            string `validate:"required,ascii"`                               // e.g. "platformsh-cli"
-		UserConfigDir   string `validate:"required" yaml:"user_config_dir"`              // e.g. ".platformsh"
+		Name            string `validate:"required"`                                     // e.g. "Upsun CLI"
+		EnvPrefix       string `validate:"required" yaml:"env_prefix"`                   // e.g. "UPSUN_CLI_"
+		Executable      string `validate:"required"`                                     // e.g. "upsun"
+		Slug            string `validate:"required,ascii"`                               // e.g. "upsun-cli"
+		UserConfigDir   string `validate:"required" yaml:"user_config_dir"`              // e.g. ".upsun"
 		UserStateFile   string `validate:"omitempty" yaml:"user_state_file,omitempty"`   // defaults to "state.json"
 		WritableUserDir string `validate:"omitempty" yaml:"writable_user_dir,omitempty"` // defaults to UserConfigDir
 		TempSubDir      string `validate:"omitempty" yaml:"tmp_sub_dir,omitempty"`       // defaults to Slug+"-tmp"
@@ -42,32 +42,32 @@ type Config struct {
 
 	// Fields only needed by the PHP (legacy) CLI, at least for now.
 	API struct {
-		BaseURL string `validate:"required,url" yaml:"base_url"`            // e.g. "https://api.platform.sh"
-		AuthURL string `validate:"omitempty,url" yaml:"auth_url,omitempty"` // e.g. "https://auth.api.platform.sh"
+		BaseURL string `validate:"required,url" yaml:"base_url"`            // e.g. "https://api.upsun.com"
+		AuthURL string `validate:"omitempty,url" yaml:"auth_url,omitempty"` // e.g. "https://auth.upsun.com"
 
 		UserAgent string `validate:"omitempty" yaml:"user_agent,omitempty"`       // a template - see UserAgent method
 		SessionID string `validate:"omitempty,ascii" yaml:"session_id,omitempty"` // the ID for the authentication session - defaults to "default"
 
 		OAuth2ClientID     string `validate:"omitempty" yaml:"oauth2_client_id,omitempty"`                               // e.g. "upsun-cli"
-		OAuth2AuthorizeURL string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_auth_url,omitempty"`   // e.g. "https://auth.api.platform.sh/oauth2/authorize"
-		OAuth2RevokeURL    string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_revoke_url,omitempty"` // e.g. "https://auth.api.platform.sh/oauth2/revoke"
-		OAuth2TokenURL     string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_token_url,omitempty"`  // e.g. "https://auth.api.platform.sh/oauth2/token"
-		CertifierURL       string `validate:"required_without=AuthURL,omitempty,url" yaml:"certifier_url,omitempty"`     // e.g. "https://ssh.api.platform.sh"
+		OAuth2AuthorizeURL string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_auth_url,omitempty"`   // e.g. "https://auth.upsun.com/oauth2/authorize"
+		OAuth2RevokeURL    string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_revoke_url,omitempty"` // e.g. "https://auth.upsun.com/oauth2/revoke"
+		OAuth2TokenURL     string `validate:"required_without=AuthURL,omitempty,url" yaml:"oauth2_token_url,omitempty"`  // e.g. "https://auth.upsun.com/oauth2/token"
+		CertifierURL       string `validate:"required_without=AuthURL,omitempty,url" yaml:"certifier_url,omitempty"`     // No longer used
 
 		AIServiceURL        string `validate:"omitempty,url" yaml:"ai_url,omitempty"`    // The AI service URL, e.g. "https://ai.upsun.com".
 		EnableOrganizations bool   `validate:"omitempty" yaml:"organizations,omitempty"` // Whether the "organizations" feature is enabled.
 	} `validate:"required"`
 	Detection struct {
-		GitRemoteName string   `validate:"required" yaml:"git_remote_name"` // e.g. "platform"
-		SiteDomains   []string `validate:"required" yaml:"site_domains"`    // e.g. ["platformsh.site", "tst.site"]
+		GitRemoteName string   `validate:"required" yaml:"git_remote_name"` // e.g. "upsun"
+		SiteDomains   []string `validate:"required" yaml:"site_domains"`    // e.g. ["upsunapp.com", "upsun.app"]
 	} `validate:"required"`
 	Service struct {
-		Name                string `validate:"required"`                                         // e.g. "Platform.sh"
+		Name                string `validate:"required"`                                         // e.g. "Upsun"
 		EnvPrefix           string `validate:"required" yaml:"env_prefix"`                       // e.g. "PLATFORM_"
 		ProjectConfigDir    string `validate:"required" yaml:"project_config_dir"`               // e.g. ".platform"
 		ProjectConfigFlavor string `validate:"omitempty" yaml:"project_config_flavor,omitempty"` // default: "platform"
-		ConsoleURL          string `validate:"omitempty,url" yaml:"console_url,omitempty"`       // e.g. "https://console.platform.sh"
-		DocsURL             string `validate:"omitempty,url" yaml:"docs_url,omitempty"`          // e.g. "https://docs.platform.sh"
+		ConsoleURL          string `validate:"omitempty,url" yaml:"console_url,omitempty"`       // e.g. "https://console.upsun.com"
+		DocsURL             string `validate:"omitempty,url" yaml:"docs_url,omitempty"`          // e.g. "https://docs.upsun.com"
 	} `validate:"required"`
 	SSH struct {
 		DomainWildcards []string `validate:"required" yaml:"domain_wildcards"` // e.g. ["*.platform.sh"]
