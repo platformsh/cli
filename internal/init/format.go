@@ -7,15 +7,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 
 	"github.com/platformsh/cli/internal/init/streaming"
+	"github.com/platformsh/cli/internal/tui"
 )
 
 var (
-	defaultMessageColor = "green"
-	defaultColorFunc    = color.GreenString
+	defaultMessageColor = "default"
+	defaultColorFunc    = fmt.Sprintf
 	levelColors         = map[string]string{
 		streaming.LogLevelDebug: "cyan",
 		streaming.LogLevelInfo:  defaultMessageColor,
@@ -46,19 +46,18 @@ func colorFunc(name string) func(string, ...any) string {
 	return defaultColorFunc
 }
 
-func defaultSpinner(w io.Writer) *spinner.Spinner {
-	return spinner.New(spinner.CharSets[23], 80*time.Millisecond, spinner.WithWriter(w))
+func defaultSpinner(w io.Writer) *tui.Spinner {
+	return tui.NewDefault(w)
 }
 
-func printWithSpinner(spinr *spinner.Spinner, colorName, format string, args ...any) {
-	_ = spinr.Color(colorName)
+func printWithSpinner(spinr *tui.Spinner, colorName, format string, args ...any) {
 	spinr.Suffix = " " + colorFunc(colorName)(format, args...)
 	spinr.Start()
 	time.Sleep(time.Millisecond * 300)
 }
 
 type logPrinter struct {
-	spinr  *spinner.Spinner
+	spinr  *tui.Spinner
 	stderr io.Writer
 }
 
