@@ -97,9 +97,7 @@ lint: lint-gomod lint-golangci ## Run linters.
 
 .PHONY: lint-gomod
 lint-gomod:
-ifneq ($(shell go mod tidy -v 2>/dev/stdout | tee /dev/stderr | grep -c 'unused '),0)
-	@false
-endif
+	go mod tidy -diff
 
 .PHONY: lint-golangci
 lint-golangci:
