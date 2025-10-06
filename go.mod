@@ -12,7 +12,7 @@ require (
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/gofrs/flock v0.12.1
 	github.com/oklog/ulid/v2 v2.1.1
-	github.com/platformsh/platformify v0.4.1
+	github.com/platformsh/platformify v0.4.2
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
