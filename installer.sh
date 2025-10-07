@@ -96,12 +96,65 @@ function output {
     builtin echo -e "${style_start}${1}${style_end}"
 }
 
+function create_table_line() {
+    local text="${1:-}"
+    local width="${2:-}"
+
+    if [ -z "$width" ]; then
+        # Calculate width based on text length, minimum 50
+        local text_length=${#text}
+        width=$((text_length < 50 ? 50 : text_length + 4))
+    fi
+
+    if [ "$text" = "border" ] || [ -z "$text" ]; then
+        # Border line
+        printf "+"
+        for ((i=0; i<width-2; i++)); do
+            printf "-"
+        done
+        printf "+"
+    elif [ "$text" = "empty" ]; then
+        # Empty line
+        printf "|"
+        for ((i=0; i<width-2; i++)); do
+            printf " "
+        done
+        printf "|"
+    else
+        # Text line
+        local text_length=${#text}
+        local padding=$(((width - 2 - text_length) / 2))
+        local right_padding=$((width - 2 - text_length - padding))
+        printf "|"
+        for ((i=0; i<padding; i++)); do
+            printf " "
+        done
+        printf "%s" "$text"
+        for ((i=0; i<right_padding; i++)); do
+            printf " "
+        done
+        printf "|"
+    fi
+    printf "\n"
+}
+
+function create_table() {
+    local text="$1"
+    local min_width="${2:-50}"
+    local text_length=${#text}
+    local table_width=$((text_length < min_width ? min_width : text_length + 4))
+
+    create_table_line "border" "$table_width"
+    create_table_line "empty" "$table_width"
+    create_table_line "$text" "$table_width"
+    create_table_line "empty" "$table_width"
+    create_table_line "border" "$table_width"
+}
+
 function exit_with_error() {
-    output "+--------------------------------------------------+" "error"
-    output "|                                                  |" "error"
-    output "|              Installation failed                 |" "error"
-    output "|                                                  |" "error"
-    output "+--------------------------------------------------+" "error"
+    local title="Installation failed"
+
+    output "$(create_table "$title")" "error"
 
     output "\nGet help with your $vendor_name CLI installation:" "heading"
     output "  Inspect the logs: ${INSTALL_LOG}"
@@ -112,22 +165,18 @@ function exit_with_error() {
 }
 
 function intro() {
-    output "+--------------------------------------------------+" "heading"
-    output "|                                                  |" "heading"
-    output "|           $vendor_name CLI Installer              |" "heading"
-    output "|                                                  |" "heading"
-    output "+--------------------------------------------------+" "heading"
+    local title="$vendor_name CLI Installer"
+
+    output "$(create_table "$title")" "heading"
 
     output "\nChecking environment" "heading"
 }
 
 function outro() {
+    local title="$vendor_name CLI has been installed successfully."
+
     output ""
-    output "+--------------------------------------------------+" "success"
-    output "|                                                  |" "success"
-    output "| $vendor_name CLI has been installed successfully. |" "success"
-    output "|                                                  |" "success"
-    output "+--------------------------------------------------+" "success"
+    output "$(create_table "$title")" "success"
 
     output "\nWhat's next?" "heading"
 
