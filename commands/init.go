@@ -47,6 +47,8 @@ func newInitCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 	}
 
 	cmd.Flags().BoolVar(&useAI, "ai", false, "Use AI configuration")
+	cmd.Flags().StringVar(&initOptions.ExtraContext, "context", "",
+		"Add extra context for AI configuration")
 	cmd.Flags().BoolVar(&initOptions.OnlyShowDigest, "digest", false,
 		"Only show the repository digest (the AI configuration input), without sending it")
 
