@@ -37,16 +37,10 @@ internal/legacy/archives/php_darwin_$(GOARCH):
 	rm -rf $(GOOS)
 
 internal/legacy/archives/php_linux_$(GOARCH):
-	cp ext/extensions.txt ext/static-php-cli/docker
-	docker buildx build \
-		--build-arg GOARCH=$(GOARCH) \
-		--build-arg PHP_VERSION=$(PHP_VERSION) \
-		--build-arg USE_BACKUP_ADDRESS=yes \
-		--file=./Dockerfile.php \
-		--platform=linux/$(GOARCH) \
-		--output=type=local,dest=./internal/legacy/archives/ \
-		--progress=plain \
-		ext/static-php-cli/docker
+	mkdir -p internal/legacy/archives
+	cd ext/static-php-cli && SPC_USE_ARCH=$(GOARCH) ./bin/spc-alpine-docker download --with-php=$(PHP_VERSION) --for-extensions=curl,filter,openssl,pcntl,phar,posix,zlib
+	cd ext/static-php-cli && SPC_USE_ARCH=$(GOARCH) ./bin/spc-alpine-docker build curl,filter,openssl,pcntl,phar,posix,zlib --build-cli
+	cp ext/static-php-cli/buildroot/bin/php $(PHP_BINARY_PATH)
 
 PHP_WINDOWS_REMOTE_FILENAME := "php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip"
 internal/legacy/archives/php_windows.zip:

@@ -1,0 +1,33 @@
+# craft.yml configuration for building PHP CLI for Upsun CLI
+# This file configures static-php-cli v2.7.5+ to build a minimal PHP binary
+
+php-version: "8.2"
+
+extensions:
+  - curl
+  - filter
+  - openssl
+  - pcntl
+  - phar
+  - posix
+  - zlib
+
+libs: []
+
+sapi:
+  - cli
+
+build-options:
+  with-clean: false
+  with-suggested-libs: false
+  with-upx-pack: true
+  with-strip-php: true
+
+download-options:
+  prefer-pre-built: true
+  retry: 5
+
+craft-options:
+  doctor: true
+  download: true
+  build: true
