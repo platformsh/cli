@@ -21,7 +21,6 @@ build-options:
   with-clean: false
   with-suggested-libs: false
   with-upx-pack: true
-  with-strip-php: true
 
 download-options:
   prefer-pre-built: true
