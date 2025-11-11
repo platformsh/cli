@@ -27,6 +27,6 @@ download-options:
   retry: 5
 
 craft-options:
-  doctor: true
-  download: true
-  build: true
+  doctor: true    # Check environment and automatically fix when possible.
+  download: true  # Download source code (php-src and libraries).
+  build: true     # Build the static PHP binary.
