@@ -38,8 +38,8 @@ internal/legacy/archives/php_darwin_$(GOARCH):
 
 internal/legacy/archives/php_linux_$(GOARCH):
 	mkdir -p internal/legacy/archives
-	cd ext/static-php-cli && SPC_USE_ARCH=$(GOARCH) ./bin/spc-alpine-docker download --with-php=$(PHP_VERSION) --for-extensions=curl,filter,openssl,pcntl,phar,posix,zlib
-	cd ext/static-php-cli && SPC_USE_ARCH=$(GOARCH) ./bin/spc-alpine-docker build curl,filter,openssl,pcntl,phar,posix,zlib --build-cli
+	cp ext/craft.yml ext/static-php-cli/craft.yml
+	cd ext/static-php-cli && SPC_USE_ARCH=$(GOARCH) ./bin/spc-alpine-docker craft craft.yml
 	cp ext/static-php-cli/buildroot/bin/php $(PHP_BINARY_PATH)
 
 PHP_WINDOWS_REMOTE_FILENAME := "php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip"
