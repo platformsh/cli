@@ -185,6 +185,18 @@ yum upgrade -y platformsh-cli
 
 ## Building binaries, snapshots and releases
 
+Dependencies:
+  - docker
+  - docker-buildx
+  - make
+  - goreleaser
+
+Clone the project
+
+```
+git clone --recursive git@github.com:platformsh/cli.git
+```
+
 Build a single binary
 
 ```console
