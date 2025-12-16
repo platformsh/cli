@@ -13,7 +13,7 @@ To install the CLI, use either [Homebrew](https://brew.sh/) (on Linux, macOS, or
 ### HomeBrew
 
 ```console
-brew install platformsh/tap/platformsh-cli
+brew install platformsh/tap/upsun-cli
 ```
 
 > If you have issues with missing libraries on a Mac, see how to [troubleshoot CLI installation on M1/M2 Macs](https://community.platform.sh/t/troubleshoot-cli-installation-on-m1-macs/1202).
@@ -22,7 +22,7 @@ brew install platformsh/tap/platformsh-cli
 
 ```console
 scoop bucket add platformsh https://github.com/platformsh/homebrew-tap.git
-scoop install platform
+scoop install upsun
 ```
 
 ### Bash installer
@@ -30,7 +30,7 @@ scoop install platform
 Use the bash installer for an automated installation, using the most preferable way for your system.
 
 ```console
-curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VENDOR=upsun bash
 ```
 
 The installer is configurable using the following environment variables:
@@ -56,19 +56,19 @@ nix profile install nixpkgs#upsun
 <details>
     <summary>Force the CLI to be installed using the raw method</summary>
 
-    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | INSTALL_METHOD=raw bash
+    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VENDOR=upsun INSTALL_METHOD=raw bash
 </details>
 
 <details>
     <summary>Install a specific version</summary>
 
-    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VERSION=4.0.1 bash
+    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VENDOR=upsun VERSION=4.0.1 bash
 </details>
 
 <details>
     <summary>Install the CLI in a user owned directory</summary>
 
-    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | INSTALL_METHOD=raw INSTALL_DIR=$HOME/.local/bin bash
+    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VENDOR=upsun INSTALL_METHOD=raw INSTALL_DIR=$HOME/.local/bin bash
 </details>
 
 ### Alpine
@@ -92,7 +92,7 @@ curl -1sLf \
 
 ```console
 # Install the CLI
-apk add platformsh-cli
+apk add upsun-cli
 ```
 
 ### Ubuntu/Debian
@@ -123,7 +123,7 @@ curl -1sLf \
 
 ```console
 # Install the CLI
-apt-get install -y platformsh-cli
+apt-get install -y upsun-cli
 ```
 
 ### CentOS/RHEL/Fedora
@@ -134,7 +134,7 @@ curl -1sLf \
   | sudo -E bash
 
 # Install the CLI
-yum install -y platformsh-cli
+yum install -y upsun-cli
 ```
 
 ### Manual installation
@@ -148,37 +148,37 @@ Upgrade using the same tool:
 ### HomeBrew
 
 ```console
-brew update && brew upgrade platformsh/tap/platformsh-cli
+brew update && brew upgrade platformsh/tap/upsun-cli
 ```
 
 ### Scoop
 
 ```console
-scoop update platform
+scoop update upsun
 ```
 
 ### Bash installer
 
 ```console
-curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VENDOR=upsun bash
 ```
 
 ### Alpine
 
 ```console
-apk add -l platformsh-cli
+apk add -l upsun-cli
 ```
 
 ### Ubuntu/Debian
 
 ```console
-apt-get upgrade platformsh-cli
+apt-get upgrade upsun-cli
 ```
 
 ### CentOS/RHEL/Fedora
 
 ```console
-yum upgrade -y platformsh-cli
+yum upgrade -y upsun-cli
 ```
 
 ## Under the hood
