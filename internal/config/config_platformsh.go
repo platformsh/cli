@@ -1,5 +1,4 @@
-//go:build !vendor
-// +build !vendor
+//go:build platformsh && !vendor
 
 package config
 

@@ -1,5 +1,4 @@
-//go:build vendor && upsun
-// +build vendor,upsun
+//go:build !platformsh && !vendor
 
 package config
 

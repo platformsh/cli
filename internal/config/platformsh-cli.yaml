@@ -5,7 +5,7 @@
 # These are settings for the 'platform' command, which is available for backwards compatibility.
 wrapper:
   homebrew_tap: platformsh/tap/platformsh-cli
-  github_repo: platformsh/cli
+  github_repo: upsun/cli
 
 application:
   name: 'Upsun CLI (Platform.sh compatibility)'

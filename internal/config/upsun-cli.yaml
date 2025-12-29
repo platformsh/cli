@@ -1,11 +1,9 @@
 # Upsun CLI configuration
 #
-# Based on the legacy CLI config in https://github.com/platformsh/legacy-cli/blob/main/config.yaml
-#
 # See ../internal/config/schema.go for the required keys
 wrapper:
   homebrew_tap: platformsh/tap/upsun-cli
-  github_repo: platformsh/cli
+  github_repo: upsun/cli
 
 application:
   name: "Upsun CLI"
