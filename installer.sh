@@ -4,12 +4,12 @@
 set -euo pipefail
 
 # Location of install log
-: "${INSTALL_LOG:=/tmp/platformsh-install-$(date '+%Y%m%d-%H%M%S').log}"
+: "${INSTALL_LOG:=/tmp/upsun-install-$(date '+%Y%m%d-%H%M%S').log}"
 
 # Define this to force install method
 : "${INSTALL_METHOD:=}"
 
-: "${URL:=https://github.com/platformsh/cli/releases/download}"
+: "${URL:=https://github.com/upsun/cli/releases/download}"
 
 # Force Upsun CLI installation in this directory instead of system directory
 : "${INSTALL_DIR:=}"
@@ -19,13 +19,13 @@ set -euo pipefail
 
 # macOS specifics
 : "${BREW_TAP:=platformsh/tap}"
-: "${BREW_FORMULA:=platformsh/tap/platformsh-cli}"
+: "${BREW_FORMULA:=platformsh/tap/upsun-cli}"
 
 # GitHub token check
 : "${GITHUB_TOKEN:=}"
 
 # The vendor to install
-: "${VENDOR:=platformsh}"
+: "${VENDOR:=upsun}"
 
 # CI specifics
 : "${CI:=}"
@@ -33,9 +33,9 @@ set -euo pipefail
 : "${RUN_ID:=}"
 
 # global variables
-binary="platform"
-vendor_name="Upsun (formerly Platform.sh)"
-cloudsmith_repository="cli"
+binary="upsun"
+vendor_name="Upsun"
+cloudsmith_repository="upsun-cli"
 cmd_shasum=""
 cmd_sudo=""
 dir_bin="/usr/bin"
@@ -44,17 +44,16 @@ has_sudo=""
 kernel=""
 machine=""
 version=""
-package="platformsh-cli"
+package="upsun-cli"
 docs_url="https://docs.upsun.com"
 support_url="https://upsun.com/contact"
 
-if [ "$VENDOR" == "upsun" ]; then
-    BREW_FORMULA="platformsh/tap/upsun-cli"
-    binary="upsun"
-    vendor_name="Upsun"
-    package="upsun-cli"
-    docs_url="https://docs.upsun.com"
-    cloudsmith_repository="upsun-cli"
+if [ "$VENDOR" == "platformsh" ]; then
+    BREW_FORMULA="platformsh/tap/platformsh-cli"
+    binary="platform"
+    vendor_name="Upsun (Platform.sh compatibility)"
+    package="platformsh-cli"
+    cloudsmith_repository="cli"
 fi
 
 # create a log file where every output will be pipe to
@@ -219,13 +218,13 @@ function check_curl() {
         output "  [*] cURL is installed" "success"
         if gh auth status >/dev/null 2>&1; then
             GITHUB_TOKEN="$(gh auth token)"
-            if ! github_curl https://api.github.com/repos/platformsh/cli/releases/latest >/dev/null 2>&1; then
+            if ! github_curl https://api.github.com/repos/upsun/cli/releases/latest >/dev/null 2>&1; then
                 GITHUB_TOKEN=""
             else
                 output "  [*] Using GitHub auth from the gh CLI" "success"
             fi
         elif [ ! -z "${GITHUB_TOKEN}" ]; then
-            if ! github_curl https://api.github.com/repos/platformsh/cli/releases/latest >/dev/null 2>&1; then
+            if ! github_curl https://api.github.com/repos/upsun/cli/releases/latest >/dev/null 2>&1; then
                 GITHUB_TOKEN=""
             else
                 output "  [*] Using GitHub auth from the GITHUB_TOKEN env variable" "success"
@@ -249,7 +248,7 @@ function check_gzip() {
 
 function check_version() {
     if [ -z "${VERSION}" ]; then
-        version=$(curl -I https://github.com/platformsh/cli/releases/latest 2>/dev/null | awk -F/ -v RS='\r\n' '/platformsh.cli.releases.tag/ {printf "%s", $NF}')
+        version=$(curl -I https://github.com/upsun/cli/releases/latest 2>/dev/null | awk -F/ -v RS='\r\n' '/upsun.cli.releases.tag/ {printf "%s", $NF}')
         output "  [*] No version specified, using latest ($version)" "success"
     else
         output "  [*] Version ${VERSION} specified" "success"
