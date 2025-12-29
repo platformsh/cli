@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/platformsh/cli/pkg/mockapi"
+	"github.com/upsun/cli/pkg/mockapi"
 )
 
 func TestOrgCreate(t *testing.T) {

@@ -8,9 +8,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/state"
-	"github.com/platformsh/cli/internal/version"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/state"
+	"github.com/upsun/cli/internal/version"
 )
 
 // ShouldUpdate returns whether the Update function may be run on configuration.

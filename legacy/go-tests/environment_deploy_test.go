@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/platformsh/cli/pkg/mockapi"
+	"github.com/upsun/cli/pkg/mockapi"
 )
 
 func TestEnvironmentDeploy(t *testing.T) {

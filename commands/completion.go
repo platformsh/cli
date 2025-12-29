@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/platformsh/cli/internal/config"
+	"github.com/upsun/cli/internal/config"
 )
 
 func newCompletionCommand(cnf *config.Config) *cobra.Command {

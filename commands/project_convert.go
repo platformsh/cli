@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/viper"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/convert"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/convert"
 )
 
 // innerProjectConvertCommand returns the Command struct for the convert config command.

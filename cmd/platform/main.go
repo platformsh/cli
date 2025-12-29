@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/symfony-cli/terminal"
 
-	"github.com/platformsh/cli/commands"
-	"github.com/platformsh/cli/internal/config"
+	"github.com/upsun/cli/commands"
+	"github.com/upsun/cli/internal/config"
 )
 
 func main() {

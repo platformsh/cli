@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
-	"github.com/platformsh/cli/internal/version"
+	"github.com/upsun/cli/internal/version"
 )
 
 var _validator *validator.Validate

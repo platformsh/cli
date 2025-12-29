@@ -10,7 +10,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/platformsh/cli/internal/config"
+	"github.com/upsun/cli/internal/config"
 )
 
 // FetchConfig makes an HTTP request to fetch some config YAML, validates it, and returns decoded versions.

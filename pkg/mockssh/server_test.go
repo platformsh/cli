@@ -16,8 +16,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ssh"
 
-	"github.com/platformsh/cli/pkg/mockapi"
-	"github.com/platformsh/cli/pkg/mockssh"
+	"github.com/upsun/cli/pkg/mockapi"
+	"github.com/upsun/cli/pkg/mockssh"
 )
 
 func TestServer(t *testing.T) {

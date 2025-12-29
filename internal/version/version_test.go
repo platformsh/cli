@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/platformsh/cli/internal/version"
+	"github.com/upsun/cli/internal/version"
 )
 
 func TestCompare(t *testing.T) {

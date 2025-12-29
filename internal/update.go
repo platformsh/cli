@@ -10,9 +10,9 @@ import (
 
 	"github.com/symfony-cli/terminal"
 
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/state"
-	"github.com/platformsh/cli/internal/version"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/state"
+	"github.com/upsun/cli/internal/version"
 )
 
 // ReleaseInfo stores information about a release

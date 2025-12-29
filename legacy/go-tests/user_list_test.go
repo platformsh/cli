@@ -4,7 +4,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/platformsh/cli/pkg/mockapi"
+	"github.com/upsun/cli/pkg/mockapi"
 )
 
 func TestUserList(t *testing.T) {

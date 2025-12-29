@@ -10,8 +10,8 @@ import (
 
 	"github.com/fatih/color"
 
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/md"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/md"
 )
 
 type Formatter interface {

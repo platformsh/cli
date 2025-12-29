@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/platformsh/cli/internal/config"
+	"github.com/upsun/cli/internal/config"
 )
 
 type State struct {

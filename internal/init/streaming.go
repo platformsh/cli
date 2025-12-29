@@ -7,7 +7,7 @@ import (
 
 	"github.com/briandowns/spinner"
 
-	"github.com/platformsh/cli/internal/init/streaming"
+	"github.com/upsun/cli/internal/init/streaming"
 )
 
 type dataHandler func(data json.RawMessage, key string) error

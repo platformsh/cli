@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/legacy"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/legacy"
 )
 
 func newVersionCommand(cnf *config.Config) *cobra.Command {

@@ -5,7 +5,7 @@ package legacy
 import (
 	"path/filepath"
 
-	"github.com/platformsh/cli/internal/file"
+	"github.com/upsun/cli/internal/file"
 )
 
 func (m *phpManagerPerOS) copy() error {

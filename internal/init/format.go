@@ -10,7 +10,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 
-	"github.com/platformsh/cli/internal/init/streaming"
+	"github.com/upsun/cli/internal/init/streaming"
 )
 
 var (

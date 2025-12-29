@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/platformsh/cli/internal/legacy"
+	"github.com/upsun/cli/internal/legacy"
 )
 
 type LegacyCLIClient struct {

@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/platformsh/cli/internal/config"
+	"github.com/upsun/cli/internal/config"
 )
 
 func TestLegacyCLI(t *testing.T) {

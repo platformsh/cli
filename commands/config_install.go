@@ -14,8 +14,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/symfony-cli/terminal"
 
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/config/alt"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/config/alt"
 )
 
 func newConfigInstallCommand() *cobra.Command {

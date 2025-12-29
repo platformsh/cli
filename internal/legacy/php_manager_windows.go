@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"path/filepath"
 
-	"github.com/platformsh/cli/internal/file"
+	"github.com/upsun/cli/internal/file"
 )
 
 //go:embed archives/php_windows.exe

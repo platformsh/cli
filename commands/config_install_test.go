@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
-	"github.com/platformsh/cli/internal/config"
+	"github.com/upsun/cli/internal/config"
 )
 
 func TestConfigInstallCmd(t *testing.T) {

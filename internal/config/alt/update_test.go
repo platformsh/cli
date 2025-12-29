@@ -13,9 +13,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/config/alt"
-	"github.com/platformsh/cli/internal/state"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/config/alt"
+	"github.com/upsun/cli/internal/state"
 )
 
 func TestUpdate(t *testing.T) {

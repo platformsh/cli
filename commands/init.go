@@ -22,12 +22,12 @@ import (
 	"github.com/upsun/whatsun/pkg/files"
 	"gopkg.in/yaml.v3"
 
-	"github.com/platformsh/cli/internal/legacy"
+	"github.com/upsun/cli/internal/legacy"
 
-	"github.com/platformsh/cli/internal/api"
-	"github.com/platformsh/cli/internal/auth"
-	"github.com/platformsh/cli/internal/config"
-	_init "github.com/platformsh/cli/internal/init"
+	"github.com/upsun/cli/internal/api"
+	"github.com/upsun/cli/internal/auth"
+	"github.com/upsun/cli/internal/config"
+	_init "github.com/upsun/cli/internal/init"
 )
 
 func newInitCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cobra.Command {

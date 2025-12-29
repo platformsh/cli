@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/platformsh/cli/internal/init/streaming"
+	"github.com/upsun/cli/internal/init/streaming"
 )
 
 func TestStreaming(t *testing.T) {

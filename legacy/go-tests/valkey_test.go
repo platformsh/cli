@@ -12,8 +12,8 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/platformsh/cli/pkg/mockapi"
-	"github.com/platformsh/cli/pkg/mockssh"
+	"github.com/upsun/cli/pkg/mockapi"
+	"github.com/upsun/cli/pkg/mockssh"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

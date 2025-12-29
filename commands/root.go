@@ -18,10 +18,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/platformsh/cli/internal"
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/config/alt"
-	"github.com/platformsh/cli/internal/legacy"
+	"github.com/upsun/cli/internal"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/config/alt"
+	"github.com/upsun/cli/internal/legacy"
 )
 
 // Execute is the main entrypoint to run the CLI.

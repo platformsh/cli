@@ -13,7 +13,7 @@ import (
 	"github.com/fatih/color"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 
-	"github.com/platformsh/cli/internal/config"
+	"github.com/upsun/cli/internal/config"
 )
 
 func innerProjectInitCommand(cnf *config.Config) Command {

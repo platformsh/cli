@@ -22,8 +22,8 @@ import (
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/term"
 
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/init/streaming"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/init/streaming"
 )
 
 type Options struct {

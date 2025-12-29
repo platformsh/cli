@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
-	"github.com/platformsh/cli/internal/config/alt"
+	"github.com/upsun/cli/internal/config/alt"
 )
 
 func TestAlt(t *testing.T) {

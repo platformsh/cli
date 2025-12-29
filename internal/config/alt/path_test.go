@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/platformsh/cli/internal/config/alt"
+	"github.com/upsun/cli/internal/config/alt"
 )
 
 func TestInPath(t *testing.T) {

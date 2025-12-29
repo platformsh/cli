@@ -1,4 +1,4 @@
-module github.com/platformsh/cli
+module github.com/upsun/cli
 
 go 1.25
 

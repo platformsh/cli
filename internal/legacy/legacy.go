@@ -16,8 +16,8 @@ import (
 	"github.com/gofrs/flock"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/platformsh/cli/internal/config"
-	"github.com/platformsh/cli/internal/file"
+	"github.com/upsun/cli/internal/config"
+	"github.com/upsun/cli/internal/file"
 )
 
 //go:embed archives/platform.phar
