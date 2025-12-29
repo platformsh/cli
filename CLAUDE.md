@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-The Upsun CLI is a Go-based command-line interface for Upsun (formerly Platform.sh). The CLI is a hybrid system that wraps a legacy PHP CLI while providing new Go-based commands. It supports multiple vendors through build tags and configuration files.
+The Upsun CLI is a Go-based command-line interface for [Upsun](https://upsun.com). The CLI is a hybrid system that wraps a legacy PHP CLI (located in the `legacy/` subdirectory) while providing new Go-based commands. It supports multiple vendors through build tags and configuration files.
 
 ## Build and Test Commands
 
@@ -71,12 +71,16 @@ The CLI operates as a wrapper around a legacy PHP CLI:
 
 **Configuration**: `internal/config/`
 - `schema.go`: Config struct definition with validation tags
-- Supports vendorization through embedded YAML configs (config_upsun.go, config_platformsh.go, config_vendor.go)
-- Uses build tags to select which config is embedded
+- `version.go`: Uses runtime/debug to get version info from VCS
+- Supports vendorization through embedded YAML configs:
+  - `config_upsun.go`: Default (no build tags) - Upsun CLI
+  - `config_platformsh.go`: Requires `-tags platformsh` - Platform.sh CLI
+  - `config_vendor.go`: Requires `-tags vendor` - Custom vendor CLI
 - Config can be loaded from external files for testing/development
 
-**Legacy Integration**: `internal/legacy/`
-- `legacy.go`: CLIWrapper that manages PHP binary and phar execution
+**Legacy Integration**: `internal/legacy/` and `legacy/`
+- `internal/legacy/legacy.go`: CLIWrapper that manages PHP binary and phar execution
+- `legacy/`: The legacy PHP CLI codebase (subtree merged from legacy-cli 5.x)
 - PHP binaries are embedded per platform via go:embed and build tags
 - Uses file locking to prevent concurrent initialization
 - Copies PHP binary and phar to cache directory on first run
@@ -96,9 +100,12 @@ The CLI operates as a wrapper around a legacy PHP CLI:
 ### Build System
 
 **Multi-Vendor Support**:
-- Uses Go build tags (platform, upsun, vendor) to compile different binaries
+- Uses Go build tags to compile different binaries:
+  - Default (no tags): Upsun CLI
+  - `-tags platformsh`: Platform.sh CLI
+  - `-tags vendor`: Custom vendor CLI
 - Configuration is embedded at compile time
-- GoReleaser builds multiple variants (platform, upsun, vendor-specific)
+- GoReleaser builds multiple variants (upsun, platform, vendor-specific)
 
 **PHP Binary Handling**:
 - PHP binaries are downloaded from [upsun/cli-php-builds](https://github.com/upsun/cli-php-builds) releases
@@ -148,12 +155,13 @@ This requires a config file at `internal/config/embedded-config.yaml` (downloade
 
 ### Version Information
 
-Version information is injected at build time via ldflags:
-- `internal/config.Version`: Git tag/version
-- `internal/config.Commit`: Git commit hash
-- `internal/config.Date`: Build date
+Version information is obtained from Go's runtime/debug package (VCS info embedded at build time):
+- `internal/config.Version`: Git tag/version (from VCS or module version)
+- `internal/config.Commit`: Git commit hash (from vcs.revision)
+- `internal/config.Date`: Build date (from vcs.time)
+
+PHP version is still injected via ldflags:
 - `internal/legacy.PHPVersion`: PHP version embedded
-- `internal/legacy.LegacyCLIVersion`: Legacy CLI version embedded
 
 ### Update Checks
 

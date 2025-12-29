@@ -1,6 +1,6 @@
 # Upsun CLI
 
-The **Upsun CLI** is the official command-line interface for [Upsun](https://upsun.com) (formerly Platform.sh).
+The **Upsun CLI** is the official command-line interface for [Upsun](https://upsun.com).
 
 This repository hosts the source code and releases of the CLI.
 
@@ -13,16 +13,14 @@ To install the CLI, use either [Homebrew](https://brew.sh/) (on Linux, macOS, or
 ### HomeBrew
 
 ```console
-brew install platformsh/tap/platformsh-cli
+brew install platformsh/tap/upsun-cli
 ```
-
-> If you have issues with missing libraries on a Mac, see how to [troubleshoot CLI installation on M1/M2 Macs](https://community.platform.sh/t/troubleshoot-cli-installation-on-m1-macs/1202).
 
 ### Scoop
 
 ```console
 scoop bucket add platformsh https://github.com/platformsh/homebrew-tap.git
-scoop install platform
+scoop install upsun
 ```
 
 ### Bash installer
@@ -30,7 +28,7 @@ scoop install platform
 Use the bash installer for an automated installation, using the most preferable way for your system.
 
 ```console
-curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | bash
 ```
 
 The installer is configurable using the following environment variables:
@@ -40,59 +38,45 @@ The installer is configurable using the following environment variables:
 * `INSTALL_DIR` - the installation directory for the `raw` installation method, for example you can use `INSTALL_DIR=$HOME/.local/bin` for a single user installation
 * `VERSION` - the version of the CLI to install, if you need a version other than the latest one
 
-
-### Nix profile
-
-Refer to the [Nix
-documentation if you are not on NixOS](https://nix.dev/manual/nix/2.24/installation/installing-binary.html).
-
-```console
-nix profile install nixpkgs#platformsh
-nix profile install nixpkgs#upsun
-```
-
 #### Installation configuration examples
 
 <details>
     <summary>Force the CLI to be installed using the raw method</summary>
 
-    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | INSTALL_METHOD=raw bash
+    curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | INSTALL_METHOD=raw bash
 </details>
 
 <details>
     <summary>Install a specific version</summary>
 
-    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VERSION=4.0.1 bash
+    curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | VERSION=5.0.0 bash
 </details>
 
 <details>
     <summary>Install the CLI in a user owned directory</summary>
 
-    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | INSTALL_METHOD=raw INSTALL_DIR=$HOME/.local/bin bash
+    curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | INSTALL_METHOD=raw INSTALL_DIR=$HOME/.local/bin bash
 </details>
+
+### Nix profile
+
+Refer to the [Nix documentation if you are not on NixOS](https://nix.dev/manual/nix/2.24/installation/installing-binary.html).
+
+```console
+nix profile install nixpkgs#upsun
+```
 
 ### Alpine
 
 ```console
 sudo apk add --no-cache bash
 curl -1sLf \
-  'https://dl.cloudsmith.io/public/platformsh/cli/setup.alpine.sh' \
+  'https://dl.cloudsmith.io/public/platformsh/upsun-cli/setup.alpine.sh' \
   | sudo -E bash
 ```
 
-<details>
-    <summary>Manual setup</summary>
-
-    apk add --no-cache curl
-    curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/rsa.4F1C2AC5106DA770.key' > /etc/apk/keys/cli@platformsh-4F1C2AC5106DA770.rsa.pub
-    curl -1sLf "https://dl.cloudsmith.io/public/platformsh/cli/config.alpine.txt" >> /etc/apk/repositories
-    apk update
-
-</details>
-
 ```console
-# Install the CLI
-apk add platformsh-cli
+apk add upsun-cli
 ```
 
 ### Ubuntu/Debian
@@ -101,45 +85,27 @@ apk add platformsh-cli
 apt-get update
 apt-get install -y apt-transport-https curl
 curl -1sLf \
-  'https://dl.cloudsmith.io/public/platformsh/cli/setup.deb.sh' \
+  'https://dl.cloudsmith.io/public/platformsh/upsun-cli/setup.deb.sh' \
   | sudo -E bash
 ```
 
-<details>
-    <summary>Manual setup</summary>
-
-    apt-get update
-
-    # Only needed for Debian
-    apt-get install -y debian-keyring debian-archive-keyring
-
-    apt-get install -y apt-transport-https curl gnupg
-    curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/cli/gpg.6ED8A90E60ABD941.key' |  gpg --dearmor >> /usr/share/keyrings/platformsh-cli-archive-keyring.gpg
-    # If you use an Ubuntu derivative distro, such as Linux Mint, you may need to use UBUNTU_CODENAME instead of VERSION_CODENAME below.
-    curl -1sLf "https://dl.cloudsmith.io/public/platformsh/cli/config.deb.txt?distro=$(. /etc/os-release && echo "$ID")&codename=$(. /etc/os-release && echo "$VERSION_CODENAME")" > /etc/apt/sources.list.d/platformsh-cli.list
-    apt-get update
-
-</details>
-
 ```console
-# Install the CLI
-apt-get install -y platformsh-cli
+apt-get install -y upsun-cli
 ```
 
 ### CentOS/RHEL/Fedora
 
 ```console
 curl -1sLf \
-  'https://dl.cloudsmith.io/public/platformsh/cli/setup.rpm.sh' \
+  'https://dl.cloudsmith.io/public/platformsh/upsun-cli/setup.rpm.sh' \
   | sudo -E bash
 
-# Install the CLI
-yum install -y platformsh-cli
+yum install -y upsun-cli
 ```
 
 ### Manual installation
 
-For manual installation, you can also [download the latest binaries](https://github.com/platformsh/cli/releases/latest).
+For manual installation, you can also [download the latest binaries](https://github.com/upsun/cli/releases/latest).
 
 ## Upgrade
 
@@ -148,76 +114,82 @@ Upgrade using the same tool:
 ### HomeBrew
 
 ```console
-brew update && brew upgrade platformsh/tap/platformsh-cli
+brew update && brew upgrade platformsh/tap/upsun-cli
 ```
 
 ### Scoop
 
 ```console
-scoop update platform
+scoop update upsun
 ```
 
 ### Bash installer
 
 ```console
-curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | bash
 ```
 
 ### Alpine
 
 ```console
-apk add -l platformsh-cli
+apk upgrade upsun-cli
 ```
 
 ### Ubuntu/Debian
 
 ```console
-apt-get upgrade platformsh-cli
+apt-get upgrade upsun-cli
 ```
 
 ### CentOS/RHEL/Fedora
 
 ```console
-yum upgrade -y platformsh-cli
+yum upgrade -y upsun-cli
 ```
 
-## Under the hood
+## Platform.sh compatibility
 
-## Building binaries, snapshots and releases
+For backwards compatibility with Platform.sh, a `platform` binary is also available:
 
-Build a single binary
+```console
+brew install platformsh/tap/platformsh-cli
+```
+
+Or with the bash installer:
+
+```console
+curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | VENDOR=platformsh bash
+```
+
+## Building
+
+Build a single binary:
 
 ```console
 make single
 ```
 
-Build a snapshot
+Build a snapshot:
 
 ```console
 make snapshot
 ```
 
-Build a snapshot for a vendor
+Build a snapshot for a vendor:
 
 ```console
 # Download the config file at internal/config/embedded-config.yaml
-make vendor-snapshot VENDOR_NAME='Upsun staging' VENDOR_BINARY='upsunstg'
+make vendor-snapshot VENDOR_NAME='Vendor Name' VENDOR_BINARY='vendorcli'
 ```
 
-Create a release
+Create a release:
 
 ```console
-# First, create a new tag, if not already on a Git tag
-git tag -f -m 'Release v5.0.0' '5.0.0'
+# First, create a new tag
+git tag -m 'Release v5.0.0' 'v5.0.0'
 
-# Create a release
-# Expose a GITHUB_TOKEN to use for the release
+# Create a release (requires GITHUB_TOKEN)
 make release
-
-# Create a release for a vendor with the default .gorelease.vendor.yaml.tpl
-# Download the config file at internal/config/embedded-config.yaml
-# Optionally, download the .goreleaser.vendor.yaml file to use a custom one
-make vendor-release VENDOR_NAME='Upsun staging' VENDOR_BINARY='upsunstg'
 ```
 
 ## Licenses
