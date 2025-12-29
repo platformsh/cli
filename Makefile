@@ -1,4 +1,4 @@
-PHP_VERSION = 8.2.29
+PHP_VERSION = 8.4.16
 LEGACY_CLI_VERSION = 4.28.2
 
 GORELEASER_ID ?= upsun
@@ -6,10 +6,6 @@ GORELEASER_ID ?= upsun
 ifeq ($(GOOS), darwin)
 	GORELEASER_ID=$(GORELEASER_ID)-macos
 endif
-
-# The OpenSSL version must be compatible with the PHP version.
-# See: https://www.php.net/manual/en/openssl.requirements.php
-OPENSSL_VERSION = 1.1.1t
 
 GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 GOARCH := $(shell uname -m)
@@ -20,51 +16,55 @@ ifeq ($(GOARCH), aarch64)
 	GOARCH=arm64
 endif
 
-PHP_BINARY_PATH := internal/legacy/archives/php_$(GOOS)_$(GOARCH)
 VERSION := $(shell git describe --always)
 
 # Tooling versions
 GORELEASER_VERSION=v2.12.0
 
+# PHP binaries are downloaded from cli-php-builds releases.
+# See: https://github.com/upsun/cli-php-builds
+PHP_BUILDS_REPO = upsun/cli-php-builds
+PHP_RELEASE_URL = https://github.com/$(PHP_BUILDS_REPO)/releases/download/php-$(PHP_VERSION)
+
 internal/legacy/archives/platform.phar:
-	curl -L https://github.com/platformsh/legacy-cli/releases/download/v$(LEGACY_CLI_VERSION)/platform.phar -o internal/legacy/archives/platform.phar
+	mkdir -p internal/legacy/archives
+	curl -fSL https://github.com/platformsh/legacy-cli/releases/download/v$(LEGACY_CLI_VERSION)/platform.phar -o internal/legacy/archives/platform.phar
 
-internal/legacy/archives/php_windows_amd64: internal/legacy/archives/php_windows.zip internal/legacy/archives/cacert.pem
-
+# Download PHP binary for the current platform.
 internal/legacy/archives/php_darwin_$(GOARCH):
-	bash build-php-brew.sh $(GOOS) $(PHP_VERSION) $(OPENSSL_VERSION)
-	mv -f $(GOOS)/php-$(PHP_VERSION)/sapi/cli/php $(PHP_BINARY_PATH)
-	rm -rf $(GOOS)
+	mkdir -p internal/legacy/archives
+	curl -fSL "$(PHP_RELEASE_URL)/php-$(PHP_VERSION)-darwin-$(GOARCH)" -o $@
+	chmod +x $@
 
 internal/legacy/archives/php_linux_$(GOARCH):
-	cp ext/extensions.txt ext/static-php-cli/docker
-	docker buildx build \
-		--build-arg GOARCH=$(GOARCH) \
-		--build-arg PHP_VERSION=$(PHP_VERSION) \
-		--build-arg USE_BACKUP_ADDRESS=yes \
-		--file=./Dockerfile.php \
-		--platform=linux/$(GOARCH) \
-		--output=type=local,dest=./internal/legacy/archives/ \
-		--progress=plain \
-		ext/static-php-cli/docker
+	mkdir -p internal/legacy/archives
+	curl -fSL "$(PHP_RELEASE_URL)/php-$(PHP_VERSION)-linux-$(GOARCH)" -o $@
+	chmod +x $@
 
-PHP_WINDOWS_REMOTE_FILENAME := "php-$(PHP_VERSION)-nts-Win32-vs16-x64.zip"
-internal/legacy/archives/php_windows.zip:
-	( \
-	  set -e ;\
-	  mkdir -p internal/legacy/archives ;\
-	  cd internal/legacy/archives ;\
-	  curl -f "https://windows.php.net/downloads/releases/$(PHP_WINDOWS_REMOTE_FILENAME)" > php_windows.zip ;\
-	  curl -f https://windows.php.net/downloads/releases/sha256sum.txt | grep "$(PHP_WINDOWS_REMOTE_FILENAME)" | sed s/"$(PHP_WINDOWS_REMOTE_FILENAME)"/"php_windows.zip"/g > php_windows.zip.sha256 ;\
-	  sha256sum -c php_windows.zip.sha256 ;\
-	)
+internal/legacy/archives/php_windows_amd64: internal/legacy/archives/php_windows.exe internal/legacy/archives/cacert.pem
+
+internal/legacy/archives/php_windows.exe:
+	mkdir -p internal/legacy/archives
+	curl -fSL "$(PHP_RELEASE_URL)/php-$(PHP_VERSION)-windows-amd64.exe" -o $@
 
 .PHONY: internal/legacy/archives/cacert.pem
 internal/legacy/archives/cacert.pem:
 	mkdir -p internal/legacy/archives
-	curl https://curl.se/ca/cacert.pem > internal/legacy/archives/cacert.pem
+	curl -fSL https://curl.se/ca/cacert.pem -o internal/legacy/archives/cacert.pem
 
-php: $(PHP_BINARY_PATH)
+# Download all PHP binaries (for release builds).
+.PHONY: download-php
+download-php:
+	mkdir -p internal/legacy/archives
+	curl -fSL "$(PHP_RELEASE_URL)/php-$(PHP_VERSION)-linux-amd64" -o internal/legacy/archives/php_linux_amd64
+	curl -fSL "$(PHP_RELEASE_URL)/php-$(PHP_VERSION)-linux-arm64" -o internal/legacy/archives/php_linux_arm64
+	curl -fSL "$(PHP_RELEASE_URL)/php-$(PHP_VERSION)-darwin-amd64" -o internal/legacy/archives/php_darwin_amd64
+	curl -fSL "$(PHP_RELEASE_URL)/php-$(PHP_VERSION)-darwin-arm64" -o internal/legacy/archives/php_darwin_arm64
+	curl -fSL "$(PHP_RELEASE_URL)/php-$(PHP_VERSION)-windows-amd64.exe" -o internal/legacy/archives/php_windows.exe
+	curl -fSL https://curl.se/ca/cacert.pem -o internal/legacy/archives/cacert.pem
+	chmod +x internal/legacy/archives/php_linux_* internal/legacy/archives/php_darwin_*
+
+php: internal/legacy/archives/php_$(GOOS)_$(GOARCH)
 
 .PHONY: goreleaser
 goreleaser:
