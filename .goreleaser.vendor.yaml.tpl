@@ -25,13 +25,7 @@ builds:
         goarch: arm64
     ldflags:
       - -s -w
-      - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
-      - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
-      - -X "github.com/platformsh/cli/internal/config.Version={{.Version}}"
-      - -X "github.com/platformsh/cli/internal/config.Commit={{.Commit}}"
-      - -X "github.com/platformsh/cli/internal/config.Date={{.Date}}"
-      - -X "github.com/platformsh/cli/internal/config.Vendor=${VENDOR_BINARY}"
-      - -X "github.com/platformsh/cli/internal/config.BuiltBy=goreleaser"
+      - -X "github.com/upsun/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
     main: ./cmd/platform
   - binary: ${VENDOR_BINARY}
     id: ${VENDOR_BINARY}-macos
@@ -46,13 +40,7 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X "github.com/platformsh/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
-      - -X "github.com/platformsh/cli/internal/legacy.LegacyCLIVersion={{.Env.LEGACY_CLI_VERSION}}"
-      - -X "github.com/platformsh/cli/internal/config.Version={{.Version}}"
-      - -X "github.com/platformsh/cli/internal/config.Commit={{.Commit}}"
-      - -X "github.com/platformsh/cli/internal/config.Date={{.Date}}"
-      - -X "github.com/platformsh/cli/internal/config.Vendor=${VENDOR_BINARY}"
-      - -X "github.com/platformsh/cli/internal/config.BuiltBy=goreleaser"
+      - -X "github.com/upsun/cli/internal/legacy.PHPVersion={{.Env.PHP_VERSION}}"
     main: ./cmd/platform
 
 checksum:
@@ -81,7 +69,7 @@ nfpms:
     description: ${VENDOR_NAME} CLI
     maintainer: Antonis Kalipetis <antonis.kalipetis@upsun.com>
     license: MIT
-    vendor: Platform.sh
+    vendor: Upsun
     ids:
       - ${VENDOR_BINARY}
     formats:
