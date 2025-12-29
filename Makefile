@@ -1,5 +1,4 @@
 PHP_VERSION = 8.4.16
-LEGACY_CLI_VERSION = 4.28.2
 
 GORELEASER_ID ?= upsun
 
@@ -26,9 +25,14 @@ GORELEASER_VERSION=v2.12.0
 PHP_BUILDS_REPO = upsun/cli-php-builds
 PHP_RELEASE_URL = https://github.com/$(PHP_BUILDS_REPO)/releases/download/php-$(PHP_VERSION)
 
-internal/legacy/archives/platform.phar:
+# Build the legacy CLI phar from the legacy/ subdirectory.
+internal/legacy/archives/platform.phar: legacy/vendor/autoload.php
 	mkdir -p internal/legacy/archives
-	curl -fSL https://github.com/platformsh/legacy-cli/releases/download/v$(LEGACY_CLI_VERSION)/platform.phar -o internal/legacy/archives/platform.phar
+	cd legacy && php -d phar.readonly=0 vendor/bin/box compile
+	mv legacy/platform.phar internal/legacy/archives/platform.phar
+
+legacy/vendor/autoload.php:
+	cd legacy && composer install --no-dev --no-interaction
 
 # Download PHP binary for the current platform.
 internal/legacy/archives/php_darwin_$(GOARCH):
@@ -72,19 +76,20 @@ goreleaser:
 
 .PHONY: single
 single: goreleaser internal/legacy/archives/platform.phar php ## Build a single target release
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --clean
+	PHP_VERSION=$(PHP_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --clean
 
 .PHONY: snapshot ## Build a snapshot release
 snapshot: goreleaser internal/legacy/archives/platform.phar php
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser build --snapshot --clean
+	PHP_VERSION=$(PHP_VERSION) goreleaser build --snapshot --clean
 
 .PHONY: clean-phar
 clean-phar: ## Clean up the legacy CLI phar
 	rm -f internal/legacy/archives/platform.phar
+	rm -rf legacy/vendor
 
 .PHONY: release
 release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Create and publish a release
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser release --clean
+	PHP_VERSION=$(PHP_VERSION) goreleaser release --clean
 	VERSION=$(VERSION) bash cloudsmith.sh
 
 .PHONY: test
@@ -117,12 +122,12 @@ endif
 
 .PHONY: vendor-release
 vendor-release:  check-vendor .goreleaser.vendor.yaml goreleaser clean-phar internal/legacy/archives/platform.phar php ## Release a vendor CLI
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) VENDOR_BINARY="$(VENDOR_BINARY)" VENDOR_NAME="$(VENDOR_NAME)" goreleaser release --clean --config=.goreleaser.vendor.yaml
+	PHP_VERSION=$(PHP_VERSION) VENDOR_BINARY="$(VENDOR_BINARY)" VENDOR_NAME="$(VENDOR_NAME)" goreleaser release --clean --config=.goreleaser.vendor.yaml
 
 .PHONY: vendor-snapshot
 vendor-snapshot: check-vendor .goreleaser.vendor.yaml goreleaser internal/legacy/archives/platform.phar php ## Build a vendor CLI snapshot
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) VENDOR_BINARY="$(VENDOR_BINARY)" VENDOR_NAME="$(VENDOR_NAME)" goreleaser build --snapshot --clean --config=.goreleaser.vendor.yaml
+	PHP_VERSION=$(PHP_VERSION) VENDOR_BINARY="$(VENDOR_BINARY)" VENDOR_NAME="$(VENDOR_NAME)" goreleaser build --snapshot --clean --config=.goreleaser.vendor.yaml
 
 .PHONY: goreleaser-check
 goreleaser-check:  goreleaser ## Check the goreleaser configs
-	PHP_VERSION=$(PHP_VERSION) LEGACY_CLI_VERSION=$(LEGACY_CLI_VERSION) goreleaser check --config=.goreleaser.yaml
+	PHP_VERSION=$(PHP_VERSION) goreleaser check --config=.goreleaser.yaml
