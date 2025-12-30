@@ -1,0 +1,15 @@
+# Ignore OS X metadata.
+.DS_Store
+
+# Ignore PhpStorm project files.
+.idea
+
+# Ignore configuration files that may contain sensitive information.
+sites/*/settings.local.php
+
+# Ignore paths that contain user-generated content.
+sites/*/files
+sites/*/private
+
+# Ignore SimpleTest multi-site environment.
+sites/simpletest

@@ -1,0 +1,44 @@
+{
+  "chmod": "0755",
+  "directories": [
+    "bin",
+    "config",
+    "resources"
+  ],
+  "files": [
+    "config.yaml",
+    "config-defaults.yaml",
+    "constants.php",
+    "shell-config.tmpl.rc",
+    "shell-config-bash.tmpl.rc",
+    "shell-config-bash-direct.tmpl.rc",
+    "vendor/autoload.php",
+    "vendor/symfony/console/Resources/bin/hiddeninput.exe",
+    "vendor/composer/ca-bundle/res/cacert.pem"
+  ],
+  "finder": [
+    {
+      "in": "src",
+      "exclude": ["Rector"]
+    },
+    {
+      "in": "vendor",
+      "name": "*.php*",
+      "exclude": [
+        "phpunit",
+        "Tests",
+        "tests",
+        "giggsey/libphonenumber-for-php/src/carrier/data",
+        "giggsey/libphonenumber-for-php/src/geocoding/data",
+        "giggsey/locale/data"
+      ]
+    }
+  ],
+  "main": "bin/platform",
+  "output": "platform.phar",
+  "stub": "resources/phar-stub.php",
+  "compactors": [
+      "KevinGH\\Box\\Compactor\\Json",
+      "KevinGH\\Box\\Compactor\\Php"
+  ]
+}

@@ -1,0 +1,89 @@
+# Platform.sh CLI configuration overrides.
+# See config-defaults.yaml for the default values and a list of other required keys.
+application:
+  name: 'Platform.sh CLI'
+  slug: 'platformsh-cli'
+  executable: 'platform'
+  env_prefix: 'PLATFORMSH_CLI_'
+  user_config_dir: '.platformsh'
+
+  package_name: 'platformsh/cli'
+  installer_url: 'https://platform.sh/cli/installer'
+  manifest_url: 'https://platform.sh/cli/manifest.json'
+  github_repo: 'platformsh/legacy-cli'
+
+  mark_unwrapped_legacy: true
+  wrapped_disabled_commands:
+    - self:install
+    - self:update
+
+local:
+  # A legacy project config file from versions < 3.
+  project_config_legacy: 'platform-project.yaml'
+
+service:
+  name: 'Platform.sh'
+  env_prefix: 'PLATFORM_'
+
+  project_config_dir: '.platform'
+  app_config_file: '.platform.app.yaml'
+
+  console_url: 'https://console.platform.sh'
+
+  docs_url: 'https://docs.platform.sh'
+  docs_search_url: 'https://docs.platform.sh/search.html?q={{ terms }}'
+
+  register_url: 'https://auth.api.platform.sh/register'
+  reset_password_url: 'https://auth.api.platform.sh/reset-password'
+
+  pricing_url: 'https://platform.sh/pricing'
+
+  activity_type_list_url: 'https://docs.upsun.com/anchors/fixed/integrations/activity-scripts/type/'
+
+  runtime_operations_help_url: 'https://docs.upsun.com/anchors/fixed/app/runtime-operations/'
+
+api:
+  base_url: 'https://api.platform.sh'
+
+  auth_url: 'https://auth.api.platform.sh'
+  oauth2_client_id: 'platform-cli'
+
+  organization_types: [flexible, fixed]
+  default_organization_type: flexible
+
+  organizations: true
+  user_verification: true
+  metrics: true
+  teams: true
+
+  vendor_filter: 'platformsh'
+
+ssh:
+  domain_wildcards: ['*.platform.sh']
+
+detection:
+  git_remote_name: 'platform'
+  git_domain: 'platform.sh' # matches git.eu-5.platform.sh, etc.
+  site_domains: ['platform.sh', 'platformsh.site', 'tst.site']
+  cluster_header: 'X-Platform-Cluster'
+
+migrate:
+  prompt: true
+  docs_url: https://docs.upsun.com/anchors/fixed/cli/
+
+warnings:
+  non_production_domains_msg: |
+    This feature is only available to Enterprise and Elite customers.
+    If you're an Enterprise or Elite customer, contact support to enable the feature.
+    Otherwise contact sales first to upgrade your plan.
+
+    See: https://docs.upsun.com/anchors/fixed/get-support/
+
+  guaranteed_resources_msg: |
+    You have chosen to allocate guaranteed resources for app(s) and/or service(s).
+    This change may affect resource costs. See: <info>https://upsun.com/pricing/</info>
+
+    This process requires a redeployment of containers on their own host, which may take a few minutes to complete.
+
+  guaranteed_resources_branch_msg: |
+    Guaranteed resources from the parent will be provisioned, impacting your bill.

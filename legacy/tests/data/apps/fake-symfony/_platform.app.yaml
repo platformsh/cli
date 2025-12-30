@@ -1,0 +1,7 @@
+# This app pretends to be a Symfony application, but it doesn't even contain a
+# composer.json file.
+
+name: fake-symfony
+type: php
+build:
+  flavor: symfony

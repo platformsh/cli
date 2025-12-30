@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+/**
+ * @file
+ * This is the front/entry script for the CLI.
+ */
+
+const CLI_FILE = __FILE__;
+
+// Disable the memory limit.
+ini_set('memory_limit', '-1');
+
+// Send errors to stderr, not stdout.
+ini_set('display_errors', 'stderr');
+
+// Avoid displaying PHP errors twice.
+ini_set('log_errors', '0');
+
+// Disable early deprecation notices, e.g. those relating to Symfony Console.
+error_reporting(E_ALL & ~E_DEPRECATED);
+
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require __DIR__ . '/../vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/../../../autoload.php')) {
+    // we are globally installed via Composer
+    require __DIR__ . '/../../../autoload.php';
+} else {
+    echo "Composer autoload file not found.\n";
+    echo "You need to run 'composer install'.\n";
+    exit(1);
+}
+
+(new \Platformsh\Cli\Application())->run();
