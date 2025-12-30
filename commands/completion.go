@@ -18,9 +18,10 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 		Args:          cobra.MaximumNArgs(1),
 		SilenceErrors: true,
 		Run: func(cmd *cobra.Command, args []string) {
-			completionArgs := []string{"_completion", "-g", "--program", cnf.Application.Executable}
+			// The legacy 5.x CLI uses Symfony's native completion command.
+			completionArgs := []string{"completion"}
 			if len(args) > 0 {
-				completionArgs = append(completionArgs, "--shell-type", args[0])
+				completionArgs = append(completionArgs, args[0])
 			}
 			var b bytes.Buffer
 			c := makeLegacyCLIWrapper(cnf, &b, cmd.ErrOrStderr(), cmd.InOrStdin())
@@ -43,7 +44,6 @@ func newCompletionCommand(cnf *config.Config) *cobra.Command {
 				filepath.Base(pharPath),
 				cnf.Application.Executable,
 			)
-			fmt.Fprintln(cmd.OutOrStdout(), "#compdef "+cnf.Application.Executable)
 			fmt.Fprintln(cmd.OutOrStdout(), completions)
 		},
 	}

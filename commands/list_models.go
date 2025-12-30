@@ -162,6 +162,50 @@ type List struct {
 	Namespaces  []Namespace `json:"namespaces,omitempty"`
 }
 
+// UnmarshalJSON handles both array and object formats for the commands field.
+// Symfony 7 outputs commands as a map (object) with command names as keys,
+// while older versions output an array.
+func (l *List) UnmarshalJSON(data []byte) error {
+	// Parse into raw JSON to detect the commands format
+	var raw struct {
+		Application Application     `json:"application"`
+		Commands    json.RawMessage `json:"commands"`
+		Namespace   string          `json:"namespace,omitempty"`
+		Namespaces  []Namespace     `json:"namespaces,omitempty"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	l.Application = raw.Application
+	l.Namespace = raw.Namespace
+	l.Namespaces = raw.Namespaces
+
+	// Check if commands is an object (starts with '{') or array (starts with '[')
+	if len(raw.Commands) > 0 && raw.Commands[0] == '{' {
+		// Symfony 7 format: commands is a map
+		var cmdMap map[string]*Command
+		if err := json.Unmarshal(raw.Commands, &cmdMap); err != nil {
+			return err
+		}
+		l.Commands = make([]*Command, 0, len(cmdMap))
+		for _, cmd := range cmdMap {
+			l.Commands = append(l.Commands, cmd)
+		}
+		// Sort commands by name for consistent ordering
+		sort.Slice(l.Commands, func(i, j int) bool {
+			return l.Commands[i].Name.String() < l.Commands[j].Name.String()
+		})
+	} else {
+		// Older format: commands is an array
+		if err := json.Unmarshal(raw.Commands, &l.Commands); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type Application struct {
 	Name       string `json:"name"`
 	Version    string `json:"version"`
@@ -427,6 +471,40 @@ func (a *Any) UnmarshalJSON(text []byte) error {
 type Namespace struct {
 	ID       string   `json:"id"`
 	Commands []string `json:"commands"` // the same as Command.Name
+}
+
+// UnmarshalJSON handles both array and object formats for the commands field.
+// Symfony 7 outputs commands as a map with command names as keys.
+func (n *Namespace) UnmarshalJSON(data []byte) error {
+	var raw struct {
+		ID       string          `json:"id"`
+		Commands json.RawMessage `json:"commands"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	n.ID = raw.ID
+
+	if len(raw.Commands) > 0 && raw.Commands[0] == '{' {
+		// Symfony 7 format: commands is a map with command names as keys
+		var cmdMap map[string]any
+		if err := json.Unmarshal(raw.Commands, &cmdMap); err != nil {
+			return err
+		}
+		n.Commands = make([]string, 0, len(cmdMap))
+		for name := range cmdMap {
+			n.Commands = append(n.Commands, name)
+		}
+		sort.Strings(n.Commands)
+	} else {
+		// Older format: commands is an array of strings
+		if err := json.Unmarshal(raw.Commands, &n.Commands); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (l *List) DescribesNamespace() bool {

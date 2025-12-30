@@ -58,6 +58,7 @@ linters:
       - third_party$
       - builtin$
       - examples$
+      - legacy
 formatters:
   enable:
     - gofmt
@@ -65,7 +66,7 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/platformsh/cli
+        - github.com/upsun/cli
   exclusions:
     generated: lax
     paths:
@@ -73,3 +74,4 @@ formatters:
       - third_party$
       - builtin$
       - examples$
+      - legacy

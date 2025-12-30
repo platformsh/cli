@@ -14,6 +14,9 @@
     "shell-config-bash-direct.tmpl.rc",
     "vendor/autoload.php",
     "vendor/symfony/console/Resources/bin/hiddeninput.exe",
+    "vendor/symfony/console/Resources/completion.bash",
+    "vendor/symfony/console/Resources/completion.fish",
+    "vendor/symfony/console/Resources/completion.zsh",
     "vendor/composer/ca-bundle/res/cacert.pem"
   ],
   "finder": [
