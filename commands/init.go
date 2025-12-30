@@ -133,15 +133,15 @@ func runInitCommand(
 
 	var isInteractive = !viper.GetBool("no-interaction")
 
-	debugLog("Checking selected organization")
+	debugLogf("Checking selected organization")
 	org, err := handleOrganizations(cmd.Context(), cnf, legacyCLIClient, initOptions)
 	if err != nil {
 		return err
 	}
 	if org != nil {
-		debugLog("Selected organization: %s (%s)", org.Label, org.ID)
+		debugLogf("Selected organization: %s (%s)", org.Label, org.ID)
 		if initOptions.ProjectID != "" {
-			debugLog("Selected project: %s", initOptions.ProjectID)
+			debugLogf("Selected project: %s", initOptions.ProjectID)
 		}
 	}
 
@@ -176,7 +176,7 @@ func runInitCommand(
 		return err
 	}
 
-	debugLog("Analyzing repository")
+	debugLogf("Analyzing repository")
 	dg, err := generateDigest(cmd.Context(), gitRoot)
 	if err != nil {
 		return err
@@ -188,7 +188,7 @@ func runInitCommand(
 	initOptions.IsInteractive = isInteractive
 	initOptions.Yes = viper.GetBool("yes")
 	initOptions.IsDebug = viper.GetBool("debug")
-	initOptions.DebugLogFunc = debugLog
+	initOptions.DebugLogFunc = debugLogf
 
 	return _init.RunAIConfig(cmd.Context(), cnf, dg, gitRoot, initOptions, cmd.OutOrStdout(), cmd.ErrOrStderr())
 }

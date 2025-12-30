@@ -59,6 +59,7 @@ func (c *Config) TempDir() (string, error) {
 }
 
 // WritableUserDir returns the path to a writable user-level directory.
+//
 // Deprecated: unless backwards compatibility is desired, TempDir is preferable.
 func (c *Config) WritableUserDir() (string, error) {
 	if c.writableUserDir != "" {

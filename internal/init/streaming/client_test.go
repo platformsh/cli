@@ -22,17 +22,17 @@ func TestStreaming(t *testing.T) {
 			t.Fatal(err)
 		}
 		defer stream.Close()
-		stream.Info("first message")
+		stream.Infof("first message")
 		time.Sleep(20 * time.Millisecond)
-		stream.Warn("warning")
-		stream.Debug("debug")
+		stream.Warnf("warning")
+		stream.Debugf("debug")
 		stream.Output("output chunk 1\n")
 		time.Sleep(20 * time.Millisecond)
 		stream.Output("output chunk 2\n")
 		stream.Output("output chunk 3\n")
 		stream.LogWithTags(streaming.LogLevelInfo, "tagged message", "example")
-		stream.Error("error")
-		stream.Info("more output")
+		stream.Errorf("error")
+		stream.Infof("more output")
 	}))
 	t.Cleanup(s.Close)
 
@@ -154,7 +154,7 @@ func (h *ServerHandler) send(msg *streaming.Message) {
 	h.mux.Unlock()
 }
 
-func (h *ServerHandler) log(level, format string, args ...any) {
+func (h *ServerHandler) logf(level, format string, args ...any) {
 	h.send(&streaming.Message{
 		Type:    streaming.MessageTypeLog,
 		Level:   level,
@@ -171,18 +171,18 @@ func (h *ServerHandler) LogWithTags(level, message string, tags ...string) {
 	})
 }
 
-func (h *ServerHandler) Debug(format string, args ...any) {
-	h.log(streaming.LogLevelDebug, format, args...)
+func (h *ServerHandler) Debugf(format string, args ...any) {
+	h.logf(streaming.LogLevelDebug, format, args...)
 }
 
-func (h *ServerHandler) Info(format string, args ...any) {
-	h.log(streaming.LogLevelInfo, format, args...)
+func (h *ServerHandler) Infof(format string, args ...any) {
+	h.logf(streaming.LogLevelInfo, format, args...)
 }
 
-func (h *ServerHandler) Warn(format string, args ...any) {
-	h.log(streaming.LogLevelWarn, format, args...)
+func (h *ServerHandler) Warnf(format string, args ...any) {
+	h.logf(streaming.LogLevelWarn, format, args...)
 }
 
-func (h *ServerHandler) Error(format string, args ...any) {
-	h.log(streaming.LogLevelError, format, args...)
+func (h *ServerHandler) Errorf(format string, args ...any) {
+	h.logf(streaming.LogLevelError, format, args...)
 }

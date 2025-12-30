@@ -52,7 +52,7 @@ func Save(state State, cnf *config.Config) error {
 
 // getPath determines the path to the state JSON file depending on config.
 func getPath(cnf *config.Config) (string, error) {
-	writableDir, err := cnf.WritableUserDir()
+	writableDir, err := cnf.WritableUserDir() //nolint:staticcheck // backwards compatibility is needed for state files
 	if err != nil {
 		return "", err
 	}

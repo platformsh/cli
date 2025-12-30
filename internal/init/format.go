@@ -50,6 +50,7 @@ func defaultSpinner(w io.Writer) *spinner.Spinner {
 	return spinner.New(spinner.CharSets[23], 80*time.Millisecond, spinner.WithWriter(w))
 }
 
+//nolint:goprintffuncname // printWithSpinnerf is unreadable
 func printWithSpinner(spinr *spinner.Spinner, colorName, format string, args ...any) {
 	_ = spinr.Color(colorName)
 	spinr.Suffix = " " + colorFunc(colorName)(format, args...)

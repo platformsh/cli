@@ -15,7 +15,7 @@ func TestFindConfigDir(t *testing.T) {
 
 	t.Run("XDG_CONFIG_HOME exists", func(t *testing.T) {
 		switch runtime.GOOS {
-		case "windows", "darwin", "ios", "plan9": //nolint:goconst
+		case "windows", "darwin", "ios", "plan9":
 			t.Skip()
 		}
 		err := os.Setenv("XDG_CONFIG_HOME", tempDir)

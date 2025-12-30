@@ -80,7 +80,7 @@ func newRootCommand(cnf *config.Config, assets *vendorization.VendorAssets) *cob
 			}
 			if alt.ShouldUpdate(cnf) {
 				go func() {
-					if err := alt.Update(cmd.Context(), cnf, debugLog); err != nil {
+					if err := alt.Update(cmd.Context(), cnf, debugLogf); err != nil {
 						cmd.PrintErrln("Error updating config:", color.RedString(err.Error()))
 					}
 				}()
@@ -243,7 +243,7 @@ func isUnderHomebrew(binary string) bool {
 	return strings.HasPrefix(binary, brewBinPrefix)
 }
 
-func debugLog(format string, v ...any) {
+func debugLogf(format string, v ...any) {
 	if !viper.GetBool("debug") {
 		return
 	}
@@ -256,7 +256,7 @@ func exitWithError(err error) {
 	var execErr *exec.ExitError
 	if errors.As(err, &execErr) {
 		exitCode := execErr.ExitCode()
-		debugLog(err.Error())
+		debugLogf(err.Error())
 		os.Exit(exitCode)
 	}
 	if !viper.GetBool("quiet") {
@@ -269,7 +269,7 @@ func makeLegacyCLIWrapper(cnf *config.Config, stdout, stderr io.Writer, stdin io
 	return &legacy.CLIWrapper{
 		Config:             cnf,
 		Version:            config.Version,
-		DebugLogFunc:       debugLog,
+		DebugLogFunc:       debugLogf,
 		DisableInteraction: viper.GetBool("no-interaction"),
 		Stdout:             stdout,
 		Stderr:             stderr,
