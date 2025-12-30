@@ -42,3 +42,25 @@ golangci-lint:
   extends: .go-setup
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/golangci/golangci-lint:v2.4
   script: golangci-lint run --timeout 0 --verbose
+
+legacy-php:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.4-cli
+  interruptible: true
+  cache:
+    key:
+      files:
+        - legacy/composer.lock
+    paths:
+      - ${COMPOSER_HOME}/
+  variables:
+    COMPOSER_HOME: $CI_PROJECT_DIR/.composer
+  before_script:
+    - apt-get update && apt-get install -y zip unzip git
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    - cd legacy
+    - composer install --no-interaction
+  script:
+    - make lint-php-cs-fixer lint-phpstan
+    - ./scripts/test/unit.sh

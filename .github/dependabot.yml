@@ -1,7 +1,10 @@
 version: 2
 updates:
-  # Enable weekly automated version updates for Composer dependencies.
   - package-ecosystem: composer
+    directory: /legacy
+    schedule:
+      interval: weekly
+  - package-ecosystem: gomod
     directory: /
     schedule:
       interval: weekly
