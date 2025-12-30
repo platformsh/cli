@@ -133,7 +133,7 @@ class Shell
      * @param string[]|string $args
      * @param array<string, string> $env
      */
-    private function setupProcess(string|array $args, ?string $dir = null, array $env = [], int|null $timeout = 3600, mixed $input = null): Process
+    private function setupProcess(string|array $args, ?string $dir = null, array $env = [], ?int $timeout = 3600, mixed $input = null): Process
     {
         if (is_string($args)) {
             $process = Process::fromShellCommandline($args, null, null, $input, $timeout);

@@ -130,9 +130,9 @@ class EnvironmentDeleteCommand extends CommandBase
             }
             $inactive = array_filter(
                 $environments,
-                fn($environment): bool =>
+                fn($environment): bool
                     /** @var Environment $environment */
-                    $environment->status == 'inactive',
+                    => $environment->status == 'inactive',
             );
             $this->stdErr->writeln($this->formatPlural(count($inactive), 'inactive environment') . ' found.');
             $this->stdErr->writeln('');

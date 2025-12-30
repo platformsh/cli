@@ -109,7 +109,7 @@ abstract class CommandBase extends Command implements MultiAwareInterface
      *
      * @param int-mask-of<InputOption::*>|null $mode
      */
-    protected function addHiddenOption(string $name, string|null $shortcut = null, ?int $mode = null, string $description = '', mixed $default = null): static
+    protected function addHiddenOption(string $name, ?string $shortcut = null, ?int $mode = null, string $description = '', mixed $default = null): static
     {
         $this->getDefinition()->addOption(new HiddenInputOption($name, $shortcut, $mode, $description, $default));
 

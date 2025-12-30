@@ -369,7 +369,7 @@ class LocalBuild
      *   False if the build hooks fail, true if they succeed, null if not
      *   applicable.
      */
-    protected function runPostBuildHooks(array $appConfig, string $buildDir): bool|null
+    protected function runPostBuildHooks(array $appConfig, string $buildDir): ?bool
     {
         if (!isset($appConfig['hooks']['build'])) {
             return null;
@@ -392,7 +392,7 @@ class LocalBuild
      *   False if the deploy hooks fail, true if they succeed, null if not
      *   applicable.
      */
-    protected function runDeployHooks(array $appConfig, string $appDir): bool|null
+    protected function runDeployHooks(array $appConfig, string $appDir): ?bool
     {
         if (empty($this->settings['run-deploy-hooks'])) {
             return null;

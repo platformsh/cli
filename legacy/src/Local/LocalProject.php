@@ -258,7 +258,7 @@ class LocalProject
      *
      * @throws \Exception
      */
-    public function getProjectConfig(?string $projectRoot = null): array|null
+    public function getProjectConfig(?string $projectRoot = null): ?array
     {
         $projectRoot = $projectRoot ?: $this->getProjectRoot();
         if (isset(self::$projectConfigs[$projectRoot])) {

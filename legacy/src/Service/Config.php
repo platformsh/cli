@@ -97,7 +97,7 @@ class Config
      *
      * @return null|string|bool|array<mixed>|int|float
      */
-    public function get(string $name): bool|array|string|null|int|float
+    public function get(string $name): bool|array|string|int|float|null
     {
         $value = NestedArrayUtil::getNestedArrayValue($this->config, explode('.', $name), $exists);
         if (!$exists) {

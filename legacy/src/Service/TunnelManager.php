@@ -16,7 +16,7 @@ class TunnelManager
     public const LOCAL_IP = '127.0.0.1';
 
     /** @var Tunnel[]|null */
-    private array|null $tunnels;
+    private ?array $tunnels;
 
     public function __construct(private readonly Config $config, private readonly Io $io, private readonly Relationships $relationships) {}
 

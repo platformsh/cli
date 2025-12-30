@@ -227,11 +227,11 @@ class VariableCommandUtil
             'optionName' => 'visible-build',
             'description' => 'Whether the variable should be visible at build time',
             'questionLine' => 'Should the variable be available at build time?',
-            'defaultCallback' => fn(array $values): bool =>
+            'defaultCallback' => fn(array $values): bool
                 // Variables that are visible at build-time will affect the
                 // build cache, so it is good to minimise the number of them.
                 // This defaults to true for project-level variables, false otherwise.
-                isset($values['level']) && $values['level'] === self::LEVEL_PROJECT,
+                => isset($values['level']) && $values['level'] === self::LEVEL_PROJECT,
             'avoidQuestion' => true,
         ]);
         $fields['visible_runtime'] = new BooleanField('Visible at runtime', [

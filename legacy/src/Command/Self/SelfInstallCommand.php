@@ -388,7 +388,7 @@ class SelfInstallCommand extends CommandBase
      * @return string|false
      *   The absolute path to a shell config file, or false on failure.
      */
-    protected function findShellConfigFile(string|null $shellType): string|false
+    protected function findShellConfigFile(?string $shellType): string|false
     {
         // Special handling for the .environment file on Platform.sh environments.
         $envPrefix = $this->config->getStr('service.env_prefix');
@@ -477,9 +477,9 @@ class SelfInstallCommand extends CommandBase
      */
     private function generateBatContents(string $binTarget): string
     {
-        return "@ECHO OFF\r\n" .
-            "setlocal DISABLEDELAYEDEXPANSION\r\n" .
-            "SET BIN_TARGET=%~dp0/" . trim(OsUtil::escapeShellArg($binTarget), '"\'') . "\r\n" .
-            "php \"%BIN_TARGET%\" %*\r\n";
+        return "@ECHO OFF\r\n"
+            . "setlocal DISABLEDELAYEDEXPANSION\r\n"
+            . "SET BIN_TARGET=%~dp0/" . trim(OsUtil::escapeShellArg($binTarget), '"\'') . "\r\n"
+            . "php \"%BIN_TARGET%\" %*\r\n";
     }
 }

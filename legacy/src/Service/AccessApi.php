@@ -78,7 +78,7 @@ class AccessApi
      *
      * @return ProjectAccess|null
      */
-    private function doLoadLegacyProjectAccessByEmail(Project $project, string $email): ProjectAccess|null
+    private function doLoadLegacyProjectAccessByEmail(Project $project, string $email): ?ProjectAccess
     {
         foreach ($project->getUsers() as $user) {
             $info = $this->legacyUserInfo($user);

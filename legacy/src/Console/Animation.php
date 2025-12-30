@@ -13,7 +13,7 @@ class Animation
 
     protected int $currentFrame = 0;
     protected ?int $lastFrame = null;
-    protected null|int|float $lastFrameTime = null;
+    protected int|float|null $lastFrameTime = null;
 
     /**
      * @param OutputInterface $output
