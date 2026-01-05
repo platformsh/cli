@@ -1,7 +1,7 @@
 // Package tests contains integration tests, which run the CLI as a shell command and verify its output.
 //
 // A TEST_CLI_PATH environment variable can be provided to override the path to a
-// CLI executable. It defaults to `bin/platform` in the repository root.
+// CLI executable. It defaults to a built binary in the dist/ directory.
 package tests
 
 import (
@@ -33,9 +33,13 @@ func getCommandName(t *testing.T) string {
 		_, err := os.Stat(candidate)
 		require.NoError(t, err)
 	} else {
-		matches, _ := filepath.Glob("../bin/platform")
+		// Look for built binaries in dist/ directory (from make single or make snapshot).
+		matches, _ := filepath.Glob("../dist/*/upsun")
 		if len(matches) == 0 {
-			t.Skipf("skipping integration tests: CLI not found matching path: %s", "../bin/platform")
+			matches, _ = filepath.Glob("../dist/*/platform")
+		}
+		if len(matches) == 0 {
+			t.Skip("skipping integration tests: CLI not found in dist/ directory (run 'make single' to build)")
 			return ""
 		}
 		c, err := filepath.Abs(matches[0])

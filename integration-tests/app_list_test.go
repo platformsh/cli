@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/upsun/cli/pkg/mockapi"
 	"github.com/stretchr/testify/assert"
+	"github.com/upsun/cli/pkg/mockapi"
 )
 
 func TestAppList(t *testing.T) {

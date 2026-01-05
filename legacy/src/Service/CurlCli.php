@@ -69,18 +69,25 @@ readonly class CurlCli implements InputConfiguringInterface
         $process = Process::fromShellCommandline($commandline);
         $shouldRetry = false;
         $newToken = '';
-        $onOutput = function ($type, $buffer) use ($censor, $output, $stdErr, $process, $retryOn401, &$newToken, &$shouldRetry) {
+        $stdoutBuffer = '';
+        $onOutput = function ($type, $buffer) use ($censor, $output, $stdErr, $process, $retryOn401, &$newToken, &$shouldRetry, &$stdoutBuffer) {
             if ($shouldRetry) {
                 // Ensure there is no output after a retry is triggered.
                 return;
             }
             if ($type === Process::OUT) {
-                $output->write($buffer);
+                if ($retryOn401) {
+                    // Buffer stdout when we might need to retry on 401.
+                    $stdoutBuffer .= $buffer;
+                } else {
+                    $output->write($buffer);
+                }
                 return;
             }
             if ($type === Process::ERR) {
                 if ($retryOn401 && $this->parseCurlStatusCode($buffer) === 401 && $this->api->isLoggedIn()) {
                     $shouldRetry = true;
+                    $stdoutBuffer = '';  // Discard buffered stdout from the 401 response.
                     $process->clearErrorOutput();
                     $process->clearOutput();
 
@@ -104,6 +111,7 @@ readonly class CurlCli implements InputConfiguringInterface
             // Create a new curl process, replacing the access token.
             $commandline = $this->buildCurlCommand($url, $newToken, $input);
             $process = Process::fromShellCommandline($commandline);
+            $stdoutBuffer = '';  // Reset the buffer for the retry.
             $shouldRetry = false;
 
             // Update the $token variable in the $censor closure.
@@ -111,6 +119,11 @@ readonly class CurlCli implements InputConfiguringInterface
 
             $stdErr->writeln(sprintf('Running command: <info>%s</info>', $censor($commandline)), OutputInterface::VERBOSITY_VERBOSE);
             $process->run($onOutput);
+        }
+
+        // Flush buffered stdout after the final request.
+        if ($retryOn401 && $stdoutBuffer !== '') {
+            $output->write($stdoutBuffer);
         }
 
         return $process->getExitCode();

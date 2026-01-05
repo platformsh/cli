@@ -8,17 +8,19 @@ import (
 
 func newHelpCommand(_ *config.Config) *cobra.Command {
 	return &cobra.Command{
-		Use:                "help",
-		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+		Use: "help",
+		// Disable flag parsing so flags like --format are preserved for the legacy CLI.
+		DisableFlagParsing: true,
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd, _, e := cmd.Root().Find(args)
-			if cmd == nil || e != nil {
-				cmd.Printf("Unknown help topic %#q\n", args)
-				cobra.CheckErr(cmd.Root().Usage())
+			foundCmd, _, e := cmd.Root().Find(args)
+			if foundCmd == nil || e != nil || foundCmd == cmd.Root() {
+				// Unknown command or root: delegate to root's HelpFunc for legacy CLI.
+				cmd.Root().HelpFunc()(cmd.Root(), args)
 			} else {
-				cmd.InitDefaultHelpFlag()
-				cmd.InitDefaultVersionFlag()
-				cmd.HelpFunc()(cmd, args)
+				// Known Go-native command: use its built-in help.
+				foundCmd.InitDefaultHelpFlag()
+				foundCmd.InitDefaultVersionFlag()
+				foundCmd.HelpFunc()(foundCmd, args)
 			}
 		},
 	}

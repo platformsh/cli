@@ -91,8 +91,51 @@ jobs:
         run: ./scripts/test/unit.sh
 
       - name: Build platform.phar
+        run: php bin/platform self:build --no-interaction --output=platform.phar
+
+  integration-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ./go.mod
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl, openssl, phar, zlib
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('legacy/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install legacy dependencies
+        run: cd legacy && composer install --no-interaction
+
+      - name: Download PHP binary
+        run: make php
+
+      - name: Build platform.phar
         run: |
-          composer install --no-dev --no-interaction
-          curl -fSL https://github.com/box-project/box/releases/download/4.6.6/box.phar -o box.phar
-          chmod +x box.phar
-          php -d phar.readonly=0 box.phar compile
+          mkdir -p internal/legacy/archives
+          cd legacy && php bin/platform self:build --no-interaction --output=../internal/legacy/archives/platform.phar
+
+      - name: Build CLI
+        run: make single
+
+      - name: Run integration tests
+        run: make integration-test

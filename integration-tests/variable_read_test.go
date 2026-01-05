@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"github.com/upsun/cli/pkg/mockapi"
 	"github.com/stretchr/testify/assert"
+	"github.com/upsun/cli/pkg/mockapi"
 	"net/http/httptest"
 	"testing"
 )

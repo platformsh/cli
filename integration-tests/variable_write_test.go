@@ -4,8 +4,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/upsun/cli/pkg/mockapi"
 	"github.com/stretchr/testify/assert"
+	"github.com/upsun/cli/pkg/mockapi"
 )
 
 func TestVariableCreate(t *testing.T) {

@@ -26,17 +26,13 @@ PHP_BUILDS_REPO = upsun/cli-php-builds
 PHP_RELEASE_URL = https://github.com/$(PHP_BUILDS_REPO)/releases/download/php-$(PHP_VERSION)
 
 # Build the legacy CLI phar from the legacy/ subdirectory.
-internal/legacy/archives/platform.phar: legacy/vendor/autoload.php legacy/box.phar
+# The self:build command handles composer --no-dev rebuild, Box installation, and cache warming.
+internal/legacy/archives/platform.phar: legacy/vendor/autoload.php
 	mkdir -p internal/legacy/archives
-	cd legacy && php -d phar.readonly=0 box.phar compile
-	mv legacy/platform.phar internal/legacy/archives/platform.phar
+	cd legacy && php bin/platform self:build --no-interaction --output=../internal/legacy/archives/platform.phar
 
 legacy/vendor/autoload.php:
-	cd legacy && composer install --no-dev --no-interaction
-
-legacy/box.phar:
-	curl -fSL https://github.com/box-project/box/releases/download/4.6.6/box.phar -o legacy/box.phar
-	chmod +x legacy/box.phar
+	cd legacy && composer install --no-interaction
 
 # Download PHP binary for the current platform.
 internal/legacy/archives/php_darwin_$(GOARCH):
@@ -98,8 +94,12 @@ release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Cre
 
 .PHONY: test
 # "We encourage users of encoding/json to test their programs with GOEXPERIMENT=jsonv2 enabled" (https://tip.golang.org/doc/go1.25)
-test: ## Run unit tests
-	GOEXPERIMENT=jsonv2 go test -v -race -cover -count=1 ./...
+test: ## Run unit tests (excludes integration tests)
+	GOEXPERIMENT=jsonv2 go test -v -race -cover -count=1 $$(go list ./... | grep -v /integration-tests)
+
+.PHONY: integration-test
+integration-test: single ## Run integration tests (requires built CLI)
+	cd integration-tests && GOEXPERIMENT=jsonv2 go test -v -count=1 ./...
 
 .PHONY: lint
 lint: lint-gomod lint-golangci ## Run linters.
