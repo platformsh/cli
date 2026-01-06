@@ -77,7 +77,7 @@ func (f *cmdFactory) Run(args ...string) string {
 }
 
 // RunCombinedOutput runs a command and returns its stdout, stderr and the error.
-func (f *cmdFactory) RunCombinedOutput(args ...string) (string, string, error) {
+func (f *cmdFactory) RunCombinedOutput(args ...string) (stdOut, stdErr string, err error) {
 	cmd := f.buildCommand(args...)
 	var stdOutBuffer bytes.Buffer
 	var stdErrBuffer bytes.Buffer
@@ -87,7 +87,7 @@ func (f *cmdFactory) RunCombinedOutput(args ...string) (string, string, error) {
 		cmd.Stderr = io.MultiWriter(&stdErrBuffer, os.Stderr)
 	}
 	f.t.Log("Running:", cmd)
-	err := cmd.Run()
+	err = cmd.Run()
 	return stdOutBuffer.String(), stdErrBuffer.String(), err
 }
 

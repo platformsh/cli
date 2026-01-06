@@ -1,10 +1,12 @@
 package tests
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/upsun/cli/pkg/mockapi"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/upsun/cli/pkg/mockapi"
 )
 
 func TestVariableList(t *testing.T) {

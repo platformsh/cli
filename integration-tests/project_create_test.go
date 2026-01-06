@@ -29,7 +29,9 @@ func TestProjectCreate(t *testing.T) {
 
 	f := newCommandFactory(t, apiServer.URL, authServer.URL)
 
-	stdOut, stdErr, err := f.RunCombinedOutput("project:create", "-v", "--region", region, "--title", title, "--org", "cli-tests")
+	stdOut, stdErr, err := f.RunCombinedOutput(
+		"project:create", "-v", "--region", region, "--title", title, "--org", "cli-tests",
+	)
 	require.NoError(t, err)
 
 	// stdout should contain the project ID.

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/upsun/cli/pkg/mockapi"
 	"github.com/upsun/cli/pkg/mockssh"
 )

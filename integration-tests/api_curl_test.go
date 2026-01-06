@@ -25,6 +25,7 @@ func TestApiCurlCommand(t *testing.T) {
 			if !strings.HasPrefix(r.URL.Path, "/oauth2") {
 				if r.Header.Get("Authorization") != "Bearer "+validToken {
 					w.WriteHeader(http.StatusUnauthorized)
+					//nolint:lll
 					_ = json.NewEncoder(w).Encode(map[string]any{"error": "invalid_token", "error_description": "Invalid access token."})
 					return
 				}
@@ -33,15 +34,15 @@ func TestApiCurlCommand(t *testing.T) {
 		})
 	})
 	var tokenFetches int
-	mux.Post("/oauth2/token", func(w http.ResponseWriter, r *http.Request) {
+	mux.Post("/oauth2/token", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		tokenFetches++
 		_ = json.NewEncoder(w).Encode(map[string]any{"access_token": validToken, "expires_in": 900, "token_type": "bearer"})
 	})
-	mux.Get("/users/me", func(w http.ResponseWriter, r *http.Request) {
+	mux.Get("/users/me", func(w http.ResponseWriter, _ *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]any{"id": "userID", "email": "me@example.com"})
 	})
-	mux.Get("/fake-api-path", func(w http.ResponseWriter, r *http.Request) {
+	mux.Get("/fake-api-path", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte("success"))
 	})
 	mockServer := httptest.NewServer(mux)

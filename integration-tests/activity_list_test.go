@@ -43,7 +43,7 @@ func TestActivityList(t *testing.T) {
 			CompletionPercent: 100,
 			Project:           projectID,
 			Environments:      []string{"main"},
-			Description:       "<user>Mock User</user> created variable <variable>X</variable> on environment <environment>main</environment>",
+			Description:       "<user>Mock User</user> created variable <variable>X</variable> on environment <environment>main</environment>", //nolint:lll
 			Text:              "Mock User created variable X on environment main",
 			CreatedAt:         aprilFoolsDay10am,
 			UpdatedAt:         aprilFoolsDay11am,
@@ -103,7 +103,7 @@ func TestActivityList(t *testing.T) {
 			CompletionPercent: 100,
 			Project:           projectID,
 			Environments:      []string{"main"},
-			Description:       "<user>Mock User</user> created variable <variable>" + varName + "</variable> on environment <environment>main</environment>",
+			Description:       "<user>Mock User</user> created variable <variable>" + varName + "</variable> on environment <environment>main</environment>", //nolint:lll
 			Text:              "Mock User created variable " + varName + " on environment main",
 			CreatedAt:         createdAt,
 			UpdatedAt:         createdAt,

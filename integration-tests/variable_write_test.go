@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"github.com/upsun/cli/pkg/mockapi"
 )
 
@@ -40,23 +41,28 @@ func TestVariableCreate(t *testing.T) {
 
 	f := newCommandFactory(t, apiServer.URL, authServer.URL)
 
+	//nolint:lll
 	_, stdErr, err := f.RunCombinedOutput("var:create", "-p", projectID, "-l", "e", "-e", "main", "env:TEST", "--value", "env-level-value")
 	assert.NoError(t, err)
 	assert.Contains(t, stdErr, "Creating variable env:TEST on the environment main")
 
 	assertTrimmed(t, "env-level-value", f.Run("var:get", "-p", projectID, "-e", "main", "env:TEST", "-P", "value"))
 
+	//nolint:lll
 	_, stdErr, err = f.RunCombinedOutput("var:create", "-p", projectID, "env:TEST", "-l", "p", "--value", "project-level-value")
 	assert.NoError(t, err)
 	assert.Contains(t, stdErr, "Creating variable env:TEST on the project "+projectID)
 
+	//nolint:lll
 	assertTrimmed(t, "project-level-value", f.Run("var:get", "-p", projectID, "-e", "main", "env:TEST", "-P", "value", "-l", "p"))
+	//nolint:lll
 	assertTrimmed(t, "env-level-value", f.Run("var:get", "-p", projectID, "-e", "main", "env:TEST", "-P", "value", "-l", "e"))
 
 	_, stdErr, err = f.RunCombinedOutput("var:create", "-p", projectID, "existing", "-l", "p", "--value", "test")
 	assert.Error(t, err)
 	assert.Contains(t, stdErr, "The variable already exists")
 
+	//nolint:lll
 	_, _, err = f.RunCombinedOutput("var:update", "-p", projectID, "env:TEST", "-l", "p", "--value", "project-level-value2")
 	assert.NoError(t, err)
 	assertTrimmed(t, "project-level-value2", f.Run("var:get", "-p", projectID, "env:TEST", "-l", "p", "-P", "value"))
