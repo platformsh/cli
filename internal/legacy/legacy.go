@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -158,6 +159,10 @@ func (c *CLIWrapper) Exec(ctx context.Context, args ...string) error {
 		PHPVersion,
 		c.Version,
 	))
+	// Pass the event name (command name) to the legacy CLI for analytics tracking.
+	if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
+		cmd.Env = append(cmd.Env, envPrefix+"EVENT_NAME="+args[0])
+	}
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("could not run PHP CLI command: %w", err)
 	}

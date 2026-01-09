@@ -7,6 +7,7 @@ import (
 
 	"golang.org/x/oauth2"
 
+	"github.com/upsun/cli/internal/config"
 	"github.com/upsun/cli/internal/legacy"
 )
 
@@ -37,13 +38,29 @@ func NewLegacyCLIClient(ctx context.Context, wrapper *legacy.CLIWrapper) (*Legac
 		baseRT = rt
 	}
 
+	// Build the transport chain:
+	// EventTransport (adds X-CLI-Event + User-Agent)
+	//   -> Transport (handles 401 retry)
+	//     -> oauth2.Transport (adds Authorization)
+	//       -> baseRT (http.DefaultTransport or custom)
+	authTransport := &Transport{
+		refresher: refresher,
+		base: &oauth2.Transport{
+			Source: ts,
+			Base:   baseRT,
+		},
+	}
+
+	var userAgent string
+	if cnf := config.FromContext(ctx); cnf != nil {
+		userAgent = cnf.UserAgent()
+	}
+
 	httpClient := &http.Client{
-		Transport: &Transport{
-			refresher: refresher,
-			base: &oauth2.Transport{
-				Source: ts,
-				Base:   baseRT,
-			},
+		Transport: &EventTransport{
+			Base:      authTransport,
+			EventName: EventNameFromContext(ctx),
+			UserAgent: userAgent,
 		},
 	}
 

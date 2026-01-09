@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/upsun/cli/internal"
+	"github.com/upsun/cli/internal/auth"
 	"github.com/upsun/cli/internal/config"
 	"github.com/upsun/cli/internal/config/alt"
 	"github.com/upsun/cli/internal/legacy"
@@ -36,6 +37,14 @@ func Execute(cnf *config.Config) error {
 	}
 
 	ctx := vendorization.WithVendorAssets(config.ToContext(context.Background(), cnf), assets)
+
+	// Extract the event name (command name) for analytics tracking.
+	var eventName string
+	if len(os.Args) > 1 && !strings.HasPrefix(os.Args[1], "-") {
+		eventName = os.Args[1]
+	}
+	ctx = auth.WithEventName(ctx, eventName)
+
 	return newRootCommand(cnf, assets).ExecuteContext(ctx)
 }
 

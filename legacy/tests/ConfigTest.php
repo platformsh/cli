@@ -125,4 +125,23 @@ class ConfigTest extends TestCase
         $home = $config->getHomeDirectory();
         $this->assertEquals($home . DIRECTORY_SEPARATOR . 'mock-cli-user-config', $config->getWritableUserDir());
     }
+
+    /**
+     * Test getEventName() reads the event name from the environment variable.
+     */
+    public function testGetEventName(): void
+    {
+        $config = new Config([], $this->configFile);
+
+        // Ensure no event name is set initially.
+        putenv('MOCK_CLI_EVENT_NAME');
+        $this->assertNull($config->getEventName());
+
+        // Set the event name.
+        putenv('MOCK_CLI_EVENT_NAME=backup:restore');
+        $this->assertEquals('backup:restore', $config->getEventName());
+
+        // Clean up.
+        putenv('MOCK_CLI_EVENT_NAME');
+    }
 }

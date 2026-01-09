@@ -27,6 +27,7 @@ use Platformsh\Cli\CredentialHelper\SessionStorage as CredentialHelperStorage;
 use Platformsh\Cli\Event\EnvironmentsChangedEvent;
 use Platformsh\Cli\Event\LoginRequiredEvent;
 use Platformsh\Cli\Exception\ProcessFailedException;
+use Platformsh\Cli\EventHeaderMiddleware;
 use Platformsh\Cli\GuzzleDebugMiddleware;
 use Platformsh\Cli\Model\Route;
 use Platformsh\Cli\Util\NestedArrayUtil;
@@ -329,6 +330,8 @@ class Api
 
         // Add middlewares.
         $connectorOptions['middlewares'] = [];
+        // Add event tracking header for analytics.
+        $connectorOptions['middlewares'][] = new EventHeaderMiddleware($this->config);
         // Debug responses.
         $connectorOptions['middlewares'][] = new GuzzleDebugMiddleware($this->output, $this->config->getBool('api.debug'));
         // Handle 403 errors.
