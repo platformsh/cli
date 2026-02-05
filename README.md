@@ -1,5 +1,17 @@
 # Upsun CLI
 
+> [!IMPORTANT]
+> **This repository has been migrated to [upsun/cli](https://github.com/upsun/cli).**
+>
+> Please use the new repository for all future installations, updates, and issue reporting.
+>
+> To install the CLI from the new location:
+> ```console
+> curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | bash
+> ```
+>
+> Existing installations will continue to work, but we recommend migrating to the new repository.
+
 The **Upsun CLI** is the official command-line interface for [Upsun](https://upsun.com) (formerly Platform.sh).
 
 This repository hosts the source code and releases of the CLI.
@@ -30,7 +42,7 @@ scoop install platform
 Use the bash installer for an automated installation, using the most preferable way for your system.
 
 ```console
-curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | bash
 ```
 
 The installer is configurable using the following environment variables:
@@ -56,19 +68,19 @@ nix profile install nixpkgs#upsun
 <details>
     <summary>Force the CLI to be installed using the raw method</summary>
 
-    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | INSTALL_METHOD=raw bash
+    curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | INSTALL_METHOD=raw bash
 </details>
 
 <details>
     <summary>Install a specific version</summary>
 
-    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | VERSION=4.0.1 bash
+    curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | VERSION=4.0.1 bash
 </details>
 
 <details>
     <summary>Install the CLI in a user owned directory</summary>
 
-    curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | INSTALL_METHOD=raw INSTALL_DIR=$HOME/.local/bin bash
+    curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | INSTALL_METHOD=raw INSTALL_DIR=$HOME/.local/bin bash
 </details>
 
 ### Alpine
@@ -139,7 +151,7 @@ yum install -y platformsh-cli
 
 ### Manual installation
 
-For manual installation, you can also [download the latest binaries](https://github.com/platformsh/cli/releases/latest).
+For manual installation, you can also [download the latest binaries](https://github.com/upsun/cli/releases/latest).
 
 ## Upgrade
 
@@ -160,7 +172,7 @@ scoop update platform
 ### Bash installer
 
 ```console
-curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | bash
 ```
 
 ### Alpine

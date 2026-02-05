@@ -9,7 +9,7 @@ set -euo pipefail
 # Define this to force install method
 : "${INSTALL_METHOD:=}"
 
-: "${URL:=https://github.com/platformsh/cli/releases/download}"
+: "${URL:=https://github.com/upsun/cli/releases/download}"
 
 # Force Upsun CLI installation in this directory instead of system directory
 : "${INSTALL_DIR:=}"
@@ -31,6 +31,12 @@ set -euo pipefail
 : "${CI:=}"
 : "${BUILD_NUMBER:=}"
 : "${RUN_ID:=}"
+
+# Skip migration prompt (set to any value to skip)
+: "${SKIP_MIGRATION_PROMPT:=}"
+
+# New repository URL
+NEW_REPO_INSTALLER="https://raw.githubusercontent.com/upsun/cli/main/installer.sh"
 
 # global variables
 binary="platform"
@@ -164,10 +170,69 @@ function exit_with_error() {
     exit 1
 }
 
+function output_stderr {
+    builtin echo -e "$1" >&2
+}
+
+function show_migration_warning {
+    output_stderr ""
+    output_stderr "\033[33m+------------------------------------------------------------------------------+\033[0m"
+    output_stderr "\033[33m|                                                                              |\033[0m"
+    output_stderr "\033[33m|   WARNING: This repository (platformsh/cli) has been migrated to upsun/cli   |\033[0m"
+    output_stderr "\033[33m|                                                                              |\033[0m"
+    output_stderr "\033[33m|   Please use the new installer:                                              |\033[0m"
+    output_stderr "\033[33m|   curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh   |\033[0m"
+    output_stderr "\033[33m|                                                                              |\033[0m"
+    output_stderr "\033[33m+------------------------------------------------------------------------------+\033[0m"
+    output_stderr ""
+}
+
+function prompt_migration_continue {
+    # Skip prompt if flag is set
+    if [ ! -z "${SKIP_MIGRATION_PROMPT}" ]; then
+        return
+    fi
+
+    # Skip prompt if running in CI
+    if is_ci; then
+        return
+    fi
+
+    # Skip prompt if not running interactively
+    if ! is_interactive; then
+        return
+    fi
+
+    # Read from /dev/tty to get input even when script is piped
+    read -r -p "  Do you want to continue with this installer? [y/N] " response < /dev/tty
+
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            output ""
+            output "  Continuing with installation from platformsh/cli..." "info"
+            output ""
+            ;;
+        *)
+            output ""
+            output "  Installation cancelled." "info"
+            output "  To install from the new repository, run:" "info"
+            output "    curl -fsSL ${NEW_REPO_INSTALLER} | bash" "info"
+            output ""
+            exit 0
+            ;;
+    esac
+}
+
 function intro() {
     local title="$vendor_name CLI Installer"
 
     output "$(create_table "$title")" "heading"
+
+    # Always show migration warning to stderr
+    show_migration_warning
+
+    # Prompt user to continue if interactive and not in CI
+    prompt_migration_continue
 
     output "\nChecking environment" "heading"
 }
@@ -219,13 +284,13 @@ function check_curl() {
         output "  [*] cURL is installed" "success"
         if gh auth status >/dev/null 2>&1; then
             GITHUB_TOKEN="$(gh auth token)"
-            if ! github_curl https://api.github.com/repos/platformsh/cli/releases/latest >/dev/null 2>&1; then
+            if ! github_curl https://api.github.com/repos/upsun/cli/releases/latest >/dev/null 2>&1; then
                 GITHUB_TOKEN=""
             else
                 output "  [*] Using GitHub auth from the gh CLI" "success"
             fi
         elif [ ! -z "${GITHUB_TOKEN}" ]; then
-            if ! github_curl https://api.github.com/repos/platformsh/cli/releases/latest >/dev/null 2>&1; then
+            if ! github_curl https://api.github.com/repos/upsun/cli/releases/latest >/dev/null 2>&1; then
                 GITHUB_TOKEN=""
             else
                 output "  [*] Using GitHub auth from the GITHUB_TOKEN env variable" "success"
@@ -249,7 +314,7 @@ function check_gzip() {
 
 function check_version() {
     if [ -z "${VERSION}" ]; then
-        version=$(curl -I https://github.com/platformsh/cli/releases/latest 2>/dev/null | awk -F/ -v RS='\r\n' '/platformsh.cli.releases.tag/ {printf "%s", $NF}')
+        version=$(curl -I https://github.com/upsun/cli/releases/latest 2>/dev/null | awk -F/ -v RS='\r\n' '/upsun.cli.releases.tag/ {printf "%s", $NF}')
         output "  [*] No version specified, using latest ($version)" "success"
     else
         output "  [*] Version ${VERSION} specified" "success"
@@ -531,6 +596,15 @@ function is_ci {
     elif [ ! -z "${BUILD_NUMBER}" ]; then # Jenkins, TeamCity
         return 0
     elif [ ! -z "${RUN_ID}" ]; then # TaskCluster, dsari
+        return 0
+    else
+        return 1
+    fi
+}
+
+function is_interactive {
+    # Check if stdin is a terminal (TTY)
+    if [ -t 0 ]; then
         return 0
     else
         return 1
