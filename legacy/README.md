@@ -7,7 +7,7 @@ To install the CLI, use either [Homebrew](https://brew.sh/) (on Linux, macOS, or
 ### HomeBrew
 
 ```console
-brew install platformsh/tap/platformsh-cli
+brew install upsun/tap/platformsh-cli
 ```
 
 ### Scoop

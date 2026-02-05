@@ -74,7 +74,6 @@ The CLI operates as a wrapper around a legacy PHP CLI:
 - `version.go`: Uses runtime/debug to get version info from VCS
 - Supports vendorization through embedded YAML configs:
   - `config_upsun.go`: Default (no build tags) - Upsun CLI
-  - `config_platformsh.go`: Requires `-tags platformsh` - Platform.sh CLI
   - `config_vendor.go`: Requires `-tags vendor` - Custom vendor CLI
 - Config can be loaded from external files for testing/development
 
@@ -86,7 +85,7 @@ The CLI operates as a wrapper around a legacy PHP CLI:
 - Copies PHP binary and phar to cache directory on first run
 
 **API Client**: `internal/api/`
-- HTTP client for interacting with Platform.sh/Upsun API
+- HTTP client for interacting with Upsun API
 - Handles authentication, organizations, and resource management
 
 **Authentication**: `internal/auth/`
@@ -102,7 +101,6 @@ The CLI operates as a wrapper around a legacy PHP CLI:
 **Multi-Vendor Support**:
 - Uses Go build tags to compile different binaries:
   - Default (no tags): Upsun CLI
-  - `-tags platformsh`: Platform.sh CLI
   - `-tags vendor`: Custom vendor CLI
 - Configuration is embedded at compile time
 - GoReleaser builds multiple variants (upsun, platform, vendor-specific)

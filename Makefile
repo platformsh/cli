@@ -19,6 +19,7 @@ VERSION := $(shell git describe --always)
 
 # Tooling versions
 GORELEASER_VERSION=v2.12.0
+REPOGEN_VERSION=v1.0.4
 
 # PHP binaries are downloaded from cli-php-builds releases.
 # See: https://github.com/upsun/cli-php-builds
@@ -74,13 +75,27 @@ php: internal/legacy/archives/php_$(GOOS)_$(GOARCH)
 goreleaser:
 	command -v goreleaser >/dev/null || go install github.com/goreleaser/goreleaser/v2@$(GORELEASER_VERSION)
 
+.PHONY: repogen
+repogen:
+	command -v repogen >/dev/null || go install github.com/ralt/repogen/cmd/repogen@$(REPOGEN_VERSION)
+
 .PHONY: single
 single: goreleaser internal/legacy/archives/platform.phar php ## Build a single target release
 	PHP_VERSION=$(PHP_VERSION) goreleaser build --single-target --id=$(GORELEASER_ID) --snapshot --clean
 
-.PHONY: snapshot ## Build a snapshot release
-snapshot: goreleaser internal/legacy/archives/platform.phar php
-	PHP_VERSION=$(PHP_VERSION) goreleaser build --snapshot --clean
+.PHONY: snapshot
+snapshot: goreleaser internal/legacy/archives/platform.phar php internal/legacy/archives/cacert.pem ## Build a snapshot release
+ifndef RSA_SIGNING_KEY_FILE
+	$(error RSA_SIGNING_KEY_FILE is not set. Set it to the path of your RSA private key for APK signing, or use 'make snapshot-no-nfpm' to skip packaging.)
+endif
+ifndef GPG_SIGNING_KEY_FILE
+	$(error GPG_SIGNING_KEY_FILE is not set. Set it to the path of your GPG private key for RPM signing, or use 'make snapshot-no-nfpm' to skip packaging.)
+endif
+	PHP_VERSION=$(PHP_VERSION) goreleaser release --snapshot --clean --skip=publish,announce
+
+.PHONY: snapshot-no-nfpm
+snapshot-no-nfpm: goreleaser internal/legacy/archives/platform.phar php ## Build a snapshot release without package signing
+	PHP_VERSION=$(PHP_VERSION) goreleaser release --snapshot --clean --skip=publish,announce,nfpm
 
 .PHONY: clean-phar
 clean-phar: ## Clean up the legacy CLI phar
@@ -88,7 +103,13 @@ clean-phar: ## Clean up the legacy CLI phar
 	rm -rf legacy/vendor
 
 .PHONY: release
-release: goreleaser clean-phar internal/legacy/archives/platform.phar php ## Create and publish a release
+release: goreleaser clean-phar internal/legacy/archives/platform.phar php internal/legacy/archives/cacert.pem ## Create and publish a release
+ifndef RSA_SIGNING_KEY_FILE
+	$(error RSA_SIGNING_KEY_FILE is not set. Set it to the path of your RSA private key for APK signing.)
+endif
+ifndef GPG_SIGNING_KEY_FILE
+	$(error GPG_SIGNING_KEY_FILE is not set. Set it to the path of your GPG private key for RPM signing.)
+endif
 	PHP_VERSION=$(PHP_VERSION) goreleaser release --clean
 	VERSION=$(VERSION) bash cloudsmith.sh
 

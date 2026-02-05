@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 # Upsun CLI installer
 
-set -euo pipefail
+set -eu
 
 # Location of install log
 : "${INSTALL_LOG:=/tmp/upsun-install-$(date '+%Y%m%d-%H%M%S').log}"
@@ -18,14 +18,11 @@ set -euo pipefail
 : "${VERSION:=}"
 
 # macOS specifics
-: "${BREW_TAP:=platformsh/tap}"
-: "${BREW_FORMULA:=platformsh/tap/upsun-cli}"
+: "${BREW_TAP:=upsun/tap}"
+: "${BREW_FORMULA:=upsun/tap/upsun-cli}"
 
 # GitHub token check
 : "${GITHUB_TOKEN:=}"
-
-# The vendor to install
-: "${VENDOR:=upsun}"
 
 # CI specifics
 : "${CI:=}"
@@ -34,8 +31,7 @@ set -euo pipefail
 
 # global variables
 binary="upsun"
-vendor_name="Upsun"
-cloudsmith_repository="upsun-cli"
+vendor_name="Upsun (formerly Platform.sh)"
 cmd_shasum=""
 cmd_sudo=""
 dir_bin="/usr/bin"
@@ -48,14 +44,6 @@ package="upsun-cli"
 docs_url="https://docs.upsun.com"
 support_url="https://upsun.com/contact"
 
-if [ "$VENDOR" == "platformsh" ]; then
-    BREW_FORMULA="platformsh/tap/platformsh-cli"
-    binary="platform"
-    vendor_name="Upsun (Platform.sh compatibility)"
-    package="platformsh-cli"
-    cloudsmith_repository="cli"
-fi
-
 # create a log file where every output will be pipe to
 pipe=/tmp/$binary-install-$$.tmp
 mkfifo $pipe
@@ -64,7 +52,7 @@ exec 1>&-
 exec 1>$pipe 2>&1
 trap 'rm -f $pipe' EXIT
 
-function output {
+output() {
     style_start=""
     style_end=""
     if [ "${2:-}" != "" ]; then
@@ -92,56 +80,77 @@ function output {
     esac
     fi
 
-    builtin echo -e "${style_start}${1}${style_end}"
+    printf "%b%b%b\n" "${style_start}" "${1}" "${style_end}"
 }
 
-function create_table_line() {
+create_table_line() {
     local text="${1:-}"
     local width="${2:-}"
+    local text_length
+    local i
+    local padding
+    local right_padding
 
     if [ -z "$width" ]; then
         # Calculate width based on text length, minimum 50
-        local text_length=${#text}
-        width=$((text_length < 50 ? 50 : text_length + 4))
+        text_length=${#text}
+        if [ $text_length -lt 50 ]; then
+            width=50
+        else
+            width=$((text_length + 4))
+        fi
     fi
 
     if [ "$text" = "border" ] || [ -z "$text" ]; then
         # Border line
         printf "+"
-        for ((i=0; i<width-2; i++)); do
+        i=0
+        while [ $i -lt $((width - 2)) ]; do
             printf "-"
+            i=$((i + 1))
         done
         printf "+"
     elif [ "$text" = "empty" ]; then
         # Empty line
         printf "|"
-        for ((i=0; i<width-2; i++)); do
+        i=0
+        while [ $i -lt $((width - 2)) ]; do
             printf " "
+            i=$((i + 1))
         done
         printf "|"
     else
         # Text line
-        local text_length=${#text}
-        local padding=$(((width - 2 - text_length) / 2))
-        local right_padding=$((width - 2 - text_length - padding))
+        text_length=${#text}
+        padding=$(((width - 2 - text_length) / 2))
+        right_padding=$((width - 2 - text_length - padding))
         printf "|"
-        for ((i=0; i<padding; i++)); do
+        i=0
+        while [ $i -lt $padding ]; do
             printf " "
+            i=$((i + 1))
         done
         printf "%s" "$text"
-        for ((i=0; i<right_padding; i++)); do
+        i=0
+        while [ $i -lt $right_padding ]; do
             printf " "
+            i=$((i + 1))
         done
         printf "|"
     fi
     printf "\n"
 }
 
-function create_table() {
+create_table() {
     local text="$1"
     local min_width="${2:-50}"
     local text_length=${#text}
-    local table_width=$((text_length < min_width ? min_width : text_length + 4))
+    local table_width
+    if [ $text_length -lt $min_width ]; then
+        table_width=$min_width
+    else
+        table_width=$((text_length + 4))
+    fi
 
     create_table_line "border" "$table_width"
     create_table_line "empty" "$table_width"
@@ -150,8 +159,8 @@ function create_table() {
     create_table_line "border" "$table_width"
 }
 
-function exit_with_error() {
-    local title="Installation failed"
+exit_with_error() {
+    title="Installation failed"
 
     output "$(create_table "$title")" "error"
 
@@ -163,16 +172,16 @@ function exit_with_error() {
     exit 1
 }
 
-function intro() {
-    local title="$vendor_name CLI Installer"
+intro() {
+    title="$vendor_name CLI Installer"
 
     output "$(create_table "$title")" "heading"
 
     output "\nChecking environment" "heading"
 }
 
-function outro() {
-    local title="$vendor_name CLI has been installed successfully."
+outro() {
+    title="$vendor_name CLI has been installed successfully."
 
     output ""
     output "$(create_table "$title")" "success"
@@ -192,7 +201,7 @@ function outro() {
     output "\nThank you for using $vendor_name!"
 }
 
-function add_footer_note() {
+add_footer_note() {
     for var in "$@"; do
         if [ ! -z "$footer_notes" ]; then
             footer_notes="${footer_notes}\n${var}"
@@ -202,42 +211,46 @@ function add_footer_note() {
     done
 }
 
-function indent() {
+indent() {
     OLDIFS=$IFS
-    IFS=$'\n'
+    IFS='
+'
     while read -r data; do
-        line=$(echo "   | ${data}"|sed $'s/\r/\r   | /g'|sed $'s/\x1B\[[0-9;]\{1,\}[A-Za-z]//g')
+        line=$(printf "   | %s" "$data" | sed 's/\r/\r   | /g' | sed 's/\x1B\[[0-9;]*[A-Za-z]//g')
         output "$line" "comment"
     done
     IFS=$OLDIFS
 }
 
 # Check that cURL is installed
-function check_curl() {
+check_curl() {
     if command -v curl >/dev/null 2>&1; then
         output "  [*] cURL is installed" "success"
-        if gh auth status >/dev/null 2>&1; then
-            GITHUB_TOKEN="$(gh auth token)"
-            if ! github_curl https://api.github.com/repos/upsun/cli/releases/latest >/dev/null 2>&1; then
-                GITHUB_TOKEN=""
-            else
-                output "  [*] Using GitHub auth from the gh CLI" "success"
-            fi
-        elif [ ! -z "${GITHUB_TOKEN}" ]; then
-            if ! github_curl https://api.github.com/repos/upsun/cli/releases/latest >/dev/null 2>&1; then
-                GITHUB_TOKEN=""
-            else
-                output "  [*] Using GitHub auth from the GITHUB_TOKEN env variable" "success"
-            fi
-        fi
     else
         output "  [ ] ERROR: cURL is required for installation" "error"
         exit_with_error
     fi
 }
 
+setup_github_token() {
+    if gh auth status >/dev/null 2>&1; then
+        GITHUB_TOKEN="$(gh auth token)"
+        if ! github_curl https://api.github.com/repos/upsun/cli/releases/latest >/dev/null 2>&1; then
+            GITHUB_TOKEN=""
+        else
+            output "  [*] Using GitHub auth from the gh CLI" "success"
+        fi
+    elif [ ! -z "${GITHUB_TOKEN}" ]; then
+        if ! github_curl https://api.github.com/repos/upsun/cli/releases/latest >/dev/null 2>&1; then
+            GITHUB_TOKEN=""
+        else
+            output "  [*] Using GitHub auth from the GITHUB_TOKEN env variable" "success"
+        fi
+    fi
+}
+
 # Check that Gzip is installed
-function check_gzip() {
+check_gzip() {
     if command -v gzip >/dev/null 2>&1; then
         output "  [*] Gzip is installed" "success"
     else
@@ -246,7 +259,17 @@ function check_gzip() {
     fi
 }
 
-function check_version() {
+# Check that ca-certificates is installed (Alpine)
+check_ca_certificates() {
+    if apk info -e ca-certificates >/dev/null 2>&1; then
+        output "  [*] ca-certificates is installed" "success"
+    else
+        output "  [ ] ERROR: ca-certificates is required for installation" "error"
+        exit_with_error
+    fi
+}
+
+check_version() {
     if [ -z "${VERSION}" ]; then
         version=$(curl -I https://github.com/upsun/cli/releases/latest 2>/dev/null | awk -F/ -v RS='\r\n' '/upsun.cli.releases.tag/ {printf "%s", $NF}')
         output "  [*] No version specified, using latest ($version)" "success"
@@ -257,7 +280,7 @@ function check_version() {
 }
 
 # Detect the kernel type
-function check_kernel() {
+check_kernel() {
     kernel=$(uname -s 2>$pipe || /usr/bin/uname -s)
     case ${kernel} in
         "Linux"|"linux")
@@ -279,7 +302,7 @@ function check_kernel() {
     output "  [*] Your kernel (${kernel}) is supported" "success"
 }
 
-function check_architecture() {
+check_architecture() {
     # Detect architecture
     machine=$(uname -m 2>$pipe || /usr/bin/uname -m)
     case ${machine} in
@@ -301,7 +324,7 @@ function check_architecture() {
     output "  [*] Your architecture (${machine}) is supported" "success"
 }
 
-function check_install_method() {
+check_install_method() {
     if [ "linux" = "$kernel" ]; then
         if [ -z "${INSTALL_METHOD}" ]; then
             if is_ci; then
@@ -318,7 +341,7 @@ function check_install_method() {
                 INSTALL_METHOD="raw"
             fi
         fi
-    elif [ "darwin" == $kernel ]; then
+    elif [ "darwin" = $kernel ]; then
         if [ -z "${INSTALL_METHOD}" ]; then
             if command -v brew > /dev/null 2>&1
             then
@@ -330,21 +353,21 @@ function check_install_method() {
         if [ "${INSTALL_METHOD}" = "raw" ]; then
             machine="all"
         fi
-    elif [ "freebsd" == $kernel ]; then
+    elif [ "freebsd" = $kernel ]; then
         INSTALL_METHOD="raw"
     fi
 
     output "  [*] Using ${INSTALL_METHOD} install method" "success"
 }
 
-function init_sudo() {
+init_sudo() {
     if [ ! -z "${has_sudo}" ]; then
         return
     fi
 
     has_sudo=false
     # Are we running the installer as root?
-    if [ "$(echo "$UID")" = "0" ]; then
+    if [ "$(id -u)" = "0" ]; then
         has_sudo=true
         cmd_sudo=''
 
@@ -357,7 +380,7 @@ function init_sudo() {
     fi
 }
 
-function call_root() {
+call_root() {
     init_sudo
 
     if ! ${has_sudo}; then
@@ -365,14 +388,21 @@ function call_root() {
         exit_with_error
     fi
 
-    if $cmd_sudo sh -c "$1" 2>&1 | indent; then
+    local output_file
+    output_file=$(mktemp)
+    if $cmd_sudo sh -c "$1" >"$output_file" 2>&1; then
+        cat "$output_file" | indent
+        rm -f "$output_file"
         return 0
+    else
+        local exit_code=$?
+        cat "$output_file" | indent
+        rm -f "$output_file"
+        return $exit_code
     fi
-
-    return 1
 }
 
-function call_try_user() {
+call_try_user() {
     if ! call_user "$1"; then
         output "  command failed, re-trying with sudo" "warning"
         if ! call_root "$1"; then
@@ -382,11 +412,11 @@ function call_try_user() {
     fi
 }
 
-function call_user() {
+call_user() {
     sh -c "$1" 2>&1 | indent
 }
 
-function check_shasum() {
+check_shasum() {
     if command -v sha1sum > /dev/null 2>&1; then
         cmd_shasum="sha1sum"
         output "  [*] sha1sum is installed" "success"
@@ -399,7 +429,7 @@ function check_shasum() {
     fi
 }
 
-function check_directories() {
+check_directories() {
     if [ ! -z "${INSTALL_DIR}" ]; then
         dir_bin="${INSTALL_DIR}"
         INSTALL_METHOD="raw"
@@ -437,7 +467,7 @@ function check_directories() {
     output "  Binary will be installed in ${dir_bin}"
 }
 
-function install_homebrew() {
+install_homebrew() {
     output "\nInstalling the $vendor_name brew tap" "heading"
     if ! call_user "brew tap ${BREW_TAP}"; then
         output "  could not add tap to brew" "error"
@@ -460,12 +490,20 @@ function install_homebrew() {
     fi
 }
 
-function install_yum() {
+install_yum() {
     output "\nSetting up the $vendor_name CLI yum repository" "heading"
 
-    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/$cloudsmith_repository/setup.rpm.sh' > /tmp/setup.rpm.sh"
+    repo_file="/etc/yum.repos.d/upsun.repo"
+    repo_content="[upsun]
+name=Upsun CLI
+baseurl=https://repositories.upsun.com/fedora/\\\$releasever/\\\$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://repositories.upsun.com/gpg.key"
 
-    if ! call_root "bash -E /tmp/setup.rpm.sh"; then
+    cmd="printf '${repo_content}' > '${repo_file}'"
+
+    if ! call_root "${cmd}"; then
         output "  could not setup the RPM repository the CLI" "error"
         exit_with_error
     fi
@@ -478,13 +516,32 @@ function install_yum() {
     fi
 }
 
-function install_apt() {
+install_apt() {
     output "\nSetting up the $vendor_name CLI apt repository" "heading"
 
-    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/$cloudsmith_repository/setup.deb.sh' > /tmp/setup.deb.sh"
+    # Install the GPG key
+    if ! call_root "mkdir -p /etc/apt/keyrings"; then
+        output "  could not create keyrings directory" "error"
+        exit_with_error
+    fi
 
-    if ! call_root "bash -E /tmp/setup.deb.sh"; then
+    if ! call_root "curl -fsSL https://repositories.upsun.com/gpg.key -o /etc/apt/keyrings/upsun.asc"; then
+        output "  could not download GPG key" "error"
+        exit_with_error
+    fi
+
+    list_file="/etc/apt/sources.list.d/upsun.list"
+    list_content="deb [signed-by=/etc/apt/keyrings/upsun.asc] https://repositories.upsun.com/debian stable main"
+
+    cmd="printf '${list_content}' > '${list_file}'"
+
+    if ! call_root "${cmd}"; then
         output "  could not setup the APT repository the CLI" "error"
+        exit_with_error
+    fi
+
+    if ! call_root "apt-get update"; then
+        output "  could not update apt cache" "error"
         exit_with_error
     fi
 
@@ -496,13 +553,24 @@ function install_apt() {
     fi
 }
 
-function install_apk() {
+install_apk() {
     output "\nSetting up the $vendor_name CLI apk repository" "heading"
 
-    call_user "curl -1sLf 'https://dl.cloudsmith.io/public/platformsh/$cloudsmith_repository/setup.alpine.sh' > /tmp/setup.alpine.sh"
+    # Repository configuration
+    local repo_url="https://repositories.upsun.com"
+    local rsa_key_name="repositories-upsun-com.rsa.pub"
 
-    if ! call_root "bash -E /tmp/setup.alpine.sh"; then
-        output "  could not setup the APK repository the CLI" "error"
+    # Download and install the repository signing key
+    output "  Installing repository signing key..."
+    if ! call_root "mkdir -p /etc/apk/keys && curl -fsSL -o /etc/apk/keys/${rsa_key_name} ${repo_url}/alpine/${rsa_key_name}"; then
+        output "  could not install the signing key" "error"
+        exit_with_error
+    fi
+
+    # Add the repository (Alpine automatically appends /$arch to the URL)
+    output "  Adding repository..."
+    if ! call_root "grep -qF '${repo_url}/alpine' /etc/apk/repositories 2>/dev/null || echo '${repo_url}/alpine' >> /etc/apk/repositories"; then
+        output "  could not add the repository" "error"
         exit_with_error
     fi
 
@@ -514,17 +582,17 @@ function install_apk() {
     fi
 }
 
-function github_curl {
+github_curl() {
     if [ -z "${GITHUB_TOKEN}" ]; then
-        curl -fsSL -H "Accept: application/vnd.github+json" $1
+        curl -fsSL -H "Accept: application/vnd.github+json" "$1"
         return $?
     else
-        curl -fsSL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GITHUB_TOKEN}" $1
+        curl -fsSL -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GITHUB_TOKEN}" "$1"
         return $?
     fi
 }
 
-function is_ci {
+is_ci() {
     if [ ! -z "${CI}" ]; then # GitHub Actions, Travis CI, CircleCI, Cirrus CI, GitLab CI, AppVeyor, CodeShip, dsari
         return 0
     elif [ ! -z "${BUILD_NUMBER}" ]; then # Jenkins, TeamCity
@@ -536,7 +604,7 @@ function is_ci {
     fi
 }
 
-function install_raw() {
+install_raw() {
     # Start downloading the right version
     output "\nDownloading the $vendor_name CLI" "heading"
 
@@ -544,18 +612,18 @@ function install_raw() {
     output "  Downloading ${url}";
     tmp_dir=$(mktemp -d)
     tmp_name="$binary-"$(date +"%s")
-    if ! github_curl $url > "${tmp_dir}/${tmp_name}.tgz"; then
+    if ! github_curl "$url" > "${tmp_dir}/${tmp_name}.tgz"; then
         output "  the download failed" "error"
         exit_with_error
     fi
 
     output "  Uncompressing archive"
-    tar -C ${tmp_dir} -xzf "${tmp_dir}/${tmp_name}.tgz"
+    tar -C "${tmp_dir}" -xzf "${tmp_dir}/${tmp_name}.tgz"
 
     output "  Making the binary executable"
     chmod 0755 "${tmp_dir}/$binary"
 
-    if [ ! -d $dir_bin ]; then
+    if [ ! -d "$dir_bin" ]; then
         output "  Creating ${dir_bin} directory"
         call_try_user "mkdir -p ${dir_bin}" "Failed to create the ${dir_bin} directory"
     fi
@@ -564,7 +632,7 @@ function install_raw() {
     call_try_user "mv '${tmp_dir}/$binary' '${dir_bin}/${binary}'" "Failed to move the binary ${binary}"
 }
 
-function install() {
+install() {
     if [ "homebrew" = "${INSTALL_METHOD}" ]; then
        install_homebrew
     elif [ "yum" = "${INSTALL_METHOD}" ]; then
@@ -583,8 +651,9 @@ check_kernel
 check_architecture
 check_install_method
 if [ "raw" = "${INSTALL_METHOD}" ]; then
+    check_curl
     if [ -z "${VERSION}" ]; then
-        check_curl
+        setup_github_token
     fi
     check_version
     check_gzip
@@ -592,6 +661,9 @@ if [ "raw" = "${INSTALL_METHOD}" ]; then
     check_directories
 elif [ "apt" = "${INSTALL_METHOD}" ] || [ "yum" = "${INSTALL_METHOD}" ] || [ "apk" = "${INSTALL_METHOD}" ]; then
     check_curl
+    if [ "apk" = "${INSTALL_METHOD}" ]; then
+        check_ca_certificates
+    fi
 fi
 install
 outro

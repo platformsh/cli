@@ -104,7 +104,7 @@ release:
     ### HomeBrew
 
     ```console
-    brew update && brew upgrade platformsh/tap/upsun-cli
+    brew update && brew upgrade upsun/tap/upsun-cli
     ```
 
     ### Scoop
@@ -118,30 +118,6 @@ release:
     ```console
     curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | bash
     ```
-
-    <details>
-
-    <summary>Platform.sh compatibility</summary>
-
-    ### HomeBrew
-
-    ```console
-    brew update && brew upgrade platformsh/tap/platformsh-cli
-    ```
-
-    ### Scoop
-
-    ```console
-    scoop update platform
-    ```
-
-    ### Bash installer
-
-    ```console
-    curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | VENDOR=platformsh bash
-    ```
-
-    </details>
 
 archives:
   - id: platform
@@ -171,7 +147,7 @@ archives:
 brews:
   - name: platformsh-cli
     repository:
-      owner: platformsh
+      owner: upsun
       name: homebrew-tap
       token: "{{ .Env.GITHUB_TOKEN }}"
     ids:
@@ -201,7 +177,7 @@ brews:
 
   - name: upsun-cli
     repository:
-      owner: platformsh
+      owner: upsun
       name: homebrew-tap
       token: "{{ .Env.GITHUB_TOKEN }}"
     ids:
@@ -232,7 +208,7 @@ brews:
 scoops:
   - name: platform
     repository:
-      owner: platformsh
+      owner: upsun
       name: homebrew-tap
       token: "{{ .Env.GITHUB_TOKEN }}"
     ids:
@@ -253,7 +229,7 @@ scoops:
 
   - name: upsun
     repository:
-      owner: platformsh
+      owner: upsun
       name: homebrew-tap
       token: "{{ .Env.GITHUB_TOKEN }}"
     ids:
@@ -280,6 +256,7 @@ nfpms:
     maintainer: Antonis Kalipetis <antonis.kalipetis@upsun.com>
     license: MIT
     vendor: Platform.sh
+    file_name_template: "platformsh-cli_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     ids:
       - platform
     formats:
@@ -291,6 +268,13 @@ nfpms:
         dst: /etc/bash_completion.d/platform
       - src: completion/zsh/_platform
         dst: /usr/local/share/zsh/site-functions/_platform
+    apk:
+      signature:
+        key_file: "{{ with .Env.RSA_SIGNING_KEY_FILE }}{{ . }}{{ end }}"
+        key_name: repositories-upsun-com
+    rpm:
+      signature:
+        key_file: "{{ with .Env.GPG_SIGNING_KEY_FILE }}{{ . }}{{ end }}"
 
   - id: upsun
     homepage: https://docs.upsun.com/anchors/cli/
@@ -298,7 +282,8 @@ nfpms:
     description: Upsun CLI
     maintainer: Antonis Kalipetis <antonis.kalipetis@upsun.com>
     license: MIT
-    vendor: Platform.sh
+    file_name_template: upsun-cli_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    vendor: Upsun
     ids:
       - upsun
     formats:
@@ -310,3 +295,10 @@ nfpms:
         dst: /etc/bash_completion.d/upsun
       - src: completion/zsh/_upsun
         dst: /usr/local/share/zsh/site-functions/_upsun
+    apk:
+      signature:
+        key_file: "{{ with .Env.RSA_SIGNING_KEY_FILE }}{{ . }}{{ end }}"
+        key_name: repositories-upsun-com
+    rpm:
+      signature:
+        key_file: "{{ with .Env.GPG_SIGNING_KEY_FILE }}{{ . }}{{ end }}"

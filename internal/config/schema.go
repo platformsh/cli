@@ -20,8 +20,8 @@ import (
 type Config struct {
 	// Fields only used by to the Go wrapper.
 	Wrapper struct {
-		HomebrewTap string `yaml:"homebrew_tap,omitempty"` // e.g. "platformsh/tap/platformsh-cli"
-		GitHubRepo  string `yaml:"github_repo,omitempty"`  // e.g. "platformsh/cli"
+		HomebrewTap string `yaml:"homebrew_tap,omitempty"` // e.g. "upsun/tap/platformsh-cli"
+		GitHubRepo  string `yaml:"github_repo,omitempty"`  // e.g. "upsun/cli"
 	} `yaml:"wrapper,omitempty"`
 
 	Application struct {

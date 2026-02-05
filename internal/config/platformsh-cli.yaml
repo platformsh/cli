@@ -4,15 +4,15 @@
 #
 # These are settings for the 'platform' command, which is available for backwards compatibility.
 wrapper:
-  homebrew_tap: platformsh/tap/platformsh-cli
+  homebrew_tap: upsun/tap/platformsh-cli
   github_repo: upsun/cli
 
 application:
-  name: 'Upsun CLI (Platform.sh compatibility)'
-  slug: 'platformsh-cli'
-  executable: 'platform'
-  env_prefix: 'PLATFORMSH_CLI_'
-  user_config_dir: '.platformsh'
+  name: "Upsun CLI (Platform.sh compatibility)"
+  slug: "platformsh-cli"
+  executable: "platform"
+  env_prefix: "PLATFORMSH_CLI_"
+  user_config_dir: ".platformsh"
 
   mark_unwrapped_legacy: true
 
@@ -21,32 +21,32 @@ application:
     - self:update
 
 service:
-  name: 'Upsun (formerly Platform.sh)'
-  env_prefix: 'PLATFORM_'
+  name: "Upsun (formerly Platform.sh)"
+  env_prefix: "PLATFORM_"
 
-  project_config_dir: '.platform'
-  app_config_file: '.platform.app.yaml'
-  project_config_flavor: 'platform'
+  project_config_dir: ".platform"
+  app_config_file: ".platform.app.yaml"
+  project_config_flavor: "platform"
 
-  console_url: 'https://console.upsun.com'
+  console_url: "https://console.upsun.com"
 
-  docs_url: 'https://docs.upsun.com'
-  docs_search_url: 'https://docs.upsun.com/search.html?q={{ terms }}'
+  docs_url: "https://docs.upsun.com"
+  docs_search_url: "https://docs.upsun.com/search.html?q={{ terms }}"
 
-  register_url: 'https://auth.upsun.com/register'
-  reset_password_url: 'https://auth.upsun.com/reset-password'
+  register_url: "https://auth.upsun.com/register"
+  reset_password_url: "https://auth.upsun.com/reset-password"
 
-  pricing_url: 'https://upsun.com/pricing'
+  pricing_url: "https://upsun.com/pricing"
 
-  activity_type_list_url: 'https://docs.upsun.com/anchors/fixed/integrations/activity-scripts/type/'
+  activity_type_list_url: "https://docs.upsun.com/anchors/fixed/integrations/activity-scripts/type/"
 
-  runtime_operations_help_url: 'https://docs.upsun.com/anchors/fixed/app/runtime-operations/'
+  runtime_operations_help_url: "https://docs.upsun.com/anchors/fixed/app/runtime-operations/"
 
 api:
-  base_url: 'https://api.upsun.com'
+  base_url: "https://api.upsun.com"
 
-  auth_url: 'https://auth.upsun.com'
-  oauth2_client_id: 'platform-cli'
+  auth_url: "https://auth.upsun.com"
+  oauth2_client_id: "platform-cli"
 
   organization_types: [flexible, fixed]
   default_organization_type: flexible
@@ -56,16 +56,17 @@ api:
   metrics: true
   teams: true
 
-  vendor_filter: 'upsun'
+  vendor_filter: "upsun"
 
 ssh:
-  domain_wildcards: ['*.platform.sh']
+  domain_wildcards: ["*.platform.sh"]
 
 detection:
-  git_remote_name: 'platform'
-  git_domain: 'platform.sh' # matches git.eu-5.platform.sh, etc.
-  site_domains: ['platform.sh', 'platformsh.site', 'tst.site', 'upsunapp.com', 'upsun.app']
-  cluster_header: 'X-Platform-Cluster'
+  git_remote_name: "platform"
+  git_domain: "platform.sh" # matches git.eu-5.platform.sh, etc.
+  site_domains:
+    ["platform.sh", "platformsh.site", "tst.site", "upsunapp.com", "upsun.app"]
+  cluster_header: "X-Platform-Cluster"
 
 browser_login:
   body: |

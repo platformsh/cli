@@ -1,0 +1,122 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ./go.mod
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: curl, openssl, phar, zlib
+          tools: composer:v2
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(cd legacy && composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('legacy/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install legacy dependencies
+        run: cd legacy && composer install --no-interaction
+
+      - name: Get PHP version from Makefile
+        id: php-version
+        run: echo "version=$(grep '^PHP_VERSION' Makefile | cut -d= -f2 | tr -d ' ')" >> $GITHUB_OUTPUT
+
+      - name: Get tool versions from Makefile
+        id: tool-versions
+        run: |
+          echo "goreleaser=$(grep '^GORELEASER_VERSION' Makefile | cut -d= -f2 | tr -d ' ')" >> $GITHUB_OUTPUT
+          echo "repogen=$(grep '^REPOGEN_VERSION' Makefile | cut -d= -f2 | tr -d ' ')" >> $GITHUB_OUTPUT
+
+      - name: Cache PHP binaries
+        uses: actions/cache@v4
+        id: php-cache
+        with:
+          path: internal/legacy/archives/php_*
+          key: php-binaries-${{ steps.php-version.outputs.version }}
+
+      - name: Download all PHP binaries
+        if: steps.php-cache.outputs.cache-hit != 'true'
+        run: make download-php
+
+      - name: Write signing keys to files
+        id: signing-keys
+        run: |
+          KEY_DIR=$(mktemp -d)
+          echo "key_dir=$KEY_DIR" >> $GITHUB_OUTPUT
+          echo "${{ secrets.RSA_SIGNING_KEY }}" > "$KEY_DIR/rsa-signing-key.pem"
+          chmod 600 "$KEY_DIR/rsa-signing-key.pem"
+          openssl rsa -in "$KEY_DIR/rsa-signing-key.pem" -pubout -out "$KEY_DIR/rsa-signing-key.pub"
+          echo "${{ secrets.GPG_SIGNING_KEY }}" | base64 -d > "$KEY_DIR/gpg-signing-key.asc"
+          chmod 600 "$KEY_DIR/gpg-signing-key.asc"
+
+      - name: Cache Go binaries
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin
+          key: ${{ runner.os }}-go-bin-goreleaser-${{ steps.tool-versions.outputs.goreleaser }}-repogen-${{ steps.tool-versions.outputs.repogen }}
+
+      - name: Install Go tools
+        run: make goreleaser repogen
+
+      - name: Build release (tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RSA_SIGNING_KEY_FILE: ${{ steps.signing-keys.outputs.key_dir }}/rsa-signing-key.pem
+          GPG_SIGNING_KEY_FILE: ${{ steps.signing-keys.outputs.key_dir }}/gpg-signing-key.asc
+          CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
+        run: make release
+
+      - name: Build snapshot (branch)
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        env:
+          RSA_SIGNING_KEY_FILE: ${{ steps.signing-keys.outputs.key_dir }}/rsa-signing-key.pem
+          GPG_SIGNING_KEY_FILE: ${{ steps.signing-keys.outputs.key_dir }}/gpg-signing-key.asc
+        run: make snapshot
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Upload packages to repository
+        env:
+          GPG_PRIVATE_KEY_FILE: ${{ steps.signing-keys.outputs.key_dir }}/gpg-signing-key.asc
+          RSA_PRIVATE_KEY_FILE: ${{ steps.signing-keys.outputs.key_dir }}/rsa-signing-key.pem
+          RSA_PUBLIC_KEY_FILE: ${{ steps.signing-keys.outputs.key_dir }}/rsa-signing-key.pub
+        run: bash ./repogen.sh
+
+      - name: Clean up signing keys
+        if: always()
+        run: |
+          rm -rf "${{ steps.signing-keys.outputs.key_dir }}"

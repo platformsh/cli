@@ -13,13 +13,13 @@ To install the CLI, use either [Homebrew](https://brew.sh/) (on Linux, macOS, or
 ### HomeBrew
 
 ```console
-brew install platformsh/tap/upsun-cli
+brew install upsun/tap/upsun-cli
 ```
 
 ### Scoop
 
 ```console
-scoop bucket add platformsh https://github.com/platformsh/homebrew-tap.git
+scoop bucket add upsun https://github.com/upsun/homebrew-tap.git
 scoop install upsun
 ```
 
@@ -69,38 +69,43 @@ nix profile install nixpkgs#upsun
 ### Alpine
 
 ```console
-sudo apk add --no-cache bash
-curl -1sLf \
-  'https://dl.cloudsmith.io/public/platformsh/upsun-cli/setup.alpine.sh' \
-  | sudo -E bash
-```
+# Add the signing key and repository
+sudo mkdir -p /etc/apk/keys
+sudo curl -fsSL -o /etc/apk/keys/repositories-upsun-com.rsa.pub https://repositories.upsun.com/alpine/repositories-upsun-com.rsa.pub
+echo "https://repositories.upsun.com/alpine" | sudo tee -a /etc/apk/repositories
 
-```console
-apk add upsun-cli
+# Install the CLI
+sudo apk add upsun-cli
 ```
 
 ### Ubuntu/Debian
 
 ```console
-apt-get update
-apt-get install -y apt-transport-https curl
-curl -1sLf \
-  'https://dl.cloudsmith.io/public/platformsh/upsun-cli/setup.deb.sh' \
-  | sudo -E bash
-```
+# Add the signing key and repository
+sudo mkdir -p /etc/apt/keyrings
+sudo curl -fsSL https://repositories.upsun.com/gpg.key -o /etc/apt/keyrings/upsun.asc
+echo "deb [signed-by=/etc/apt/keyrings/upsun.asc] https://repositories.upsun.com/debian stable main" | sudo tee /etc/apt/sources.list.d/upsun.list
 
-```console
-apt-get install -y upsun-cli
+# Install the CLI
+sudo apt-get update
+sudo apt-get install -y upsun-cli
 ```
 
 ### CentOS/RHEL/Fedora
 
 ```console
-curl -1sLf \
-  'https://dl.cloudsmith.io/public/platformsh/upsun-cli/setup.rpm.sh' \
-  | sudo -E bash
+# Add the repository
+sudo tee /etc/yum.repos.d/upsun.repo << 'EOF'
+[upsun]
+name=Upsun CLI
+baseurl=https://repositories.upsun.com/fedora/$releasever/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://repositories.upsun.com/gpg.key
+EOF
 
-yum install -y upsun-cli
+# Install the CLI (use yum on older systems)
+sudo dnf install -y upsun-cli
 ```
 
 ### Manual installation
@@ -114,7 +119,7 @@ Upgrade using the same tool:
 ### HomeBrew
 
 ```console
-brew update && brew upgrade platformsh/tap/upsun-cli
+brew update && brew upgrade upsun/tap/upsun-cli
 ```
 
 ### Scoop
@@ -132,33 +137,19 @@ curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | bash
 ### Alpine
 
 ```console
-apk upgrade upsun-cli
+sudo apk update && sudo apk upgrade upsun-cli
 ```
 
 ### Ubuntu/Debian
 
 ```console
-apt-get upgrade upsun-cli
+sudo apt-get update && sudo apt-get upgrade upsun-cli
 ```
 
 ### CentOS/RHEL/Fedora
 
 ```console
-yum upgrade -y upsun-cli
-```
-
-## Platform.sh compatibility
-
-For backwards compatibility with Platform.sh, a `platform` binary is also available:
-
-```console
-brew install platformsh/tap/platformsh-cli
-```
-
-Or with the bash installer:
-
-```console
-curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | VENDOR=platformsh bash
+sudo dnf upgrade -y upsun-cli
 ```
 
 ## Building
@@ -182,15 +173,21 @@ Build a snapshot for a vendor:
 make vendor-snapshot VENDOR_NAME='Vendor Name' VENDOR_BINARY='vendorcli'
 ```
 
-Create a release:
+## Creating a Release
 
-```console
-# First, create a new tag
-git tag -m 'Release v5.0.0' 'v5.0.0'
+Releases are automated via GitHub Actions. To create a new release:
 
-# Create a release (requires GITHUB_TOKEN)
-make release
-```
+1. Create and push a new tag:
+   ```console
+   git tag -m 'Release v5.0.0' 'v5.0.0'
+   git push origin v5.0.0
+   ```
+
+2. The [Release workflow](.github/workflows/release.yml) will automatically:
+   - Build binaries for all platforms
+   - Sign packages (APK, DEB, RPM)
+   - Create a GitHub release with all artifacts
+   - Update package repositories at repositories.upsun.com
 
 ## Licenses
 
