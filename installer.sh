@@ -176,14 +176,14 @@ function output_stderr {
 
 function show_migration_warning {
     output_stderr ""
-    output_stderr "\033[33m+------------------------------------------------------------------------------+\033[0m"
-    output_stderr "\033[33m|                                                                              |\033[0m"
-    output_stderr "\033[33m|   WARNING: This repository (platformsh/cli) has been migrated to upsun/cli   |\033[0m"
-    output_stderr "\033[33m|                                                                              |\033[0m"
-    output_stderr "\033[33m|   Please use the new installer:                                              |\033[0m"
-    output_stderr "\033[33m|   curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh   |\033[0m"
-    output_stderr "\033[33m|                                                                              |\033[0m"
-    output_stderr "\033[33m+------------------------------------------------------------------------------+\033[0m"
+    output_stderr "\033[33m+-------------------------------------------------------------------------------------+\033[0m"
+    output_stderr "\033[33m|                                                                                     |\033[0m"
+    output_stderr "\033[33m|   WARNING: This repository (platformsh/cli) has been migrated to upsun/cli          |\033[0m"
+    output_stderr "\033[33m|                                                                                     |\033[0m"
+    output_stderr "\033[33m|   Please use the new installer:                                                     |\033[0m"
+    output_stderr "\033[33m|   curl -fsSL $NEW_REPO_INSTALLER | bash   |\033[0m"
+    output_stderr "\033[33m|                                                                                     |\033[0m"
+    output_stderr "\033[33m+-------------------------------------------------------------------------------------+\033[0m"
     output_stderr ""
 }
 
