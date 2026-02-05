@@ -4,8 +4,8 @@
 #
 # See ../internal/config/schema.go for the required keys
 wrapper:
-  homebrew_tap: platformsh/tap/upsun-cli
-  github_repo: platformsh/cli
+  homebrew_tap: upsun/tap/upsun-cli
+  github_repo: upsun/cli
 
 application:
   name: "Upsun CLI"
