@@ -293,11 +293,12 @@ type Activity struct {
 }
 
 type Variable struct {
-	Name           string `json:"name"`
-	Value          string `json:"value,omitempty"`
-	IsSensitive    bool   `json:"is_sensitive"`
-	VisibleBuild   bool   `json:"visible_build"`
-	VisibleRuntime bool   `json:"visible_runtime"`
+	Name             string   `json:"name"`
+	Value            string   `json:"value,omitempty"`
+	IsSensitive      bool     `json:"is_sensitive"`
+	VisibleBuild     bool     `json:"visible_build"`
+	VisibleRuntime   bool     `json:"visible_runtime"`
+	ApplicationScope []string `json:"application_scope,omitempty"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

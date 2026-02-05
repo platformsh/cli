@@ -77,7 +77,7 @@ readonly class CurlCli implements InputConfiguringInterface
             }
             if ($type === Process::OUT) {
                 if ($retryOn401) {
-                    // Buffer stdout when we might need to retry on 401.
+                    // Buffer stdout so it can be discarded if a 401 triggers a retry.
                     $stdoutBuffer .= $buffer;
                 } else {
                     $output->write($buffer);
@@ -87,7 +87,7 @@ readonly class CurlCli implements InputConfiguringInterface
             if ($type === Process::ERR) {
                 if ($retryOn401 && $this->parseCurlStatusCode($buffer) === 401 && $this->api->isLoggedIn()) {
                     $shouldRetry = true;
-                    $stdoutBuffer = '';  // Discard buffered stdout from the 401 response.
+                    $stdoutBuffer = '';
                     $process->clearErrorOutput();
                     $process->clearOutput();
 
@@ -107,6 +107,11 @@ readonly class CurlCli implements InputConfiguringInterface
 
         $process->run($onOutput);
 
+        if (!$shouldRetry && $stdoutBuffer !== '') {
+            $output->write($stdoutBuffer);
+            $stdoutBuffer = '';
+        }
+
         if ($shouldRetry) {
             // Create a new curl process, replacing the access token.
             $commandline = $this->buildCurlCommand($url, $newToken, $input);
@@ -119,6 +124,11 @@ readonly class CurlCli implements InputConfiguringInterface
 
             $stdErr->writeln(sprintf('Running command: <info>%s</info>', $censor($commandline)), OutputInterface::VERBOSITY_VERBOSE);
             $process->run($onOutput);
+
+            if ($stdoutBuffer !== '') { // @phpstan-ignore notIdentical.alwaysFalse ($stdoutBuffer is modified by reference in $onOutput)
+                $output->write($stdoutBuffer);
+                $stdoutBuffer = '';
+            }
         }
 
         // Flush buffered stdout after the final request.
