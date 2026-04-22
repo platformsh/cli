@@ -174,11 +174,11 @@ function output_stderr {
     builtin echo -e "$1" >&2
 }
 
-function show_migration_warning {
+function show_migration_notice {
     output_stderr ""
     output_stderr "\033[33m+-------------------------------------------------------------------------------------+\033[0m"
     output_stderr "\033[33m|                                                                                     |\033[0m"
-    output_stderr "\033[33m|   WARNING: This repository (platformsh/cli) has been migrated to upsun/cli          |\033[0m"
+    output_stderr "\033[33m|   NOTICE: This repository (platformsh/cli) has been migrated to upsun/cli           |\033[0m"
     output_stderr "\033[33m|                                                                                     |\033[0m"
     output_stderr "\033[33m|   Please use the new installer:                                                     |\033[0m"
     output_stderr "\033[33m|   curl -fsSL $NEW_REPO_INSTALLER | bash   |\033[0m"
@@ -228,8 +228,8 @@ function intro() {
 
     output "$(create_table "$title")" "heading"
 
-    # Always show migration warning to stderr
-    show_migration_warning
+    # Always show migration notice to stderr
+    show_migration_notice
 
     # Prompt user to continue if interactive and not in CI
     prompt_migration_continue
