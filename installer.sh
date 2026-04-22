@@ -603,8 +603,9 @@ function is_ci {
 }
 
 function is_interactive {
-    # Check if stdin is a terminal (TTY)
-    if [ -t 0 ]; then
+    # Test /dev/tty by actually opening it: in no-TTY containers the device node
+    # exists with rw perms but open() returns ENXIO.
+    if (: < /dev/tty) >/dev/null 2>&1; then
         return 0
     else
         return 1
