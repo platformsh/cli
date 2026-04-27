@@ -561,7 +561,8 @@ install_apt() {
         exit_with_error
     fi
 
-    list_file="/etc/apt/sources.list.d/upsun.list"
+    list_name="upsun.list"
+    list_file="/etc/apt/sources.list.d/${list_name}"
     list_content="deb [signed-by=/etc/apt/keyrings/upsun.asc] https://repositories.upsun.com/debian stable main"
 
     cmd="printf '${list_content}' > '${list_file}'"
@@ -571,7 +572,10 @@ install_apt() {
         exit_with_error
     fi
 
-    if ! call_root "apt-get update"; then
+    # Only refresh the cache for the newly added list, so unrelated broken
+    # repositories on the host cannot fail this install.
+    apt_update_cmd="apt-get update -o Dir::Etc::sourcelist='sources.list.d/${list_name}' -o Dir::Etc::sourceparts='-' -o APT::Get::List-Cleanup='0'"
+    if ! call_root "${apt_update_cmd}"; then
         output "  could not update apt cache" "error"
         exit_with_error
     fi
