@@ -19,7 +19,7 @@ set -eu
 
 # macOS specifics
 : "${BREW_TAP:=upsun/tap}"
-: "${BREW_FORMULA:=upsun/tap/upsun-cli}"
+: "${BREW_FORMULA:=upsun/tap/platformsh-cli}"
 
 # GitHub token check
 : "${GITHUB_TOKEN:=}"
@@ -29,7 +29,10 @@ set -eu
 : "${BUILD_NUMBER:=}"
 : "${RUN_ID:=}"
 
-: "${VENDOR:=upsun}"
+# The vendor to install. Defaults to platformsh for backward compatibility:
+# users who pipe this script from platformsh/cli/installer.sh have historically
+# received the `platform` binary unless they passed VENDOR=upsun.
+: "${VENDOR:=platformsh}"
 
 # global variables
 binary="platform"
@@ -46,6 +49,13 @@ version=""
 package="platformsh-cli"
 docs_url="https://docs.upsun.com"
 support_url="https://upsun.com/contact"
+
+if [ "$VENDOR" = "upsun" ]; then
+    BREW_FORMULA="upsun/tap/upsun-cli"
+    binary="upsun"
+    vendor_name="Upsun"
+    package="upsun-cli"
+fi
 
 # create a log file where every output will be pipe to
 pipe=/tmp/$binary-install-$$.tmp
