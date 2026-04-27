@@ -15,7 +15,7 @@ curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | bash
 
 For other installation methods (Homebrew, Scoop, Alpine, Debian/Ubuntu, RHEL/Fedora, Nix), upgrade instructions, and documentation, see [upsun/cli](https://github.com/upsun/cli).
 
-### Legacy `platform` binary
+### The `platform` binary
 
 The `platform` binary remains available for users who depend on it. It is functionally close to `upsun` but the binary name differs and a few behaviors are subtly different. To install it, use this repository's installer:
 
